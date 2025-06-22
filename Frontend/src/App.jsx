@@ -6,7 +6,8 @@ import SignUp from './SignUp'
 import Header from './Header'
 import Footer from './Footer'
 import AboutUs from './AboutUs'
-
+import Signin from './Signin'
+import Register from './Register'
 
 function App() {
   
@@ -19,9 +20,12 @@ function App() {
           <Route path='/' element={<Landing/>}/>
           <Route path='/login' element={<Login/>}/>
           <Route path='/signup' element={<SignUp/>}/>
+          <Route path='/signin' element={<Signin/>}/>
+          <Route path='/Register' element={<Register/>}/>
           <Route path='/header' element={<Header/>}/>
           <Route path='/footer' element={<Footer/>}/>
             <Route path='/aboutus' element={<AboutUs/>}/>
+            
         </Routes>
         </BrowserRouter>
       </div>
