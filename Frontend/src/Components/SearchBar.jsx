@@ -14,7 +14,7 @@ const SearchBar = () => {
         <h1 className="md:text-5xl font-bold mb-4">
          Start Your Career Journey
         </h1>
-        <p className="text-md md:text-xl mb-8">
+        <p className="text-xl mb-8">
          Search jobs based on your skills, interests, and values
         </p>
 
@@ -23,7 +23,7 @@ const SearchBar = () => {
           <input
             type="text"
             placeholder="Search categories..."
-            className="w-full h-16 py-3 px-4 rounded-l-full text-gray-700 focus:outline-none"
+            className="w-full h-16 py-3 px-4 text-xl rounded-l-full text-gray-700 focus:outline-none"
           />
           <button className="bg-sky-700 py-3 px-4  h-16 rounded-r-full">
            <IoSearch  className="text-white w-5 h-5" />
