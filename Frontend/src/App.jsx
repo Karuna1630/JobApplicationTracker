@@ -4,6 +4,8 @@ import Landing from './Landing'
 import Login from './Login'
 import SignUp from './SignUp'
 import Header from './Header'
+import Footer from './Footer'
+import AboutUs from './AboutUs'
 
 
 function App() {
@@ -18,6 +20,8 @@ function App() {
           <Route path='/login' element={<Login/>}/>
           <Route path='/signup' element={<SignUp/>}/>
           <Route path='/header' element={<Header/>}/>
+          <Route path='/footer' element={<Footer/>}/>
+            <Route path='/aboutus' element={<AboutUs/>}/>
         </Routes>
         </BrowserRouter>
       </div>

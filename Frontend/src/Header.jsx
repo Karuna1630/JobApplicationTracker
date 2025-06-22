@@ -1,6 +1,7 @@
 import React from "react";
 import logo from "./assets/logof.png";
 import SearchBar from "./SearchBar";
+import Footer from "./Footer";
 
 const Header = () => {
   return (
@@ -39,6 +40,7 @@ const Header = () => {
       </div>
     </header>
     <SearchBar/>
+    <Footer/>
     </>
   );
 };
