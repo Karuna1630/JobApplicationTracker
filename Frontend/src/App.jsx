@@ -6,6 +6,7 @@ import SignUp from './SignUp'
 import Header from './Header'
 import Footer from './Footer'
 import AboutUs from './AboutUs'
+import RegisterComponent from './RegisterComponent'
 
 
 function App() {
@@ -21,7 +22,8 @@ function App() {
           <Route path='/signup' element={<SignUp/>}/>
           <Route path='/header' element={<Header/>}/>
           <Route path='/footer' element={<Footer/>}/>
-            <Route path='/aboutus' element={<AboutUs/>}/>
+          <Route path='/aboutus' element={<AboutUs/>}/>
+          <Route path='/registercomp' element={<RegisterComponent/>}/>
         </Routes>
         </BrowserRouter>
       </div>
