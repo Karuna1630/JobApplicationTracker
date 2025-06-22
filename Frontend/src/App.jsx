@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import {BrowserRouter, Routes, Route} from 'react-router-dom'
-import Landing from './Landing'
-import Login from './Login'
-import SignUp from './SignUp'
-import Header from './Header'
-import Footer from './Footer'
-import AboutUs from './AboutUs'
-import RegisterComponent from './RegisterComponent'
-import Signin from './Signin'
-import Register from './Register'
+import Home from './Pages/Home'
+import Login from './Pages/Login'
+import SignUp from './Pages/SignUp'
+import Header from './Components/Header'
+import Footer from './Components/Footer'
+import AboutUs from './Pages/AboutUs'
+import RegisterComponent from './Components/RegisterComponent'
+import Signin from './Pages/Signin'
+import Register from './Pages/Register'
 
 
 function App() {
@@ -19,7 +19,7 @@ function App() {
       <div>
         <BrowserRouter>
         <Routes>
-          <Route path='/' element={<Landing/>}/>
+          <Route path='/' element={<Home/>}/>
           <Route path='/login' element={<Login/>}/>
           <Route path='/signup' element={<SignUp/>}/>
           <Route path='/signin' element={<Signin/>}/>

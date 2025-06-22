@@ -1,5 +1,5 @@
 import React from "react";
-import logo from "./assets/logof.png";
+import logo from "../assets/logof.png";
 import SearchBar from "./SearchBar";
 import Footer from "./Footer";
 
@@ -40,7 +40,7 @@ const Header = () => {
       </div>
     </header>
     <SearchBar/>
-   
+    
     </>
   );
 };

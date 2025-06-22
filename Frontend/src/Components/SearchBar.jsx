@@ -11,21 +11,21 @@ const SearchBar = () => {
 
       {/* Centered Content */}
       <div className="text-center max-w-2xl mx-auto relative z-10">
-        <h1 className="text-3xl md:text-4xl font-bold mb-4">
+        <h1 className="md:text-5xl font-bold mb-4">
          Start Your Career Journey
         </h1>
-        <p className="text-md md:text-lg mb-8">
+        <p className="text-md md:text-xl mb-8">
          Search jobs based on your skills, interests, and values
         </p>
 
         {/* Search Bar */}
-        <div className="flex items-center  justify-center">
+        <div className="flex items-center justify-center">
           <input
             type="text"
             placeholder="Search categories..."
-            className="w-full max-w-md py-3 px-4 rounded-l-full text-gray-700 focus:outline-none"
+            className="w-full h-16 py-3 px-4 rounded-l-full text-gray-700 focus:outline-none"
           />
-          <button className="bg-sky-700 py-3 px-4 rounded-r-full">
+          <button className="bg-sky-700 py-3 px-4  h-16 rounded-r-full">
            <IoSearch  className="text-white w-5 h-5" />
           </button>
         </div>

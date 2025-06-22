@@ -1,25 +1,27 @@
 import React from 'react';
-import UNDPlogo from "./assets/UNDP_logo.svg.png";
-import Merojoblogo from "./assets/Merojob.jpg";
-import GenerationNextCommunicationslogo from "./assets/GNC.jpg"; 
-import Zegallogo from "./assets/Zegal.jpg";
-import Innovativelogo from "./assets/Innovative.jpg";
-import apexlogo from "./assets/apex.jpg";
-import Modernlogo from "./assets/Modern.jpg";
-import Evergreenlogo from "./assets/Evergreen.jpg";
-import SameDaylogo from "./assets/SameDay.jpg";
-import Soalteelogo from "./assets/Soaltee.jpg";
-import Oracarelogo from "./assets/Oracare.jpg";
-import Renewlogo from "./assets/Renew.jpg";
-import Secondarylogo from "./assets/Secondary.jpg";
-import Mayalogo from "./assets/Maya.jpg";
-import SoonChandilogo from "./assets/SoonChandi.jpg";
-import WorldLinklogo from "./assets/WorldLink.jpg";
+import UNDPlogo from "../assets/UNDP_logo.svg.png";
+import Merojoblogo from "../assets/Merojob.jpg";
+import GenerationNextCommunicationslogo from "../assets/GNC.jpg"; 
+import Zegallogo from "../assets/Zegal.jpg";
+import Innovativelogo from "../assets/Innovative.jpg";
+import apexlogo from "../assets/apex.jpg";
+import Modernlogo from "../assets/Modern.jpg";
+import Evergreenlogo from "../assets/Evergreen.jpg";
+import SameDaylogo from "../assets/SameDay.jpg";
+import Soalteelogo from "../assets/Soaltee.jpg";
+import Oracarelogo from "../assets/Oracare.jpg";
+import Renewlogo from "../assets/Renew.jpg";
+import Secondarylogo from "../assets/Secondary.jpg";
+import Mayalogo from "../assets/Maya.jpg";
+import SoonChandilogo from "../assets/SoonChandi.jpg";
+import WorldLinklogo from "../assets/WorldLink.jpg";
+import Header from '../Components/Header';
+import Footer from '../Components/Footer';
 
 
 
 
-const Landing = () => {
+const Home = () => {
   const topJobs = [
     {
       id: 1,
@@ -133,6 +135,7 @@ const Landing = () => {
 
  return (   
   <>
+  <Header/>
     {/* Main content container with same horizontal padding as header */}
   <div className="p-6 min-h-screen bg-gray-100 px-14 flex flex-col items-start">
     <h2 className="text-3xl font-bold mb-6">Top Jobs</h2>
@@ -153,8 +156,9 @@ const Landing = () => {
       ))}
     </div>
   </div>
+ <Footer/>
   </>
   );
 };
 
-export default Landing;
+export default Home;

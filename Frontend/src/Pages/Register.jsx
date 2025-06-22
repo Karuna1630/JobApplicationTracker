@@ -1,10 +1,10 @@
 import React from 'react';
-import './Register.css';
-import user_icon from './Assets/user.png';
-import email_icon from './Assets/email.png';
-import password_icon from './Assets/password.png';
-import phone_icon from './Assets/phone.png';
-import leftimage from "./assets/leftimage.png";
+import "./Register.css";
+import user_icon from "../assets/user.png";
+import email_icon from "../assets/email.png";
+import password_icon from "../assets/password.png";
+import phone_icon from "../assets/phone.png";
+import leftimage from "../assets/leftimage.png";
 
 const Register = () => {
   return (
