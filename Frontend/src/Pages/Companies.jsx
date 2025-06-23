@@ -1,4 +1,4 @@
-import React from "react";
+
 import React from "react";
 import UNDPlogo from "../assets/UNDP_logo.svg.png";
 import Merojoblogo from "../assets/Merojob.jpg";
@@ -32,7 +32,7 @@ import linklogo from "../assets/J.link.jpg";
 import Techmindslogo from "../assets/Techminds.jpg";
 import Alchilogo from "../assets/Alchi.jpg";
 import Winsomelogo from "../assets/Winsome.jpg";
-import Header from "../Components/Header";
+import Header from "../Components/Navbar";
 import Footer from "../Components/Footer";
 
 const Companies = () => {
