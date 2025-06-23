@@ -1,38 +1,4 @@
-import React from 'react';
-import UNDPlogo from "../assets/UNDP_logo.svg.png";
-import Merojoblogo from "../assets/Merojob.jpg";
-import GenerationNextCommunicationslogo from "../assets/GNC.jpg"; 
-import Zegallogo from "../assets/Zegal.jpg";
-import Innovativelogo from "../assets/Innovative.jpg";
-import apexlogo from "../assets/apex.jpg";
-import Modernlogo from "../assets/Modern.jpg";
-import Evergreenlogo from "../assets/Evergreen.jpg";
-import SameDaylogo from "../assets/SameDay.jpg";
-import Soalteelogo from "../assets/Soaltee.jpg";
-import Oracarelogo from "../assets/Oracare.jpg";
-import Renewlogo from "../assets/Renew.jpg";
-import Secondarylogo from "../assets/Secondary.jpg";
-import Mayalogo from "../assets/Maya.jpg";
-import SoonChandilogo from "../assets/SoonChandi.jpg";
-import WorldLinklogo from "../assets/WorldLink.jpg";
-import Hotellogo from "../assets/Hotel.jpg";
-import Garimalogo  from "../assets/Garima.jpg";
-import ABlogo from "../assets/AB.jpg";
-import Infologo from "../assets/Info.jpg";
-import RGlogo from "../assets/RG.jpg";
-import Agralogo from "../assets/Agra.jpg";
-import Himallogo from "../assets/Himal.jpg";
-import ARClogo from "../assets/ARC.jpg";
-import Carewindslogo from "../assets/Carewinds.jpg";
-import Archiplanlogo from "../assets/Archiplan.jpg";
-import Flintlogo from "../assets/Flint.jpg";
-import Lotuslogo from "../assets/Lotus.jpg";
-import linklogo from "../assets/J.link.jpg";
-import Techmindslogo from "../assets/Techminds.jpg";
-import Alchilogo from "../assets/Alchi.jpg";
-import Winsomelogo from "../assets/Winsome.jpg";
-import Header from '../Components/Header';
-import Footer from '../Components/Footer';
+
 
 
 

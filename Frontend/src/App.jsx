@@ -9,6 +9,7 @@ import AboutUs from './Pages/AboutUs'
 import RegisterComponent from './Components/RegisterComponent'
 import Signin from './Pages/Signin'
 import Register from './Pages/Register'
+import Companies from './Pages/Companies'
 
 
 function App() {
@@ -28,8 +29,9 @@ function App() {
           <Route path='/footer' element={<Footer/>}/>
           <Route path='/aboutus' element={<AboutUs/>}/>
           <Route path='/registercomp' element={<RegisterComponent/>}/>
-            <Route path='/aboutus' element={<AboutUs/>}/>
- 
+          <Route path='/aboutus' element={<AboutUs/>}/>
+          <Route path='/companies' element={<Companies/>}/>
+    
         </Routes>
         </BrowserRouter>
       </div>
