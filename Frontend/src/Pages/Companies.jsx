@@ -19,7 +19,7 @@ import WorldLinklogo from "../assets/WorldLink.jpg";
 import Hotellogo from "../assets/Hotel.jpg";
 import Garimalogo from "../assets/Garima.jpg";
 import ABlogo from "../assets/AB.jpg";
-import Infologo from "../assets/Info.png";
+import Infologo from "../assets/Info.jpg";
 import RGlogo from "../assets/RG.jpg";
 import Agralogo from "../assets/Agra.jpg";
 import Himallogo from "../assets/Himal.jpg";
