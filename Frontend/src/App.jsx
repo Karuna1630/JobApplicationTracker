@@ -10,8 +10,7 @@ import Companies from './Pages/Companies'
 import ResumeManagement from './Pages/ResumeManagement'
 import JobRecommendation from './Pages/JobRecommendation'
 import CompanyR1 from './Pages/CompanyR1'
-
-
+import CompanyR2 from './Pages/CompanyR2'
 
 function App() {
   
@@ -34,7 +33,7 @@ function App() {
           
 
           <Route path='/companyR1' element={<CompanyR1/>}/>
-
+          <Route path='/companyR2' element={<CompanyR2/>}/>
     
         </Routes>
         </BrowserRouter>
