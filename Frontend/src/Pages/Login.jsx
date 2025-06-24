@@ -20,7 +20,7 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-300">
       <div className="bg-white rounded-2xl shadow-xl flex flex-col md:flex-row w-full max-w-4xl h-[500px] overflow-hidden">
 
-        {/* Left Side Image */}
+        {/* Login Page for Left Side Image */}
         <div className="md:w-1/2 w-full h-full hidden md:block">
           <img
             src={loginimage}

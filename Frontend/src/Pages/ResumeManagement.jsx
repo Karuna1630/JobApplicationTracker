@@ -10,7 +10,7 @@ import deleteIcon from "../assets/delete.png";
 const ResumeManagement = () => {
   return (
     <div className="bg-gradient-to-br from-blue-100 via-white to-blue-300 px=20,py=20">
-      {/* Title & Description */}
+      {/* Title & Description for resume*/}
       <div className="mb-10 text-center flex flex-col items-center">
   <h2 className="text-4xl font-bold text-gray-800">Resume Management</h2>
   <p className="text-gray-600 text-sm mt-1 max-w-md">

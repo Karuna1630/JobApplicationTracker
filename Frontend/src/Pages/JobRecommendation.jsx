@@ -43,6 +43,7 @@ const jobs = [
     badgeColor: "bg-blue-600",
     description: "We are looking for a skilled .NET developer to maintain and expand our enterprise applications...",
   },
+  //tgt
 ];
 
 const JobRecommendation = () => {

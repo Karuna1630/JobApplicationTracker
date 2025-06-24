@@ -10,7 +10,7 @@ const Register = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-300">
       <div className="bg-white rounded-2xl shadow-xl flex flex-col md:flex-row w-full max-w-5xl overflow-hidden">
         
-        {/* Left Side  */}
+        {/* RegisterImage for Left Side  */}
         <div className="md:w-1/2 hidden md:block">
           <img
             src={registerimage}
