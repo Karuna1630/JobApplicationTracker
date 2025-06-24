@@ -248,7 +248,7 @@ const Companies = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gray-100 flex flex-col">
+      <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-300  flex flex-col">
         <div className="w-full max-w-6xl mx-auto px-4">
           <h2 className="text-3xl font-bold mb-6">Top Jobs</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
