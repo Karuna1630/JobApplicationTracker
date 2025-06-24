@@ -13,6 +13,11 @@ import CompanyR1 from './Pages/CompanyR1'
 import MessagesInbox from './Pages/MessagesInbox'
 import LoginC from './Pages/LoginC'
 
+import CompanyR2 from './Pages/CompanyR2'
+
+import LoginComponent from './Components/LoginComponent.jsx'
+
+
 
 
 function App() {
@@ -24,20 +29,21 @@ function App() {
         <BrowserRouter>
         <Routes>
           <Route path='/' element={<Home/>}/>
-          <Route path='/login' element={<Login/>}/>
+          <Route path='/loginu' element={<Login/>}/>
           <Route path='/signup' element={<SignUp/>}/>
-          <Route path='/Register' element={<Register/>}/>
+          <Route path='/registeru' element={<Register/>}/>
           <Route path='/aboutus' element={<AboutUs/>}/>
           <Route path='/registercomp' element={<RegisterComponent/>}/>
           <Route path='/companies' element={<Companies/>}/>
-
           <Route path='/resumemanagement' element={<ResumeManagement/>}/>
           <Route path='/jobrecommendation' element={<JobRecommendation/>}/>
-          
-
           <Route path='/companyR1' element={<CompanyR1/>}/>
           <Route path='/messagesinbox' element={<MessagesInbox/>}/>
           <Route path='/loginc' element= {<LoginC/>}/>
+
+          <Route path='/companyR2' element={<CompanyR2/>}/>
+
+          <Route path='/logincomp' element={<LoginComponent/>}/>
 
     
         </Routes>

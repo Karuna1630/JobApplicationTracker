@@ -1,18 +1,15 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { AiFillCheckCircle } from "react-icons/ai";
+import crlogo from "../assets/CR.avif";
+import { GoArrowLeft } from "react-icons/go";
+import { GoArrowRight } from "react-icons/go";
 
-import { Navigate, useNavigate } from "react-router-dom";
-
-import Navbar from "../Components/Navbar";
-
-
-const CompanyR1=()=> {
-  const navigate = useNavigate();
+const CompanyR2=()=> {
   return (
-    <>
-   <Navbar/>
+    // this is registration form 
     <div className="min-h-screen font-sans flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-300 p-10">
-      <div className="flex w-full max-w-6xl shadow-lg rounded-lg overflow-hidden">
+      <div className="flex w-full max-w-6xl bg-black shadow-lg rounded-lg overflow-hidden">
         {/* Left image section */}
         <div className="hidden md:block md:w-1/2">
           <img
@@ -25,13 +22,13 @@ const CompanyR1=()=> {
         <div className="w-full md:w-1/2 bg-white flex items-center justify-center p-8">
           <div className="max-w-sm w-full">
             {/* Step Indicator */}
-            <div className="text-center mb-6">
+            <div className="text-center mb-6 " >
               <h2 className="text-2xl font-bold">3 easy steps of Company Registration</h2>
               <div className="flex justify-center items-center mt-6 relative">
                 {/* Step 1 */}
                 <div className="flex flex-col items-center z-10">
-                  <div className="h-10 w-10 rounded-full bg-blue-500 text-black border border-black flex items-center justify-center">
-                    1
+                  <div className="h-10 w-10 rounded-full text-white flex items-center justify-center text-xl">
+                    <AiFillCheckCircle  className="text-green-600 text-6xl"/>
                   </div>
                   <span className="text-sm mt-1 font-medium">Organization</span>
                 </div>
@@ -62,6 +59,7 @@ const CompanyR1=()=> {
                 <h2 className="text-1xl font-bold">Organization Details</h2>
                 <h4 className="text-l"> Provide Recruitment focal personal contact detalis </h4>
                 </div>
+
             </div>
 
             {/* Form Section */}
@@ -70,38 +68,34 @@ const CompanyR1=()=> {
               <input
                 type="text"
                 name="name"
-                placeholder="Organization Name"
+                placeholder="Personal Name"
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
               />
 
               {/* Phone Number */}
               <input
-                type="tel"
+                type="text"
                 name="number"
-                placeholder="Phone Number"
+                placeholder="personal Phone Number"
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
               />
 
               {/* Industry Dropdown */}
-              <select
-                name="industry"
-                className="w-full px-4 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
-              >
-                <option value="">Select Industry</option>
-                <option value="Education">Education</option>
-                <option value="Healthcare">Healthcare</option>
-                <option value="IT">Information Technology</option>
-                <option value="Finance">Finance</option>
-                <option value="Construction">Construction</option>
-              </select>
+              <input
+                type="text"
+                name="email"
+                placeholder="personal Email"
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
+                />
 
-              {/* Continue Button */}
-              <button onClick={()=> navigate("/companyR2")}
-                type="submit"
-                className="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-800 transition"
-              >
-                Continue
-              </button>
+              <div className=" flex flex-row space-x-8 pl-72">
+               <Link to ="/companyR1">
+                <GoArrowLeft className="size-8  text-blue-800 hover:text-blue-600"/>
+               </Link>
+               <Link to ="/companyR3">
+                <GoArrowRight className="size-8 text-blue-800 hover:text-blue-600" />
+               </Link>
+              </div>
 
               {/* Login link */}
               <p className="text-center text-sm mt-4">
@@ -115,8 +109,6 @@ const CompanyR1=()=> {
         </div>
       </div>
     </div>
-    <Footer/>
-  </>
   );
 }
-export default CompanyR1
+export default CompanyR2

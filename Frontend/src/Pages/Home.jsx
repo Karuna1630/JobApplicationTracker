@@ -17,7 +17,7 @@ const Home = () => {
             <p className="text-lg">Stay organized and take control of your job search — all in one place.</p>
             <div className="space-x-4">
               <button onClick={() => navigate('/registercomp')} className="bg-white text-blue-700 font-semibold px-6 py-3 rounded-xl hover:bg-blue-100">Get Started</button>
-              <button onClick={() => navigate('/login')} className="bg-blue-800 text-white px-6 py-3 rounded-xl hover:bg-blue-900">Login</button>
+              <button onClick={() => navigate('/logincomp')} className="bg-blue-800 text-white px-6 py-3 rounded-xl hover:bg-blue-900">Login</button>
             </div>
           </div>
         </section>

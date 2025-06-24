@@ -1,6 +1,8 @@
 import React from 'react';
 import { IoSearchSharp, IoCalendarOutline } from "react-icons/io5";
 import { CiLocationOn } from "react-icons/ci";
+import Footer from '../Components/Footer';
+import Navbar from '../Components/Navbar';
 
 const jobs = [
   {
@@ -48,8 +50,9 @@ const jobs = [
 
 const JobRecommendation = () => {
   return (
+    <>
+    <Navbar/>
     <div className="bg-gradient-to-br from-blue-100 via-white to-blue-300">
-      
       {/* Title & Description */}
       <div className="mb-10 text-center flex flex-col items-center">
         <h2 className="text-4xl font-bold text-gray-800">Job Recommendations</h2>
@@ -114,6 +117,8 @@ const JobRecommendation = () => {
         </button>
       </div>
     </div>
+    <Footer/>
+    </>
   );
 };
 
