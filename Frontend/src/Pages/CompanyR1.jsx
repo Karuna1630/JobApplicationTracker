@@ -1,12 +1,16 @@
 import React from "react";
 import { AiFillCheckCircle } from "react-icons/ai";
-import crlogo from "../assets/CR.avif";
+
 import { Navigate, useNavigate } from "react-router-dom";
+
+import Navbar from "../Components/Navbar";
+
 
 const CompanyR1=()=> {
   const navigate = useNavigate();
   return (
-    // this is registration form 
+    <>
+   <Navbar/>
     <div className="min-h-screen font-sans flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-300 p-10">
       <div className="flex w-full max-w-6xl shadow-lg rounded-lg overflow-hidden">
         {/* Left image section */}
@@ -111,6 +115,8 @@ const CompanyR1=()=> {
         </div>
       </div>
     </div>
+    <Footer/>
+  </>
   );
 }
 export default CompanyR1
