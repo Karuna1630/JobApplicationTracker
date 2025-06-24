@@ -4,6 +4,7 @@ import crlogo from "../assets/CR.avif";
 
 export default function CompanyR1() {
   return (
+    // this is registration form 
     <div className="min-h-screen font-sans flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-300 p-10">
       <div className="flex w-full max-w-6xl shadow-lg rounded-lg overflow-hidden">
         {/* Left image section */}
