@@ -4,10 +4,13 @@ import { AiFillCheckCircle } from "react-icons/ai";
 import crlogo from "../assets/CR.avif";
 import { GoArrowLeft } from "react-icons/go";
 import { GoArrowRight } from "react-icons/go";
+import Footer from "../Components/Footer";
+import Navbar from "../Components/Navbar";
 
 const CompanyR2=()=> {
   return (
-    // this is registration form 
+    <>
+    <Navbar/>
     <div className="min-h-screen font-sans flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-300 p-10">
       <div className="flex w-full max-w-6xl bg-black shadow-lg rounded-lg overflow-hidden">
         {/* Left image section */}
@@ -109,6 +112,8 @@ const CompanyR2=()=> {
         </div>
       </div>
     </div>
+    <Footer/>
+    </>
   );
 }
 export default CompanyR2

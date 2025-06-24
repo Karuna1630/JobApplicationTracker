@@ -1,9 +1,10 @@
 import React from "react";
 import { AiFillCheckCircle } from "react-icons/ai";
-
+import crlogo from "../assets/CR.avif";
 import { Navigate, useNavigate } from "react-router-dom";
 
 import Navbar from "../Components/Navbar";
+import Footer from "../Components/Footer";
 
 
 const CompanyR1=()=> {

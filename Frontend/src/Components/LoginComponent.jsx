@@ -27,7 +27,7 @@ const LoginComponent = () => {
              <BsFillPersonFill className="size-64" />
             <h1 className="font-bold text-3xl text-gray-800">Job Seeker</h1>
             <p className="text-xl text-gray-600 text-center">Register to Find your dream job</p>
-            <button onClick={() => navigate('/login')} className="bg-blue-600 text-white text-lg font-semibold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-md">
+            <button onClick={() => navigate('/loginu')} className="bg-blue-600 text-white text-lg font-semibold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-md">
               Login
             </button>  
           </div>
@@ -39,7 +39,7 @@ const LoginComponent = () => {
             <BsBuildingsFill className="size-60" />
             <h1 className="font-bold text-3xl text-gray-800">Company</h1>
             <p className="text-xl text-gray-600 text-center">Register to Find great talent</p>
-            <button onClick={() => navigate('/login')} className="bg-blue-600 text-white text-lg font-semibold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-md">
+            <button onClick={() => navigate('/loginc')} className="bg-blue-600 text-white text-lg font-semibold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-md">
               Login
             </button>  
           </div>

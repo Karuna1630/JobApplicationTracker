@@ -3,9 +3,10 @@ import Header from './Navbar'
 import { BsFillPersonFill } from "react-icons/bs";
 import { BsBuildingsFill } from "react-icons/bs";
 import Footer from './Footer';
-import { Link } from 'react-router-dom';
+import { Link ,useNavigate } from 'react-router-dom';
 
 const RegisterComponent = () => {
+   const navigate = useNavigate();
   return (
     <>
     <Header/>
@@ -26,7 +27,7 @@ const RegisterComponent = () => {
              <BsFillPersonFill className="size-64" />
             <h1 className="font-bold text-3xl text-gray-800">Job Seeker</h1>
             <p className="text-xl text-gray-600 text-center">Register to Find your dream job</p>
-            <button className="bg-blue-600 text-white text-lg font-semibold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-md">
+            <button onClick={() => navigate('/registeru')} className="bg-blue-600 text-white text-lg font-semibold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-md">
               Register
             </button>  
           </div>
@@ -38,7 +39,7 @@ const RegisterComponent = () => {
             <BsBuildingsFill className="size-60" />
             <h1 className="font-bold text-3xl text-gray-800">Company</h1>
             <p className="text-xl text-gray-600 text-center">Register to Find great talent</p>
-            <button className="bg-blue-600 text-white text-lg font-semibold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-md">
+            <button onClick={() => navigate("/companyR1")} className="bg-blue-600 text-white text-lg font-semibold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-md">
               Register
             </button>  
           </div>

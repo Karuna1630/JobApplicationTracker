@@ -4,9 +4,13 @@ import email_icon from "../assets/email.png";
 import password_icon from "../assets/password.png";
 import phone_icon from "../assets/phone.png";
 import registerimage from "../assets/registerimage.png";
+import Navbar from '../Components/Navbar';
+import Footer from '../Components/Footer';
 
 const Register = () => {
   return (
+    <>
+    <Navbar/>
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-300">
       <div className="bg-white rounded-2xl shadow-xl flex flex-col md:flex-row w-full max-w-5xl overflow-hidden">
         
@@ -75,6 +79,8 @@ const Register = () => {
         </div>
       </div>
     </div>
+    <Footer/>
+    </>
   );
 };
 

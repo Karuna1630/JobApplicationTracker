@@ -3,6 +3,8 @@ import React from 'react';
 import email_icon from "../assets/email.png";
 import password_icon from "../assets/password.png";
 import loginimage from "../assets/loginimage.png";
+import Footer from '../Components/Footer';
+import Navbar from '../Components/Navbar';
 
 const LoginC = () => {
   const handleSubmit = (e) => {
@@ -11,6 +13,8 @@ const LoginC = () => {
   };
 
   return (
+    <>
+    <Navbar/>
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-300">
       <div className="bg-white rounded-2xl shadow-xl flex flex-col md:flex-row w-full max-w-4xl h-[500px] overflow-hidden">
 
@@ -67,13 +71,15 @@ const LoginC = () => {
 
             <p className="text-center text-sm mt-4">
               Don’t have an account?{' '}
-              <a href="#" className="text-cyan-600 hover:underline">Login here</a>
+              <a href="#" className="text-cyan-600 hover:underline">Register</a>
             </p>
           </form>
         </div>
 
       </div>
     </div>
+    <Footer/>
+    </>
   );
 };
 
