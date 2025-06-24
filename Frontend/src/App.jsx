@@ -8,6 +8,7 @@ import RegisterComponent from './Components/RegisterComponent'
 import Signin from './Pages/Signin'
 import Register from './Pages/Register'
 import Companies from './Pages/Companies'
+import CompanyR1 from './Pages/CompanyR1'
 
 
 function App() {
@@ -25,8 +26,8 @@ function App() {
           <Route path='/Register' element={<Register/>}/>
           <Route path='/aboutus' element={<AboutUs/>}/>
           <Route path='/registercomp' element={<RegisterComponent/>}/>
-          <Route path='/aboutus' element={<AboutUs/>}/>
           <Route path='/companies' element={<Companies/>}/>
+          <Route path='/companyR1' element={<CompanyR1/>}/>
     
         </Routes>
         </BrowserRouter>
