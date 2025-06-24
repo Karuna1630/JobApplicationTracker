@@ -4,7 +4,7 @@ import email_icon from "../assets/email.png";
 import password_icon from "../assets/password.png";
 import loginimage from "../assets/loginimage.png";
 
-const Login = () => {
+const LoginC = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     alert('Sign in successful!');
@@ -77,4 +77,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default LoginC;
