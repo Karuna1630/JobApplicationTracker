@@ -6,17 +6,18 @@ import logo from '../assets/logof.png';
 const Navbar = () => {
   const navigate = useNavigate();
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  const role = localStorage.getItem('role'); // 'user', 'company', 'admin'
 
   const handleLogout = () => {
     localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('role');
     navigate('/login');
   };
 
   return (
-    <header className="flex flex-wrap items-center justify-between px-16 py-4 shadow-md bg-white gap-4">
+    <header className="flex flex-wrap items-center justify-between px-16 py-5 shadow-md bg-white gap-4">
       {/* Logo */}
       <Link to="/" className="flex items-center space-x-3">
-        {/* <img src={logo} alt="Logo" className="h-12" /> */}
         <span className="text-2xl md:text-3xl font-bold text-blue-800 hover:text-blue-600 cursor-pointer">
           Job Manager
         </span>
@@ -35,24 +36,41 @@ const Navbar = () => {
       </div>
 
       {/* Nav Links */}
-      <nav className="flex gap-6 text-xl  text-blue-800 font-medium ">
+      <nav className="flex gap-6 text-xl text-blue-800 font-medium">
         <Link to="/" className="hover:text-blue-600 transition">Home</Link>
         <Link to="/companies" className="hover:text-blue-600 transition">Companies</Link>
         <Link to="/aboutus" className="hover:text-blue-600 transition">About Us</Link>
-        {isLoggedIn && (
+
+        {isLoggedIn && role === 'user' && (
+          <>
+            <Link to="/applications" className="hover:text-blue-600 transition">My Applications</Link>
+            <Link to="/profile" className="hover:text-blue-600 transition">Profile</Link>
+          </>
+        )}
+
+        {isLoggedIn && role === 'company' && (
           <>
             <Link to="/dashboard" className="hover:text-blue-600 transition">Dashboard</Link>
             <Link to="/add-job" className="hover:text-blue-600 transition">Add Job</Link>
+            <Link to="/manage-jobs" className="hover:text-blue-600 transition">Manage Jobs</Link>
+          </>
+        )}
+
+        {isLoggedIn && role === 'admin' && (
+          <>
+            <Link to="/admin" className="hover:text-blue-600 transition">Admin Dashboard</Link>
+            <Link to="/manage-users" className="hover:text-blue-600 transition">Manage Users</Link>
+            <Link to="/reports" className="hover:text-blue-600 transition">Reports</Link>
           </>
         )}
       </nav>
 
       {/* Auth Buttons */}
-      <div className="flex items-center gap-4 text-xl ">
+      <div className="flex items-center gap-4 text-xl">
         {!isLoggedIn ? (
           <>
             <Link to="/login" className="text-blue-800 font-semibold hover:text-blue-600 transition">Login</Link>
-            <Link to="/register" className="bg-blue-600 text-white font-semibold px-4 py-2 rounded-xl hover:bg-blue-700 transition">Register</Link>
+            <Link to="/registercomp" className="bg-blue-800 text-white font-semibold px-4 py-2 rounded-xl hover:bg-blue-600 transition">Register</Link>
           </>
         ) : (
           <button onClick={handleLogout} className="text-red-600 font-semibold hover:text-red-800 transition">Logout</button>

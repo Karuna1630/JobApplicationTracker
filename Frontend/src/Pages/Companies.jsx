@@ -148,97 +148,97 @@ const Companies = () => {
   ];
   const hotJobs = [
     {
-      id: 1,
+      id: 101,
       company: "Hotel Lotus Gems",
       position: "Receptionist",
       logo: Hotellogo,
     },
     {
-      id: 2,
+      id: 102,
       company: "AB & Associates",
       position: "Accounts Assistant",
       logo: ABlogo,
     },
     {
-      id: 3,
+      id: 103,
       company: "Garima Capital Limited",
       position: "Marketing Manager, Business Analyst",
       logo: Garimalogo,
     },
     {
-      id: 4,
+      id: 104,
       company: "RG Creations Nepal",
       position: "Senior Architect",
       logo: RGlogo,
     },
     {
-      id: 5,
+      id: 105,
       company: "ARC Design Corp",
       position: "Interior Designer",
       logo: ARClogo,
     },
     {
-      id: 6,
+      id: 106,
       company: "InfoDevelopers",
       position: "HR Manager",
       logo: Infologo,
     },
     {
-      id: 7,
+      id: 107,
       company: "Agra Industries",
       position: "Sales and Marketing Executive",
       logo: Agralogo,
     },
     {
-      id: 8,
+      id: 108,
       company: "Himal Trade Link",
       position: "Mechanical Technician",
       logo: Himallogo,
     },
     {
-      id: 9,
+      id: 109,
       company: "Carewinds Medical Solutions",
       position: "Admin Officer",
       logo: Carewindslogo,
     },
     {
-      id: 10,
+      id: 110,
       company: "Hotel Lotus Gems",
       position: "Receptionist",
       logo: Lotuslogo,
     },
     {
-      id: 11,
+      id: 111,
       company: "J.link International Education",
       position: "Receptionist",
       logo: linklogo,
     },
     {
-      id: 12,
+      id: 112,
       company: "Techminds Network",
       position: "Administrative Officer",
       logo: Techmindslogo,
     },
     {
-      id: 13,
+      id: 113,
       company: "Archiplan-SBT",
       position: "Senior Architect",
       logo: Archiplanlogo,
     },
     {
-      id: 14,
+      id: 114,
       company: "Flint Group",
       position: "Loan Associate",
       logo: Flintlogo,
     },
     {
-      id: 15,
+      id: 115,
       company: "Alchi",
       position: "Sales Representative",
       logo: Alchilogo,
     },
     {
-      id: 16,
+      id: 116,
       company: "Winsome English Boarding School",
       position: "Teacher",
       logo: Winsomelogo,
@@ -248,7 +248,7 @@ const Companies = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gray-100 flex flex-col">
+      <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-300  flex flex-col">
         <div className="w-full max-w-6xl mx-auto px-4">
           <h2 className="text-3xl font-bold mb-6">Top Jobs</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
