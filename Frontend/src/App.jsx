@@ -10,6 +10,8 @@ import Companies from './Pages/Companies'
 import ResumeManagement from './Pages/ResumeManagement'
 import JobRecommendation from './Pages/JobRecommendation'
 import CompanyR1 from './Pages/CompanyR1'
+import MessagesInbox from './Pages/MessagesInbox'
+import LoginC from './Pages/LoginC'
 
 
 
@@ -34,6 +36,8 @@ function App() {
           
 
           <Route path='/companyR1' element={<CompanyR1/>}/>
+          <Route path='/messagesinbox' element={<MessagesInbox/>}/>
+          <Route path='/loginc' element= {<LoginC/>}/>
 
     
         </Routes>
