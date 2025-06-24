@@ -34,6 +34,7 @@ import Alchilogo from "../assets/Alchi.jpg";
 import Winsomelogo from "../assets/Winsome.jpg";
 import Header from "../Components/Navbar";
 import Footer from "../Components/Footer";
+import Navbar from "../Components/Navbar";
 
 const Companies = () => {
   const topJobs = [
@@ -247,7 +248,7 @@ const Companies = () => {
 
   return (
     <>
-      <Header />
+      <Navbar />
       <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-300  flex flex-col">
         <div className="w-full max-w-6xl mx-auto px-4">
           <h2 className="text-3xl font-bold mb-6">Top Jobs</h2>

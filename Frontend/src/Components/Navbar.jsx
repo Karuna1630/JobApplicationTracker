@@ -69,7 +69,7 @@ const Navbar = () => {
       <div className="flex items-center gap-4 text-xl">
         {!isLoggedIn ? (
           <>
-            <Link to="/login" className="text-blue-800 font-semibold hover:text-blue-600 transition">Login</Link>
+            <Link to="/logincomp" className="text-blue-800 font-semibold hover:text-blue-600 transition">Login</Link>
             <Link to="/registercomp" className="bg-blue-800 text-white font-semibold px-4 py-2 rounded-xl hover:bg-blue-600 transition">Register</Link>
           </>
         ) : (

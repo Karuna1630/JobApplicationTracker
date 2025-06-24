@@ -10,6 +10,7 @@ import Companies from './Pages/Companies'
 import ResumeManagement from './Pages/ResumeManagement'
 import JobRecommendation from './Pages/JobRecommendation'
 import CompanyR1 from './Pages/CompanyR1'
+import LoginComponent from './Components/LoginComponent.jsx'
 
 
 
@@ -22,19 +23,16 @@ function App() {
         <BrowserRouter>
         <Routes>
           <Route path='/' element={<Home/>}/>
-          <Route path='/login' element={<Login/>}/>
+          <Route path='/loginu' element={<Login/>}/>
           <Route path='/signup' element={<SignUp/>}/>
-          <Route path='/Register' element={<Register/>}/>
+          <Route path='/registeru' element={<Register/>}/>
           <Route path='/aboutus' element={<AboutUs/>}/>
           <Route path='/registercomp' element={<RegisterComponent/>}/>
           <Route path='/companies' element={<Companies/>}/>
-
           <Route path='/resumemanagement' element={<ResumeManagement/>}/>
           <Route path='/jobrecommendation' element={<JobRecommendation/>}/>
-          
-
           <Route path='/companyR1' element={<CompanyR1/>}/>
-
+          <Route path='/logincomp' element={<LoginComponent/>}/>
     
         </Routes>
         </BrowserRouter>
