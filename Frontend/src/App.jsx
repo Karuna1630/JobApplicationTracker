@@ -14,8 +14,10 @@ import MessagesInbox from './Pages/MessagesInbox'
 import UserProfile from './Pages/UserProfile'
 import CompanyR2 from './Pages/CompanyR2'
 import CompanyR3 from './Pages/CompanyR3'
-import ApplicationReceived from './Pages/ApplicationReceived.jsx'
+import ApplicationReceived from './Pages/ApplicationReceived'
 import ContactUs from './Pages/ContactUs'
+import JobPost from './Pages/JobPost'
+
 
 
 
@@ -45,6 +47,7 @@ function App() {
           <Route path='/companyR3' element={<CompanyR3/>}/>
           <Route path='/applicationreceived' element={<ApplicationReceived/>}/>
           <Route path='/contactus' element={<ContactUs/>}/>
+          <Route path='/jobpost' element={<JobPost/>}/>
 
 
     
