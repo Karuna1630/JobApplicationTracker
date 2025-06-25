@@ -13,6 +13,13 @@ import CompanyR1 from './Pages/CompanyR1'
 import MessagesInbox from './Pages/MessagesInbox'
 import CompanyR2 from './Pages/CompanyR2'
 import CompanyR3 from './Pages/CompanyR3'
+
+import LoginComponent from './Components/LoginComponent.jsx'
+
+
+import ApplicationReceived from './Pages/ApplicationReceived.jsx'
+
+
 import ContactUs from './Pages/ContactUs'
 
 
@@ -40,6 +47,12 @@ function App() {
           <Route path='/messagesinbox' element={<MessagesInbox/>}/>
           <Route path='/companyR2' element={<CompanyR2/>}/>
           <Route path='/companyR3' element={<CompanyR3/>}/>
+
+          <Route path='/logincomp' element={<LoginComponent/>}/>
+          
+          <Route path='/applicationreceived' element={<ApplicationReceived/>}/>
+
+
           <Route path='/contactus' element={<ContactUs/>}/>
 
 
