@@ -60,8 +60,8 @@ const CompanyR1=()=> {
                 </div>
               </div>
               <div className="pt-4">
-                <h2 className="text-1xl font-bold">Organization Details</h2>
-                <h4 className="text-l"> Provide Recruitment focal personal contact detalis </h4>
+                <h2 className="text-1xl font-bold">Organization Information</h2>
+                <h4 className="text-l"> Provide your company details </h4>
                 </div>
             </div>
 
