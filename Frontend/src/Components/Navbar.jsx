@@ -40,6 +40,7 @@ const Navbar = () => {
         <Link to="/" className="hover:text-blue-600 transition">Home</Link>
         <Link to="/companies" className="hover:text-blue-600 transition">Companies</Link>
         <Link to="/aboutus" className="hover:text-blue-600 transition">About Us</Link>
+        <Link to="/contactus" className="hover:text-blue-600 transition">Contact Us</Link>
 
         {isLoggedIn && role === 'user' && (
           <>
@@ -69,7 +70,7 @@ const Navbar = () => {
       <div className="flex items-center gap-4 text-xl">
         {!isLoggedIn ? (
           <>
-            <Link to="/logincomp" className="text-blue-800 font-semibold hover:text-blue-600 transition">Login</Link>
+            <Link to="/login" className="text-blue-800 font-semibold hover:text-blue-600 transition">Login</Link>
             <Link to="/registercomp" className="bg-blue-800 text-white font-semibold px-4 py-2 rounded-xl hover:bg-blue-600 transition">Register</Link>
           </>
         ) : (
