@@ -14,7 +14,7 @@ import MessagesInbox from './Pages/MessagesInbox'
 import LoginC from './Pages/LoginC'
 
 import CompanyR2 from './Pages/CompanyR2'
-
+import CompanyR3 from './Pages/CompanyR3'
 import LoginComponent from './Components/LoginComponent.jsx'
 
 
@@ -42,7 +42,7 @@ function App() {
           <Route path='/loginc' element= {<LoginC/>}/>
 
           <Route path='/companyR2' element={<CompanyR2/>}/>
-
+          <Route path='/companyR3' element={<CompanyR3/>}/>
           <Route path='/logincomp' element={<LoginComponent/>}/>
 
     
