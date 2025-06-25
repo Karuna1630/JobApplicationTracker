@@ -17,6 +17,8 @@ import CompanyR2 from './Pages/CompanyR2'
 
 import LoginComponent from './Components/LoginComponent.jsx'
 
+import ApplicationReceived from './Pages/ApplicationReceived.jsx'
+
 
 
 
@@ -44,6 +46,8 @@ function App() {
           <Route path='/companyR2' element={<CompanyR2/>}/>
 
           <Route path='/logincomp' element={<LoginComponent/>}/>
+          
+          <Route path='/applicationreceived' element={<ApplicationReceived/>}/>
 
     
         </Routes>
