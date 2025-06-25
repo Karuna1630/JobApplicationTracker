@@ -17,7 +17,7 @@ const Home = () => {
             <p className="text-lg">Stay organized and take control of your job search — all in one place.</p>
             <div className="space-x-4">
               <button onClick={() => navigate('/registercomp')} className="bg-white text-blue-700 font-semibold px-6 py-3 rounded-xl hover:bg-blue-100">Get Started</button>
-              <button onClick={() => navigate('/logincomp')} className="bg-blue-800 text-white px-6 py-3 rounded-xl hover:bg-blue-900">Login</button>
+              <button onClick={() => navigate('/login')} className="bg-blue-800 text-white px-6 py-3 rounded-xl hover:bg-blue-900">Login</button>
             </div>
           </div>
         </section>
@@ -26,7 +26,7 @@ const Home = () => {
         <section className="py-20 px-6 bg-white">
           <div className="max-w-6xl mx-auto text-center">
             <h2 className="text-4xl font-bold text-gray-800 mb-12">How It Works</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 ">
+            <div className="grid  grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-12 ">
               {[{
                 title: '📝 Add Job Applications',
                 desc: 'Log your job applications with all necessary details like company, position, and status.'
@@ -40,9 +40,9 @@ const Home = () => {
                 title: '📊 Get Insights',
                 desc: 'Visualize your progress with charts and stats to stay motivated.'
               }].map((item, idx) => (
-                <div key={idx} className="bg-gray-50 p-6 rounded-xl shadow hover:shadow-lg transition">
+                <div key={idx} className="bg-gray-50  p-6 rounded-xl shadow hover:shadow-lg transition">
                   <h3 className="font-semibold text-xl mb-2">{item.title}</h3>
-                  <p className="text-gray-600 text-lg">{item.desc}</p>
+                  <p className="text-gray-600 mt-3 text-lg">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -53,7 +53,7 @@ const Home = () => {
         <section className="py-20 px-6 bg-gray-100">
           <div className="max-w-6xl mx-auto text-center">
             <h2 className="text-4xl font-bold text-gray-800 mb-12">Why Choose Job Manager</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
               {["Centralized job tracking", "Easy to manage applications", "Smart reminders", "Secure & user-friendly"].map((feature, idx) => (
                 <div key={idx} className="bg-white p-6 shadow rounded-xl text-blue-700 font-medium border border-blue-100">
                   ✅ {feature}
