@@ -18,6 +18,7 @@ import ApplicationReceived from './Pages/ApplicationReceived'
 import ContactUs from './Pages/ContactUs'
 import EditProfile from './Pages/EditProfile.jsx'
 import JobPost from './Pages/JobPost'
+import Skill from './Pages/Skill'
 
 
 
@@ -51,6 +52,7 @@ function App() {
           <Route path='/contactus' element={<ContactUs/>}/>
           <Route path='/editProfile' element={<EditProfile/>}/>
           <Route path='/jobpost' element={<JobPost/>}/>
+          <Route path='/skill' element={<Skill/>}/>
 
 
 
