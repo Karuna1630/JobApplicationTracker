@@ -1,9 +1,11 @@
 import React from 'react';
+import { Navigate, useNavigate } from "react-router-dom";
 import AnshuP from "../assets/Anshu.jpg";
 import Footer from "../Components/Footer";
 import Navbar from "../Components/Navbar";
 
 const UserProfile = () => {
+  const navigate = useNavigate();
   return (
     <>
       <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-300">
@@ -34,15 +36,18 @@ const UserProfile = () => {
                             <p><span className="font-medium">Address :</span> Belbari-02, Nepal</p>
 
                             {/* Basic Information */}
-                            <h3 className="mt-4 font-semibold text-gray-600">BASIC INFORMATION</h3>
+                            <h3 className="mt-4 font-semibold text-black ">BASIC INFORMATION</h3>
                             <p><span className="font-medium">Gender :</span> Female</p>
                             <p><span className="font-medium">Birthday :</span> 2004-11-13</p>
                         </div>
 
                         {/* Edit Button */}
-                        <button className="mt-6 px-6 py-2 border border-black text-black bg-blue-500 rounded hover:bg-blue-800">
-                            Edit
-                        </button>
+                        <button onClick={()=> navigate("/editProfile")}
+                            type="submit"
+                            className="px-6 bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-800 transition"
+                          >
+                          Edit
+                      </button>
                     </div>
                 </div>
             </main>

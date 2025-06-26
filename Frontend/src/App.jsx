@@ -16,6 +16,7 @@ import CompanyR2 from './Pages/CompanyR2'
 import CompanyR3 from './Pages/CompanyR3'
 import ApplicationReceived from './Pages/ApplicationReceived.jsx'
 import ContactUs from './Pages/ContactUs'
+import EditProfile from './Pages/EditProfile.jsx'
 
 
 
@@ -45,7 +46,7 @@ function App() {
           <Route path='/companyR3' element={<CompanyR3/>}/>
           <Route path='/applicationreceived' element={<ApplicationReceived/>}/>
           <Route path='/contactus' element={<ContactUs/>}/>
-
+          <Route path='/editProfile' element={<EditProfile/>}/>
 
     
         </Routes>
