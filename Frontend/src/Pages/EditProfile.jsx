@@ -42,6 +42,15 @@ const EditProfile = () => {
         </div>
 
         {/* Social Links */}
+        <div className="border p-4 border-black shadow-xl rounded mb-6">
+            <h3 className="font-medium mb-4">Social Links</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <input type="text" defaultValue="" placeholder="LinkedIn" className="p-2 border border-black shadow-xl rounded bg-gray-100" />
+            <input type="text" defaultValue="" placeholder="Twitter" className="p-2 border border-black shadow-xl rounded bg-gray-100" />
+            <input type="text" defaultValue="" placeholder="GitHub" className="p-2 border border-black shadow-xl rounded bg-gray-100" />
+            <input type="text" defaultValue="" placeholder="Website" className="p-2 border border-black shadow-xl rounded bg-gray-100" />
+            </div>
+        </div>
 
         {/* Buttons */}
         <div className="flex justify-end gap-4">
