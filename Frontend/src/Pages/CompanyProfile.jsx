@@ -49,6 +49,14 @@ const CompanyProfile = () => {
               </p>
             </div>
 
+            {/* Edit Profile Button */}
+            <button
+              onClick={() => navigate("/editCompanyProfile")}
+              className="mt-6 px-6 bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-800 transition"
+            >
+              Edit Company Profile
+            </button>
+
           </div>
         </div>
       </main>
