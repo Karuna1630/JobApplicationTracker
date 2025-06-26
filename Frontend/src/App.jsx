@@ -17,6 +17,7 @@ import CompanyR3 from './Pages/CompanyR3'
 import ApplicationReceived from './Pages/ApplicationReceived'
 import ContactUs from './Pages/ContactUs'
 import JobPost from './Pages/JobPost'
+import Skill from './Pages/Skill'
 
 
 
@@ -48,6 +49,7 @@ function App() {
           <Route path='/applicationreceived' element={<ApplicationReceived/>}/>
           <Route path='/contactus' element={<ContactUs/>}/>
           <Route path='/jobpost' element={<JobPost/>}/>
+          <Route path='/skill' element={<Skill/>}/>
 
 
     
