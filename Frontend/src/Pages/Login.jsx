@@ -36,7 +36,7 @@ const Login = () => {
 
             <form onSubmit={handleSubmit} className="space-y-5">
 
-              {/* Username */}
+              {/* Username
               <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                 <FaUser className="text-gray-500 mr-3" />
                 <input
@@ -45,7 +45,7 @@ const Login = () => {
                   className="w-full bg-transparent outline-none text-base"
                   required
                 />
-              </div>
+              </div> */}
 
               {/* Email */}
               <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
