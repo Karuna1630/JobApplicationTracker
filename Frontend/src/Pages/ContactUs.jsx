@@ -20,7 +20,7 @@ const ContactUs = () => {
     return;
   }
 
-  console.log("Contact Form Data:", formData); // ✅ Logs to console
+  console.log("Contact Form Data:", formData); // 
 
   toast.success("Message sent successfully!");
   setFormData({ name: '', email: '', message: '' });

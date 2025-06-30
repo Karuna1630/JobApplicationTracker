@@ -11,7 +11,7 @@ const Home = () => {
       <Navbar />
       <div className="bg-gray-50 min-h-screen">
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-blue-500 to-blue-700 text-white py-20 px-4">
+        <div className="bg-gradient-to-r from-blue-500 to-blue-700 text-white py-20 px-4">
           <div className="max-w-5xl mx-auto text-center space-y-6">
             <h1 className="text-5xl font-bold">Track Your Job Applications Easily</h1>
             <p className="text-lg">Stay organized and take control of your job search — all in one place.</p>
@@ -19,8 +19,8 @@ const Home = () => {
               <button onClick={() => navigate('/registercomp')} className="bg-white text-blue-700 font-semibold px-6 py-3 rounded-xl hover:bg-blue-100">Get Started</button>
               <button onClick={() => navigate('/login')} className="bg-blue-800 text-white px-6 py-3 rounded-xl hover:bg-blue-900">Login</button>
             </div>
-          </div>
-        </section>
+          </div>  
+        </div>
 
         {/* How It Works */}
         <section className="py-20 px-6 bg-white">

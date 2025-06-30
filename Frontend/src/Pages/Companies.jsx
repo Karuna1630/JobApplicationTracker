@@ -37,6 +37,7 @@ import Footer from "../Components/Footer";
 import Navbar from "../Components/Navbar";
 
 const Companies = () => {
+  
   const topJobs = [
     {
       id: 1,

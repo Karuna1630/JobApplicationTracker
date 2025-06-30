@@ -70,15 +70,15 @@ const CompanyR1=()=> {
               <input
                 type="text"
                 name="name"
-                placeholder="Organization Name"
+                placeholder=" CompanyName"
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
               />
 
               {/* Phone Number */}
               <input
-                type="tel"
-                name="number"
-                placeholder="Phone Number"
+                type="email"
+                name="email"
+                placeholder=" Email"
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
               />
 
@@ -88,11 +88,11 @@ const CompanyR1=()=> {
                 className="w-full px-4 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
               >
                 <option value="">Select Industry</option>
-                <option value="Education">Education</option>
-                <option value="Healthcare">Healthcare</option>
-                <option value="IT">Information Technology</option>
-                <option value="Finance">Finance</option>
-                <option value="Construction">Construction</option>
+                <option value="1">Education</option>
+                <option value="2">Healthcare</option>
+                <option value="3">Information Technology</option>
+                <option value="4">Finance</option>
+                <option value="5">Construction</option>
               </select>
 
               {/* Continue Button */}
