@@ -22,7 +22,6 @@ const Register = () => {
       CompanyName: "",
       Address:"",
       PhoneNo:"",
-      
       Email: "",
    }
 
