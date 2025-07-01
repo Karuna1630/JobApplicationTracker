@@ -13,7 +13,7 @@ const CompanyR1=()=> {
       Email:"",
       MobileNo:"",
       Password:"",
-      UserType:"3",
+      UserType:"2",
       UserStatus:"active",
       company: {
         CompanyId: "0",
@@ -61,7 +61,6 @@ const CompanyR1=()=> {
             className="object-cover w-full h-full"
           />
         </div>
-
        
         <div className="w-full md:w-1/2 bg-white flex items-center justify-center p-8">
           <div className="max-w-sm w-full">
