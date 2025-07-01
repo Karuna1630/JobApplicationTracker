@@ -57,8 +57,7 @@ const CompanyR1=()=> {
         {/* Left image section */}
         <div className="hidden md:block md:w-1/2">
           <img
-            src={crlogo} 
-            className="object-cover w-full h-full"
+            src={crlogo} className="object-cover w-full h-full"
           />
         </div>
        
