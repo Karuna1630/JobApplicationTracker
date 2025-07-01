@@ -22,7 +22,7 @@ import JobPost from './Pages/JobPost'
 import CompanyProfile from './Pages/CompanyProfile.jsx'
 
 import Skill from './Pages/Skill'
-
+import CandidateScreening from './Pages/CandidateScreening.jsx'
 
 
 
@@ -60,6 +60,7 @@ function App() {
           <Route path='/companyProfile' element={<CompanyProfile/>}/>
 
           <Route path='/skill' element={<Skill/>}/>
+          <Route path='/candidatescreening' element={<CandidateScreening/>}/>
 
 
 
