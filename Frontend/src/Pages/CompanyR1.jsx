@@ -8,21 +8,27 @@ import Footer from "../Components/Footer";
 const CompanyR1 = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    UserId: "0",
-    FirstName: "",
-    LastName: "",
-    Email: "",
-    MobileNo: "",
-    Password: "",
-    UserType: "2",
-    UserStatus: "active",
+    userId: "0",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+    location:"",
+    bio:"",
+    userType: "2",
+    userStatus: "active",
     company: {
-      CompanyId: "0",
-      CompanyName: "",
-      Address: "",
-      PhoneNo: "",
-      Email: "",
-      
+      companyId: "0",
+      companyName: "",
+      companyLogo:"",
+      website:"",
+      location: "",
+      Description:"",
+      phoneNo: "",
+      email: "",
+
     },
   });
   const handleSubmit = (e) => {

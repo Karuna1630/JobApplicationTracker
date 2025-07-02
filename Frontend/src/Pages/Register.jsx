@@ -8,7 +8,14 @@ import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import { Formik, Form, Field } from "formik";
 import { RegisterSchema } from "../schemas";
+import { toast } from "react-toastify";
+import { FaLocationDot } from "react-icons/fa6";
+import { IoPersonCircleSharp } from "react-icons/io5";
+
+
+
 const Register = () => {
+
   const initialValues ={
     userId: "0",
     firstName: "",
@@ -17,6 +24,8 @@ const Register = () => {
     phone: "",
     password: "",
     confirmPassword: "",
+    location:"",
+    bio:"",
     userType: "3",
     userStatus: "active",
     company: {
@@ -28,11 +37,19 @@ const Register = () => {
     },
   }
   
-  
-  const onSubmit = (values, actions) => {
-        console.log(values);
-        actions.resetForm();
-      }
+  //fetching backend data uisng API
+  const onSubmit = async (values, actions) => {
+    console.log("values", values)
+    try {
+      const response = await axiosInstance.post('/vending/register/', values)
+      console.log("User Added:", response.data)
+      actions.resetForm()
+      toast.success("User registration successfully!"); 
+    } catch (error) {
+      console.error("Error while doing register:", error)
+      toast.error("Failed to register user.");
+    }
+  }
 
 
   return (
@@ -113,6 +130,26 @@ const Register = () => {
                     <p className="form_error">{errors.phone}</p>
                   )}
                 </div>
+                <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
+                  <FaLocationDot className="text-gray-500 mr-3" />
+                  <Field type="text" name="location"  placeholder="Location"/>
+                </div>
+                 <div className="error_container">
+                  {errors.location && touched.location && (
+                    <p className="form_error">{errors.location}</p>
+                  )}
+                </div>
+                <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
+                  <IoPersonCircleSharp className="text-gray-500 mr-3" />
+                  <Field type="text" name="bio"  placeholder="Bio"/>
+                </div>
+                 <div className="error_container">
+                  {errors.bio && touched.bio && (
+                    <p className="form_error">{errors.bio}</p>
+                  )}
+                </div>
+
+
                 <button
                   type="submit"
                   className="w-full bg-purple-600 text-white py-2 rounded-md text-lg font-medium hover:bg-purple-700 transition"
