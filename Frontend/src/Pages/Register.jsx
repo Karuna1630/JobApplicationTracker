@@ -7,7 +7,7 @@ import registerimage from "../assets/registerimage.png";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import { useFormik } from "formik";
-
+import { RegisterSchema } from "../schemas";
 const Register = () => {
   const [formData, setFormData] = useState({
     UserId: "0",
@@ -16,6 +16,7 @@ const Register = () => {
     Email: "",
     MobileNo: "",
     Password: "",
+    ConfirmPassword: "",
     UserType: "3",
     UserStatus: "active",
     company: {
@@ -26,13 +27,16 @@ const Register = () => {
       Email: "",
     },
   });
-  const { values, handleBlur, handleChange, handleSubmit } = useFormik({
-    initialValues: formData,
-    onSubmit: (values) => {
-      console.log(values);
-    },
-  });
-
+  const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
+    useFormik({
+      initialValues: formData,
+      validationSchema: RegisterSchema,
+      onSubmit: (values, actions) => {
+        console.log(values);
+        actions.resetForm();
+      },
+    });
+  console.log(touched);
   return (
     <>
       <Navbar />
@@ -65,8 +69,13 @@ const Register = () => {
                   onChange={handleChange}
                   placeholder="First Name"
                   className="w-full outline-none bg-transparent text-base"
-                  required
+                  
                 />
+              </div>
+              <div className="error_container">
+                {errors.FirstName && touched.FirstName && (
+                  <p className="form_error">{errors.FirstName}</p>
+                )}
               </div>
 
               <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
@@ -75,12 +84,17 @@ const Register = () => {
                   type="text"
                   name="LastName"
                   placeholder="Last Name"
-                  value={values.LastNameName}
+                  value={values.LastName}
                   onBlur={handleBlur}
                   onChange={handleChange}
                   className="w-full outline-none bg-transparent text-base"
-                  required
+                  
                 />
+              </div>
+               <div className="error_container">
+                {errors.LastName && touched.LastName && (
+                  <p className="form_error">{errors.LastName}</p>
+                )}
               </div>
 
               <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
@@ -93,8 +107,13 @@ const Register = () => {
                   onBlur={handleBlur}
                   onChange={handleChange}
                   className="w-full outline-none bg-transparent text-base"
-                  required
+                  
                 />
+              </div>
+               <div className="error_container">
+                {errors.Email && touched.Email && (
+                  <p className="form_error">{errors.Email}</p>
+                )}
               </div>
 
               <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
@@ -107,8 +126,32 @@ const Register = () => {
                   onBlur={handleBlur}
                   onChange={handleChange}
                   className="w-full outline-none bg-transparent text-base"
-                  required
+                
                 />
+              </div>
+               <div className="error_container">
+                {errors.Password && touched.Password && (
+                  <p className="form_error">{errors.Password}</p>
+                )}
+              </div>
+
+              <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
+                <RiLockPasswordFill className="text-gray-500 mr-3 text-lg" />
+                <input
+                  type="password"
+                  name="ConfirmPassword"
+                  placeholder="Confirm Password"
+                  value={values.ConfirmPassword}
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  className="w-full outline-none bg-transparent text-base"
+                  
+                />
+              </div>
+               <div className="error_container">
+                {errors.ConfirmPassword && touched.ConfirmPassword && (
+                  <p className="form_error">{errors.ConfirmPassword}</p>
+                )}
               </div>
 
               <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
@@ -121,8 +164,13 @@ const Register = () => {
                   onChange={handleChange}
                   placeholder="Phone Number"
                   className="w-full outline-none bg-transparent text-base"
-                  required
+                  
                 />
+              </div>
+               <div className="error_container">
+                {errors.MobileNo && touched.MobileNo && (
+                  <p className="form_error">{errors.MobileNo}</p>
+                )}
               </div>
 
               <button
