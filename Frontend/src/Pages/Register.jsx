@@ -6,35 +6,33 @@ import { FaPhone } from "react-icons/fa";
 import registerimage from "../assets/registerimage.png";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
+import { useFormik } from "formik";
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    UserId:"0",
-    FirstName:"",
-    LastName:"",
-    Email:"",
-    MobileNo:"",
-    Password:"",
-    UserType:"3",
-    UserStatus:"active",
+    UserId: "0",
+    FirstName: "",
+    LastName: "",
+    Email: "",
+    MobileNo: "",
+    Password: "",
+    UserType: "3",
+    UserStatus: "active",
     company: {
       CompanyId: "0",
       CompanyName: "",
-      Address:"",
-      PhoneNo:"",
+      Address: "",
+      PhoneNo: "",
       Email: "",
-   }
-
-
+    },
   });
-   const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Submitted", formData);
-  };
-   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+  const { values, handleBlur, handleChange, handleSubmit } = useFormik({
+    initialValues: formData,
+    onSubmit: (values) => {
+      console.log(values);
+    },
+  });
+
   return (
     <>
       <Navbar />
@@ -48,7 +46,6 @@ const Register = () => {
             />
           </div>
 
-       
           <div className="md:w-1/2 w-full p-8 flex flex-col justify-center">
             <h2 className="text-2xl font-bold text-center mb-1">
               Create Account
@@ -57,77 +54,71 @@ const Register = () => {
               Get started with your job journey
             </p>
 
-            <form onSubmit={handleSubmit} 
-            className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                 <FaUser className="text-gray-500 mr-3" />
                 <input
                   type="text"
                   name="FirstName"
-                  placeholder="First Name"
-                  value={formData.FirstName}
+                  value={values.FirstName}
+                  onBlur={handleBlur}
                   onChange={handleChange}
+                  placeholder="First Name"
                   className="w-full outline-none bg-transparent text-base"
                   required
                 />
               </div>
 
-           
               <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                 <FaUser className="text-gray-500 mr-3" />
                 <input
                   type="text"
                   name="LastName"
                   placeholder="Last Name"
-                  value={formData.LastName}
+                  value={values.LastNameName}
+                  onBlur={handleBlur}
                   onChange={handleChange}
-                  
                   className="w-full outline-none bg-transparent text-base"
                   required
                 />
               </div>
 
-              
               <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                 <MdEmail className="text-gray-500 mr-3 text-lg" />
                 <input
                   type="email"
                   name="Email"
                   placeholder="Email Address"
-                  value={formData.Email}
+                  value={values.Email}
+                  onBlur={handleBlur}
                   onChange={handleChange}
                   className="w-full outline-none bg-transparent text-base"
                   required
                 />
               </div>
 
-             
               <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                 <RiLockPasswordFill className="text-gray-500 mr-3 text-lg" />
                 <input
                   type="password"
                   name="Password"
                   placeholder="Password"
-                  value={formData.Password}
+                  value={values.Password}
+                  onBlur={handleBlur}
                   onChange={handleChange}
                   className="w-full outline-none bg-transparent text-base"
                   required
                 />
               </div>
 
-             
-             
-              
-            
-
-             
               <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                 <FaPhone className="text-gray-500 mr-3" />
                 <input
                   type="phonenumber"
                   name="MobileNo"
+                  value={values.MobileNo}
+                  onBlur={handleBlur}
                   onChange={handleChange}
-                   value={formData.MobileNo}
                   placeholder="Phone Number"
                   className="w-full outline-none bg-transparent text-base"
                   required
@@ -141,7 +132,6 @@ const Register = () => {
                 Create Account
               </button>
 
-              
               <p className="text-center text-sm mt-4">
                 Already have an account?{" "}
                 <a href="#" className="text-cyan-600 hover:underline">
