@@ -22,6 +22,7 @@ const CompanyR1 = () => {
       Address: "",
       PhoneNo: "",
       Email: "",
+      
     },
   });
   const handleSubmit = (e) => {

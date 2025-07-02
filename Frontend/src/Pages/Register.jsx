@@ -6,37 +6,35 @@ import { FaPhone } from "react-icons/fa";
 import registerimage from "../assets/registerimage.png";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
-import { useFormik } from "formik";
+import { Formik, Form, Field } from "formik";
 import { RegisterSchema } from "../schemas";
 const Register = () => {
-  const [formData, setFormData] = useState({
-    UserId: "0",
-    FirstName: "",
-    LastName: "",
-    Email: "",
-    MobileNo: "",
-    Password: "",
-    ConfirmPassword: "",
-    UserType: "3",
-    UserStatus: "active",
+  const initialValues ={
+    userId: "0",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+    userType: "3",
+    userStatus: "active",
     company: {
-      CompanyId: "0",
-      CompanyName: "",
-      Address: "",
-      PhoneNo: "",
-      Email: "",
+      companyId: "0",
+      companyName: "",
+      address: "",
+      phoneNo: "",
+      email: "",
     },
-  });
-  const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
-    useFormik({
-      initialValues: formData,
-      validationSchema: RegisterSchema,
-      onSubmit: (values, actions) => {
+  }
+  
+  
+  const onSubmit = (values, actions) => {
         console.log(values);
         actions.resetForm();
-      },
-    });
-  console.log(touched);
+      }
+
+
   return (
     <>
       <Navbar />
@@ -58,135 +56,79 @@ const Register = () => {
               Get started with your job journey
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
-                <FaUser className="text-gray-500 mr-3" />
-                <input
-                  type="text"
-                  name="FirstName"
-                  value={values.FirstName}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  placeholder="First Name"
-                  className="w-full outline-none bg-transparent text-base"
-                  
-                />
-              </div>
-              <div className="error_container">
-                {errors.FirstName && touched.FirstName && (
-                  <p className="form_error">{errors.FirstName}</p>
-                )}
-              </div>
-
-              <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
-                <FaUser className="text-gray-500 mr-3" />
-                <input
-                  type="text"
-                  name="LastName"
-                  placeholder="Last Name"
-                  value={values.LastName}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  className="w-full outline-none bg-transparent text-base"
-                  
-                />
-              </div>
-               <div className="error_container">
-                {errors.LastName && touched.LastName && (
-                  <p className="form_error">{errors.LastName}</p>
-                )}
-              </div>
-
-              <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
-                <MdEmail className="text-gray-500 mr-3 text-lg" />
-                <input
-                  type="email"
-                  name="Email"
-                  placeholder="Email Address"
-                  value={values.Email}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  className="w-full outline-none bg-transparent text-base"
-                  
-                />
-              </div>
-               <div className="error_container">
-                {errors.Email && touched.Email && (
-                  <p className="form_error">{errors.Email}</p>
-                )}
-              </div>
-
-              <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
-                <RiLockPasswordFill className="text-gray-500 mr-3 text-lg" />
-                <input
-                  type="password"
-                  name="Password"
-                  placeholder="Password"
-                  value={values.Password}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  className="w-full outline-none bg-transparent text-base"
-                
-                />
-              </div>
-               <div className="error_container">
-                {errors.Password && touched.Password && (
-                  <p className="form_error">{errors.Password}</p>
-                )}
-              </div>
-
-              <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
-                <RiLockPasswordFill className="text-gray-500 mr-3 text-lg" />
-                <input
-                  type="password"
-                  name="ConfirmPassword"
-                  placeholder="Confirm Password"
-                  value={values.ConfirmPassword}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  className="w-full outline-none bg-transparent text-base"
-                  
-                />
-              </div>
-               <div className="error_container">
-                {errors.ConfirmPassword && touched.ConfirmPassword && (
-                  <p className="form_error">{errors.ConfirmPassword}</p>
-                )}
-              </div>
-
-              <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
-                <FaPhone className="text-gray-500 mr-3" />
-                <input
-                  type="phonenumber"
-                  name="MobileNo"
-                  value={values.MobileNo}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  placeholder="Phone Number"
-                  className="w-full outline-none bg-transparent text-base"
-                  
-                />
-              </div>
-               <div className="error_container">
-                {errors.MobileNo && touched.MobileNo && (
-                  <p className="form_error">{errors.MobileNo}</p>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-purple-600 text-white py-2 rounded-md text-lg font-medium hover:bg-purple-700 transition"
-              >
-                Create Account
-              </button>
-
-              <p className="text-center text-sm mt-4">
-                Already have an account?{" "}
-                <a href="#" className="text-cyan-600 hover:underline">
-                  Sign in here
-                </a>
-              </p>
-            </form>
+            <Formik  initialValues={initialValues} validationSchema={RegisterSchema}  onSubmit= {onSubmit}>
+              {({errors, touched}) =>(
+                  <Form className="space-y-4">
+                <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
+                  <FaUser className="text-gray-500 mr-3" />
+                  <Field type="text" name="firstName"   placeholder="First Name"/>
+                </div>
+                <div className="error_container">
+                  {errors.firstName && touched.firstName && (
+                    <p className="form_error">{errors.firstName}</p>
+                  )}
+                </div>
+                <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
+                  <FaUser className="text-gray-500 mr-3" />
+                    <Field type="text" name="lastName"   placeholder="Last Name"/>
+                </div>
+                 <div className="error_container">
+                  {errors.lastName && touched.lastName && (
+                    <p className="form_error">{errors.lastName}</p>
+                  )}
+                </div>
+                <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
+                  <MdEmail className="text-gray-500 mr-3 text-lg" />
+                  <Field type="email" name="email" placeholder="Email Address"/>
+                </div>
+                 <div className="error_container">
+                  {errors.email && touched.email && (
+                    <p className="form_error">{errors.email}</p>
+                  )}
+                </div>
+                <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
+                  <RiLockPasswordFill className="text-gray-500 mr-3 text-lg" />
+                  <Field type="password" name="password" placeholder="Password"/>
+                </div>
+                 <div className="error_container">
+                  {errors.password && touched.password && (
+                    <p className="form_error">{errors.password}</p>
+                  )}
+                </div>
+                <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
+                  <RiLockPasswordFill className="text-gray-500 mr-3 text-lg" />
+                   <Field type="password" name="confirmPassword" placeholder="Confirm Password"/>
+                </div>
+                 <div className="error_container">
+                  {errors.confirmPassword && touched.confirmPassword && (
+                    <p className="form_error">{errors.confirmPassword}</p>
+                  )}
+                </div>
+                <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
+                  <FaPhone className="text-gray-500 mr-3" />
+                  <Field type="phonenumber" name="phone"  placeholder="Phone Number"/>
+                </div>
+                 <div className="error_container">
+                  {errors.phone && touched.phone && (
+                    <p className="form_error">{errors.phone}</p>
+                  )}
+                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-purple-600 text-white py-2 rounded-md text-lg font-medium hover:bg-purple-700 transition"
+                >
+                  Create Account
+                </button>
+                <p className="text-center text-sm mt-4">
+                  Already have an account?{" "}
+                  <a href="#" className="text-cyan-600 hover:underline">
+                    Sign in here
+                  </a>
+                </p>
+              </Form>
+              )}
+              
+            </Formik>
           </div>
         </div>
       </div>
