@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { FiEdit } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
 import AnshuImage from "../assets/Anshu.jpg";
 import BackgroundImage from "../assets/background.avif";
+import EditProfile from "./EditProfile";
 
 const suggestedSkills = [
   "Engineering",
@@ -24,8 +24,16 @@ const UserProfile = () => {
   const [selectedSkill, setSelectedSkill] = useState("");
   const [softSkills, setSoftSkills] = useState([]);
   const [resumeFile, setResumeFile] = useState(null);
+  const [showEditIntro, setShowEditIntro] = useState(false);
 
-  const navigate = useNavigate();
+  const [userInfo, setUserInfo] = useState({
+    firstName: "Anshu",
+    lastName: "Karki",
+    email: "example@email.com",
+    phone: "123-456-7890",
+    location: "Belbari, Nepal",
+    bio: "Frontend Developer | UI/UX Specialist"
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 to-white flex items-center justify-center p-6">
@@ -38,24 +46,16 @@ const UserProfile = () => {
           <div className="absolute inset-0 bg-black opacity-40"></div>
         </div>
 
-        {/* Top Right Buttons */}
-        <div className="absolute top-64 right-4 flex gap-2 z-20">
-          <button className="bg-blue-600 hover:bg-blue-900 text-white text-sm font-medium px-4 border rounded-md shadow-lg">
-            Add profile section
-          </button>
-          <button className="bg-white hover:bg-gray-100 text-sm font-medium px-3 py-1.5 border border-gray-300 rounded-md shadow-sm">
-            More
-          </button>
+        <div className="absolute top-64 right-4 flex gap-2 z-50">
           <button
-            onClick={() => navigate("/editCompanyProfile")}
-            className="bg-white hover:bg-gray-100 text-gray-700 p-2 border border-gray-300 rounded-full shadow"
+            onClick={() => setShowEditIntro(true)}
+            className="bg-white hover:bg-gray-100 text-gray-700 p-2 border border-gray-300 rounded-full shadow z-50"
             title="Edit Profile"
           >
             <FiEdit className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Profile Picture */}
         <div className="absolute top-32 left-8 z-20">
           <img
             src={AnshuImage}
@@ -64,28 +64,44 @@ const UserProfile = () => {
           />
         </div>
 
-        {/* Header */}
-        <div className="pt-28 px-8 pb-8 relative z-30">
-          <h2 className="text-3xl font-semibold text-gray-800">Anshu Karki</h2>
-          <p className="text-base text-gray-600 mt-2">Frontend Developer | UI/UX Specialist</p>
+        <div className="pt-28 px-8 pb-4 relative z-30">
+          <h2 className="text-3xl font-semibold text-gray-800">
+            {userInfo.firstName} {userInfo.lastName}
+          </h2>
+          <p className="text-base text-gray-600 mt-2">{userInfo.bio}</p>
         </div>
 
-        {/* Body */}
+        <hr className="border-gray-600 w-11/12 mx-auto mb-6" />
+
         <div className="px-12 pb-12 space-y-8 relative z-30">
-          {/* Contact */}
           <section>
-            <h3 className="text-xl font-semibold text-gray-800 mb-3">Contact Information</h3>
-            <ul className="space-y-2 text-gray-600 text-lg">
-              <li><strong>Email:</strong> example@email.com</li>
-              <li><strong>Phone:</strong> 123-456-7890</li>
-              <li><strong>Location:</strong> Belbari, Nepal</li>
+            <h3 className="text-xl font-semibold text-gray-800 mb-3">
+              Contact Information
+            </h3>
+            <ul className="flex flex-wrap gap-x-32 text-gray-600 text-lg">
+              <li>
+                <strong>Email:</strong> <span>{userInfo.email}</span>
+              </li>
+              <li>
+                <strong>Phone:</strong> <span>{userInfo.phone}</span>
+              </li>
+              <li>
+                <strong>Location:</strong> <span>{userInfo.location}</span>
+              </li>
             </ul>
           </section>
 
-          {/* Experience */}
+          <hr className=" border-gray-300" />
+
           <section>
-            <h3 className="text-xl font-semibold text-gray-800 mb-3">Experience Summary</h3>
-            <p className={`text-gray-700 leading-relaxed text-lg transition-all duration-300 ease-in-out ${showFullExperience ? "" : "line-clamp-3"}`}>
+            <h3 className="text-xl font-semibold text-gray-800 mb-3">
+              Experience Summary
+            </h3>
+            <p
+              className={`text-gray-700 leading-relaxed text-lg transition-all duration-300 ease-in-out ${
+                showFullExperience ? "" : "line-clamp-3"
+              }`}
+            >
               Over 2 years of experience building modern, scalable, and user-centric web applications using
               React, TypeScript, and other cutting-edge technologies. Worked in dynamic startup environments
               solving real-world problems through design-focused engineering. Passionate about building accessible,
@@ -99,16 +115,18 @@ const UserProfile = () => {
             </button>
           </section>
 
-          {/* Education */}
+          <hr className=" border-gray-300" />
+
           <section>
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-xl font-semibold text-gray-800">Education</h3>
               <span className="text-2xl text-gray-500 cursor-pointer hover:text-gray-700">+</span>
             </div>
-            <img className="w-full rounded-lg shadow-md" />
+            <img className="w-full rounded-lg shadow-md" alt="" />
           </section>
 
-          {/* Skills */}
+          <hr className="my-6 border-gray-300" />
+
           <section>
             <h3 className="text-xl font-semibold text-gray-800 mb-2">Skills</h3>
             <p className="text-gray-600 text-sm mb-4">Skills data to fill their roles</p>
@@ -141,8 +159,9 @@ const UserProfile = () => {
             </div>
           </section>
 
-          {/* Upload Resume */}
-          <section className="border-t border-gray-200 pt-6">
+          <hr className="my-6 border-gray-300" />
+
+          <section>
             <h3 className="text-xl font-semibold text-gray-800 mb-3">📄 Upload Resume</h3>
             <p className="text-sm text-gray-600 mb-4">
               Upload your latest CV or resume to share with recruiters.
@@ -160,15 +179,20 @@ const UserProfile = () => {
               }}
             />
             {resumeFile && (
-              <p className="mt-2 text-sm text-green-600">
-                Selected: {resumeFile.name}
-              </p>
+              <p className="mt-2 text-sm text-green-600">Selected: {resumeFile.name}</p>
             )}
           </section>
         </div>
       </div>
 
-      {/* Skill Modal */}
+      {showEditIntro && (
+        <EditProfile
+          userData={userInfo}
+          onSave={(updated) => setUserInfo(updated)}
+          onClose={() => setShowEditIntro(false)}
+        />
+      )}
+
       {showSkillModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white w-full max-w-2xl rounded-lg shadow-lg p-6 relative">
@@ -237,6 +261,7 @@ const UserProfile = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };
