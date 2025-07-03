@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { AiFillCheckCircle } from "react-icons/ai";
 import crlogo from "../assets/CR.avif";
