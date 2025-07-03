@@ -11,7 +11,7 @@ const Companies = () => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const topJobsRes = await axios.get("https://dummyjson.com/users?limit=18");
+        const topJobsRes = await axios.get("https://dummyjson.com/users?limit=10");
         const hotJobsRes = await axios.get("https://dummyjson.com/products?limit=15");
 
         const topJobsData = topJobsRes.data.users.map((user, index) => ({
