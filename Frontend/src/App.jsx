@@ -21,8 +21,8 @@ import JobPost from './Pages/JobPost'
 import CompanyProfile from './Pages/CompanyProfile.jsx'
 import Skill from './Pages/Skill'
 import CandidateScreening from './Pages/CandidateScreening.jsx'
-
-
+import PostJob from './Pages/PostJob.jsx'
+import CompanyInsight from './Pages/CompanyInsight.jsx'
 
 
 
@@ -55,11 +55,11 @@ function App() {
           <Route path='/editProfile' element={<EditProfile/>}/>
           <Route path='/jobpost' element={<JobPost/>}/>
           <Route path='/companyprofile' element={<CompanyProfile/>}/>
-         
+          <Route path='/postjob' element={<PostJob/>}/>
 
           <Route path='/skill' element={<Skill/>}/>
           <Route path='/candidatescreening' element={<CandidateScreening/>}/>
-
+          <Route path='/companyinsight' element={<CompanyInsight/>}/>
 
 
 
