@@ -3,11 +3,12 @@ import crlogo from "../assets/CR.avif";
 import { Navigate, useNavigate } from "react-router-dom";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
+import { useFormik } from "formik";
 
 
 const CompanyR1 = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+  const initialValues ={
     userId: "0",
     firstName: "",
     lastName: "",
@@ -17,50 +18,30 @@ const CompanyR1 = () => {
     confirmPassword: "",
     location:"",
     bio:"",
-    userType: "2",
-    userStatus: "active",
+    userType: "",
+    createdAt:"",
+    updatedAt:"",
+    isActive: "",
     company: {
-      companyId: "0",
+      companiesId: "0",
       companyName: "",
       companyLogo:"",
+      industryId:"0",
       website:"",
       location: "",
-      Description:"",
-      phoneNo: "",
-      email: "",
+      description:"",
+      createdAt:"",
+      updatedAt:"",
 
     },
-  });
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const { CompanyName, Address, PhoneNo, Email } = formData.company;
-    if (!CompanyName || !Address || !PhoneNo || !Email) {
-      alert("Please fill in all company details.");
-      return;
+  }
+  const {values, handleBlur, handleChange, handleSubmit} =useFormik({
+    initialValues,
+    onSubmit: (values)=>{
+      console.log(values)
     }
-
-    console.log("Submitted", formData);
-    navigate("/companyR2");
-  };
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-
-    if (["CompanyName", "Address", "PhoneNo", "Email"].includes(name)) {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        company: {
-          ...prevFormData.company,
-          [name]: value,
-        },
-      }));
-    } else {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        [name]: value,
-      }));
-    }
-  };
+  })
+  console.log(formik)
 
   return (
     <>
@@ -117,12 +98,12 @@ const CompanyR1 = () => {
               </div>
 
               {/* Form Section */}
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form  className="space-y-5">
                 {/* Organization Name */}
                 <input
                   type="text"
-                  name="CompanyName"
-                  value={formData.company.CompanyName}
+                  name="companyName"
+                  value={formData.company.companyName}
                   onChange={handleChange}
                   placeholder=" Company Name"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
@@ -130,30 +111,30 @@ const CompanyR1 = () => {
                 {/* Address */}
                 <input
                   type="text"
-                  name="Address"
-                  value={formData.company.Address}
+                  name="location"
+                  value={formData.company.location}
                   onChange={handleChange}
-                  placeholder="Address"
+                  placeholder="Location"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                 />
 
                 {/* Phone */}
                 <input
-                  type="tel"
-                  name="PhoneNo"
-                  value={formData.company.PhoneNo}
+                  type="text"
+                  name="description"
+                  value={formData.company.description}
                   onChange={handleChange}
-                  placeholder=" Phone Number"
+                  placeholder=" Description"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                 />
 
-                {/* Email */}
+                {/* Company logo */}
                 <input
-                  type="email"
-                  name="Email"
-                  value={formData.company.Email}
+                  type=""
+                  name=""companyLogo
+                  value={formData.company.companyLogo}
                   onChange={handleChange}
-                  placeholder=" Email"
+                  placeholder="Company Logo"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                 />
 
