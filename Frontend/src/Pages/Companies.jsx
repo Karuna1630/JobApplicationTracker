@@ -1,256 +1,51 @@
-
-import React from "react";
-import UNDPlogo from "../assets/UNDP_logo.svg.png";
-import Merojoblogo from "../assets/Merojob.jpg";
-import GenerationNextCommunicationslogo from "../assets/GNC.jpg";
-import Zegallogo from "../assets/Zegal.jpg";
-import Innovativelogo from "../assets/Innovative.jpg";
-import apexlogo from "../assets/apex.jpg";
-import Modernlogo from "../assets/Modern.jpg";
-import Evergreenlogo from "../assets/Evergreen.jpg";
-import SameDaylogo from "../assets/SameDay.jpg";
-import Soalteelogo from "../assets/Soaltee.jpg";
-import Oracarelogo from "../assets/Oracare.jpg";
-import Renewlogo from "../assets/Renew.jpg";
-import Secondarylogo from "../assets/Secondary.jpg";
-import Mayalogo from "../assets/Maya.jpg";
-import SoonChandilogo from "../assets/SoonChandi.jpg";
-import WorldLinklogo from "../assets/WorldLink.jpg";
-import Hotellogo from "../assets/Hotel.jpg";
-import Garimalogo from "../assets/Garima.jpg";
-import ABlogo from "../assets/AB.jpg";
-import Infologo from "../assets/Info.jpg";
-import RGlogo from "../assets/RG.jpg";
-import Agralogo from "../assets/Agra.jpg";
-import Himallogo from "../assets/Himal.jpg";
-import ARClogo from "../assets/ARC.jpg";
-import Carewindslogo from "../assets/Carewinds.jpg";
-import Archiplanlogo from "../assets/Archiplan.jpg";
-import Flintlogo from "../assets/Flint.jpg";
-import Lotuslogo from "../assets/Lotus.jpg";
-import linklogo from "../assets/J.link.jpg";
-import Techmindslogo from "../assets/Techminds.jpg";
-import Alchilogo from "../assets/Alchi.jpg";
-import Winsomelogo from "../assets/Winsome.jpg";
-import Header from "../Components/Navbar";
-import Footer from "../Components/Footer";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import Navbar from "../Components/Navbar";
+import Footer from "../Components/Footer";
 
 const Companies = () => {
-  
-  const topJobs = [
-    {
-      id: 1,
-      company: "UNDP",
-      logo: UNDPlogo,
-      jobs: ["Country Economist"],
-    },
-    {
-      id: 2,
-      company: "Merojob",
-      logo: Merojoblogo,
-      jobs: ["Sales / Public Relations Jobs"],
-    },
-    {
-      id: 3,
-      company: "Generation Next Communications ",
-      logo: GenerationNextCommunicationslogo,
-      jobs: ["Marketing and Communication (Marcom) Officer"],
-    },
-    {
-      id: 4,
-      company: "Zegal ",
-      logo: Zegallogo,
-      jobs: ["Software Engineer (Frontend)"],
-    },
-    {
-      id: 5,
-      company: "Innovative Infinity IT Solution",
-      logo: Innovativelogo,
-      jobs: ["Marketing Executive"],
-    },
-    {
-      id: 6,
-      company: "Modern Servicing",
-      logo: Modernlogo,
-      jobs: ["Administrator - Visa Specialist"],
-    },
-    {
-      id: 7,
-      company: "Apex Legend Development",
-      logo: apexlogo,
-      jobs: ["Telemarketer"],
-    },
-    {
-      id: 8,
-      company: "Evergreen Energy &  Investment Pvt. Ltd.",
-      logo: Evergreenlogo,
-      jobs: ["Cashier"],
-    },
-    {
-      id: 9,
-      company: "Soaltee Hotel Limited",
-      logo: Soalteelogo,
-      jobs: ["Executive Assistant / Manager Executive Office"],
-    },
-    {
-      id: 10,
-      company: "Oracare Periodontal Clinic",
-      logo: Oracarelogo,
-      jobs: ["Receptionist"],
-    },
-    {
-      id: 11,
-      company: "Same Day Courier",
-      logo: SameDaylogo,
-      jobs: ["Sales Executive (For UK)"],
-    },
-    {
-      id: 12,
-      company: "Elite Grand School",
-      logo: Secondarylogo,
-      jobs: ["Secondary Level Science Teacher"],
-    },
-    {
-      id: 13,
-      company: "WorldLink",
-      logo: WorldLinklogo,
-      jobs: ["Junior Network Administrator"],
-    },
-    {
-      id: 14,
-      company: "Renew Holdings",
-      logo: Renewlogo,
-      jobs: ["Public Relations Officer"],
-    },
-    {
-      id: 15,
-      company: "Renew Holdings",
-      logo: Renewlogo,
-      jobs: ["Solar Engineer"],
-    },
-    {
-      id: 16,
-      company: "Maya Metro Hospital Pvt. Ltd.",
-      logo: Mayalogo,
-      jobs: ["Hospital Manager"],
-    },
-    {
-      id: 17,
-      company: "SoonChandi",
-      logo: SoonChandilogo,
-      jobs: ["Sales Executive"],
-    },
-    {
-      id: 18,
-      company: "Renew Holdings",
-      logo: Renewlogo,
-      jobs: ["Accounts / Admin Officer"],
-    },
-  ];
-  const hotJobs = [
-    {
-      id: 101,
-      company: "Hotel Lotus Gems",
-      position: "Receptionist",
-      logo: Hotellogo,
-    },
-    {
-      id: 102,
-      company: "AB & Associates",
-      position: "Accounts Assistant",
-      logo: ABlogo,
-    },
-    {
-      id: 103,
-      company: "Garima Capital Limited",
-      position: "Marketing Manager, Business Analyst",
-      logo: Garimalogo,
-    },
-    {
-      id: 104,
-      company: "RG Creations Nepal",
-      position: "Senior Architect",
-      logo: RGlogo,
-    },
-    {
-      id: 105,
-      company: "ARC Design Corp",
-      position: "Interior Designer",
-      logo: ARClogo,
-    },
-    {
-      id: 106,
-      company: "InfoDevelopers",
-      position: "HR Manager",
-      logo: Infologo,
-    },
-    {
-      id: 107,
-      company: "Agra Industries",
-      position: "Sales and Marketing Executive",
-      logo: Agralogo,
-    },
-    {
-      id: 108,
-      company: "Himal Trade Link",
-      position: "Mechanical Technician",
-      logo: Himallogo,
-    },
-    {
-      id: 109,
-      company: "Carewinds Medical Solutions",
-      position: "Admin Officer",
-      logo: Carewindslogo,
-    },
-    {
-      id: 110,
-      company: "Hotel Lotus Gems",
-      position: "Receptionist",
-      logo: Lotuslogo,
-    },
-    {
-      id: 111,
-      company: "J.link International Education",
-      position: "Receptionist",
-      logo: linklogo,
-    },
-    {
-      id: 112,
-      company: "Techminds Network",
-      position: "Administrative Officer",
-      logo: Techmindslogo,
-    },
-    {
-      id: 113,
-      company: "Archiplan-SBT",
-      position: "Senior Architect",
-      logo: Archiplanlogo,
-    },
-    {
-      id: 114,
-      company: "Flint Group",
-      position: "Loan Associate",
-      logo: Flintlogo,
-    },
-    {
-      id: 115,
-      company: "Alchi",
-      position: "Sales Representative",
-      logo: Alchilogo,
-    },
-    {
-      id: 116,
-      company: "Winsome English Boarding School",
-      position: "Teacher",
-      logo: Winsomelogo,
-    },
-  ];
+  const [topJobs, setTopJobs] = useState([]);
+  const [hotJobs, setHotJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const topJobsRes = await axios.get("https://dummyjson.com/users?limit=18");
+        const hotJobsRes = await axios.get("https://dummyjson.com/products?limit=15");
+
+        const topJobsData = topJobsRes.data.users.map((user, index) => ({
+          id: user.id,
+          company: user.company?.name || `${user.firstName} Pvt. Ltd.`,
+          logo: `https://api.dicebear.com/7.x/identicon/svg?seed=${user.firstName}`, // dynamic avatar
+          jobs: ["Marketing Executive", "Frontend Developer"].slice(0, 1 + (index % 2)),
+        }));
+
+        const hotJobsData = hotJobsRes.data.products.map((product) => ({
+          id: product.id,
+          company: product.brand,
+          position: product.title,
+          logo: `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(product.title)}`, // dynamic avatar
+        }));
+
+        setTopJobs(topJobsData);
+        setHotJobs(hotJobsData);
+        setLoading(false);
+      } catch (err) {
+        console.error("Failed to fetch jobs", err);
+        setLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, []);
+
+  if (loading) return <div className="text-center mt-10 text-xl">Loading jobs...</div>;
 
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-300  flex flex-col">
+      <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-300 flex flex-col">
         <div className="w-full max-w-6xl mx-auto px-4">
           <h2 className="text-3xl font-bold mb-6">Top Jobs</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
