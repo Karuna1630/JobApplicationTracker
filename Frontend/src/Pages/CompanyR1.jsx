@@ -3,12 +3,12 @@ import crlogo from "../assets/CR.avif";
 import { Navigate, useNavigate } from "react-router-dom";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
-import { useFormik } from "formik";
-
+import { useFormik, Formik, Form, Field } from "formik";
+import { companyRegister } from "../schemas/index1";
 
 const CompanyR1 = () => {
   const navigate = useNavigate();
-  const initialValues ={
+  const initialValues = {
     userId: "0",
     firstName: "",
     lastName: "",
@@ -16,32 +16,33 @@ const CompanyR1 = () => {
     phone: "",
     password: "",
     confirmPassword: "",
-    location:"",
-    bio:"",
+    location: "",
+    bio: "",
     userType: "",
-    createdAt:"",
-    updatedAt:"",
+    createdAt: "",
+    updatedAt: "",
     isActive: "",
     company: {
       companiesId: "0",
       companyName: "",
-      companyLogo:"",
-      industryId:"0",
-      website:"",
+      companyLogo: "",
+      industryId: "0",
+      website: "",
       location: "",
-      description:"",
-      createdAt:"",
-      updatedAt:"",
-
+      description: "",
+      createdAt: "",
+      updatedAt: "",
     },
-  }
-  const {values, handleBlur, handleChange, handleSubmit} =useFormik({
+  };
+  const { values, handleBlur, handleChange, handleSubmit, errors,touched } = useFormik({
     initialValues,
-    onSubmit: (values)=>{
-      console.log(values)
-    }
-  })
-  console.log(formik)
+    validationSchema: companyRegister,
+    onSubmit: (values, actions) => {
+      console.log(values);
+      actions.resetForm();
+    },
+  });
+
 
   return (
     <>
@@ -97,51 +98,88 @@ const CompanyR1 = () => {
                 </div>
               </div>
 
-              {/* Form Section */}
-              <form  className="space-y-5">
-                {/* Organization Name */}
+              <form onSubmit={handleSubmit} className="space-y-5">
                 <input
                   type="text"
-                  name="companyName"
-                  value={formData.company.companyName}
+                  name="company.companyName"
+                  value={values.company.companyName}
+                  onBlur={handleBlur}
                   onChange={handleChange}
                   placeholder=" Company Name"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                 />
-                {/* Address */}
+                  <div className="error_container">
+                  {errors.company?.companyName &&  touched.company.companyName &&
+                    <p className="form_error">{errors.company.companyName}</p>
+                  }
+                </div>
+
                 <input
                   type="text"
-                  name="location"
-                  value={formData.company.location}
+                  name="company.location"
+                  value={values.company.location}
+                  onBlur={handleBlur}
                   onChange={handleChange}
                   placeholder="Location"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                 />
+                   <div className="error_container">
+                  {errors.company?.location &&  touched.company.location &&
+                    <p className="form_error">{errors.company.location}</p>
+                  }
+                </div>
 
-                {/* Phone */}
                 <input
                   type="text"
-                  name="description"
-                  value={formData.company.description}
+                  name="company.description"
+                  value={values.company.description}
+                  onBlur={handleBlur}
                   onChange={handleChange}
                   placeholder=" Description"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                 />
+                   <div className="error_container">
+                  {errors.company?.description &&  touched.company.description&&
+                    <p className="form_error">{errors.company.description}</p>
+                  }
+                </div>
 
-                {/* Company logo */}
                 <input
-                  type=""
-                  name=""companyLogo
-                  value={formData.company.companyLogo}
+                  type="file"
+                  name="company.companyLogo"
+                  value={values.company.companyLogo}
+                  onBlur={handleBlur}
                   onChange={handleChange}
                   placeholder="Company Logo"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                 />
+                   <div className="error_container">
+                  {errors.company?.companyLogo &&  touched.company.companyLogo &&
+                    <p className="form_error">{errors.company.companyLogo}</p>
+                  }
+                </div>
 
-                {/* Industry Dropdown */}
-                <select
-                  name="industry"
-                  className="w-full px-4 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
+                <input
+                  type="url"
+                  name="company.website"
+                  value={values.company.website}
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  placeholder="Company website"
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
+                />
+                   <div className="error_container">
+                  {errors.company?.website &&  touched.company.website &&
+                    <p className="form_error">{errors.company.website}</p>
+                  }
+                </div>
+
+                {/* <select
+                  name="company.industryId"
+                  value={values.company.industryId}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className="..."
                 >
                   <option value="">Select Industry</option>
                   <option value="1">Education</option>
@@ -150,13 +188,17 @@ const CompanyR1 = () => {
                   <option value="4">Finance</option>
                   <option value="5">Construction</option>
                 </select>
-
-                {/* Continue Button */}
+                     <div className="error_container">
+                  {errors.company?.industryId &&  touched.company.industryId &&
+                    <p className="form_error">{errors.company.industryId}</p>
+                  }
+                </div>
+                */}
                 <button
                   type="submit"
                   className="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-800 transition"
                 >
-                  Continue
+                  Create Account
                 </button>
 
                 {/* Login link */}
