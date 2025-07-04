@@ -37,11 +37,16 @@ const CompanyR1 = () => {
   const { values, handleBlur, handleChange, handleSubmit, errors,touched } = useFormik({
     initialValues,
     validationSchema: companyRegister,
-    onSubmit: (values, actions) => {
-      console.log(values);
-      actions.resetForm();
+  onSubmit: (values) => {
+  // Save company data to localStorage
+  localStorage.setItem("companyData", JSON.stringify(values.company));
+
+  // Navigate to the next step
+  navigate("/companyR2");
+}
+
     },
-  });
+  );
 
 
   return (
@@ -194,11 +199,11 @@ const CompanyR1 = () => {
                   }
                 </div>
                 */}
-                <button
+                <button 
                   type="submit"
                   className="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-800 transition"
                 >
-                  Create Account
+                  Continue
                 </button>
 
                 {/* Login link */}
@@ -217,4 +222,6 @@ const CompanyR1 = () => {
     </>
   );
 };
+
+
 export default CompanyR1;
