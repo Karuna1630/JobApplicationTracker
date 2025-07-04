@@ -10,40 +10,47 @@ import { CompanyUserSchema } from "../schemas/index2";
 
 const CompanyR2=()=> {
   
-  const initialValues ={
+
+  // Step 1: Load company data from localStorage
+  const storedCompanyData = JSON.parse(localStorage.getItem("companyData"));
+
+  // Step 2: Define full initialValues (merge company + recruiter)
+  const initialValues = {
     userId: "0",
-    companiesId:"",
+    companiesId: "",
     personName: "",
     email: "",
     number: "",
     password: "",
     confirmPassword: "",
-    userType: "",
-    createdAt:"",
-    updatedAt:"",
+    userType: "recruiter",
+    createdAt: "",
+    updatedAt: "",
     isActive: "",
-    company: {
+    company: storedCompanyData || {
       companiesId: "0",
       companyName: "",
-      companyLogo:"",
-      industryId:"",
-      website:"",
+      companyLogo: "",
+      industryId: "",
+      website: "",
       location: "",
-      description:"",
-      createdAt:"",
-      updatedAt:"",
+      description: "",
+      createdAt: "",
+      updatedAt: "",
     },
-  }
-    const { values, handleBlur, handleChange, handleSubmit, errors, touched } = useFormik({
-      initialValues,
-      validationSchema: CompanyUserSchema,
-      onSubmit: (values) => {
-        console.log(values);
-    
-      }
-  
-      });
-    console.log(touched);
+  };
+
+  // Step 3: Formik setup
+  const { values, handleBlur, handleChange, handleSubmit, errors, touched } = useFormik({
+    initialValues,
+    validationSchema: CompanyUserSchema,
+    onSubmit: (values, actions) => {
+      console.log("Final submitted data:", values); // <- shows both company + user data
+      actions.resetForm();
+      localStorage.removeItem("companyData"); // optional: clean up
+    },
+  });
+
 
   return (
     <>

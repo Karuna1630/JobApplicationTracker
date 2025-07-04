@@ -34,20 +34,18 @@ const CompanyR1 = () => {
       updatedAt: "",
     },
   };
-  const { values, handleBlur, handleChange, handleSubmit, errors,touched } = useFormik({
-    initialValues,
-    validationSchema: companyRegister,
-  onSubmit: (values) => {
-  // Save company data to localStorage
-  localStorage.setItem("companyData", JSON.stringify(values.company));
+  const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
+    useFormik({
+      initialValues,
+      validationSchema: companyRegister,
+      onSubmit: (values) => {
+        // Save company data to localStorage
+        localStorage.setItem("companyData", JSON.stringify(values.company));
 
-  // Navigate to the next step
-  navigate("/companyR2");
-}
-
-    },
-  );
-
+        // Navigate to the next step
+        navigate("/companyR2");
+      },
+    });
 
   return (
     <>
@@ -107,76 +105,92 @@ const CompanyR1 = () => {
                 <input
                   type="text"
                   name="company.companyName"
-                  value={values.company.companyName}
+                  value={values.company?.companyName}
                   onBlur={handleBlur}
                   onChange={handleChange}
                   placeholder=" Company Name"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                 />
-                  <div className="error_container">
-                  {errors.company?.companyName &&  touched.company.companyName &&
-                    <p className="form_error">{errors.company.companyName}</p>
-                  }
+                <div className="error_container">
+                  {errors.company?.companyName &&
+                    touched.company?.companyName && (
+                      <p className="form_error">{errors.company.companyName}</p>
+                    )}
                 </div>
 
                 <input
                   type="text"
                   name="company.location"
-                  value={values.company.location}
+                  value={values.company?.location}
                   onBlur={handleBlur}
                   onChange={handleChange}
                   placeholder="Location"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                 />
-                   <div className="error_container">
-                  {errors.company?.location &&  touched.company.location &&
+                <div className="error_container">
+                  {errors.company?.location && touched.company?.location && (
                     <p className="form_error">{errors.company.location}</p>
-                  }
+                  )}
                 </div>
 
                 <input
                   type="text"
                   name="company.description"
-                  value={values.company.description}
+                  value={values.company?.description}
                   onBlur={handleBlur}
                   onChange={handleChange}
                   placeholder=" Description"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                 />
-                   <div className="error_container">
-                  {errors.company?.description &&  touched.company.description&&
-                    <p className="form_error">{errors.company.description}</p>
-                  }
+                <div className="error_container">
+                  {errors.company?.description &&
+                    touched.company?.description && (
+                      <p className="form_error">{errors.company.description}</p>
+                    )}
                 </div>
 
                 <input
                   type="file"
                   name="company.companyLogo"
-                  value={values.company.companyLogo}
                   onBlur={handleBlur}
-                  onChange={handleChange}
-                  placeholder="Company Logo"
+                  onChange={(e) => {
+                    const file = e.currentTarget.files[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        handleChange({
+                          target: {
+                            name: "company.companyLogo",
+                            value: reader.result, // base64 string
+                          },
+                        });
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                 />
-                   <div className="error_container">
-                  {errors.company?.companyLogo &&  touched.company.companyLogo &&
-                    <p className="form_error">{errors.company.companyLogo}</p>
-                  }
+
+                <div className="error_container">
+                  {errors.company?.companyLogo &&
+                    touched.company?.companyLogo && (
+                      <p className="form_error">{errors.company.companyLogo}</p>
+                    )}
                 </div>
 
                 <input
                   type="url"
                   name="company.website"
-                  value={values.company.website}
+                  value={values.company?.website}
                   onBlur={handleBlur}
                   onChange={handleChange}
                   placeholder="Company website"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                 />
-                   <div className="error_container">
-                  {errors.company?.website &&  touched.company.website &&
+                <div className="error_container">
+                  {errors.company?.website && touched.company?.website && (
                     <p className="form_error">{errors.company.website}</p>
-                  }
+                  )}
                 </div>
 
                 {/* <select
@@ -199,7 +213,7 @@ const CompanyR1 = () => {
                   }
                 </div>
                 */}
-                <button 
+                <button
                   type="submit"
                   className="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-800 transition"
                 >
@@ -222,6 +236,5 @@ const CompanyR1 = () => {
     </>
   );
 };
-
 
 export default CompanyR1;
