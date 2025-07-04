@@ -114,7 +114,9 @@ const CompanyR1 = () => {
                 <div className="error_container">
                   {errors.company?.companyName &&
                     touched.company?.companyName && (
-                      <p className="form_error">{errors.company.companyName}</p>
+                      <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
+                        {errors.company.companyName}
+                      </p>
                     )}
                 </div>
 
@@ -129,7 +131,9 @@ const CompanyR1 = () => {
                 />
                 <div className="error_container">
                   {errors.company?.location && touched.company?.location && (
-                    <p className="form_error">{errors.company.location}</p>
+                    <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
+                      {errors.company.location}
+                    </p>
                   )}
                 </div>
 
@@ -145,7 +149,9 @@ const CompanyR1 = () => {
                 <div className="error_container">
                   {errors.company?.description &&
                     touched.company?.description && (
-                      <p className="form_error">{errors.company.description}</p>
+                      <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
+                        {errors.company.description}
+                      </p>
                     )}
                 </div>
 
