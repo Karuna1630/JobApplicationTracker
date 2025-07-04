@@ -149,7 +149,7 @@ const CompanyR1 = () => {
                     )}
                 </div>
 
-                <input
+                {/* <input
                   type="file"
                   name="company.companyLogo"
                   onBlur={handleBlur}
@@ -191,7 +191,7 @@ const CompanyR1 = () => {
                   {errors.company?.website && touched.company?.website && (
                     <p className="form_error">{errors.company.website}</p>
                   )}
-                </div>
+                </div> */}
 
                 {/* <select
                   name="company.industryId"

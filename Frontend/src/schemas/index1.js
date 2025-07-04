@@ -6,11 +6,11 @@ export const companyRegister = Yup.object({
       .min(3, "Company name must be at least 3 characters")
       .required("please enter company name"),
 
-    companyLogo: Yup.mixed()
-      .required("please upload your company logo"),
+    // companyLogo: Yup.mixed()
+    //   .required("please upload your company logo"),
 
-    website: Yup.string()
-      .url("Invalid URL").required("please enter URL of your company"),
+    // website: Yup.string()
+    //   .url("Invalid URL").required("please enter URL of your company"),
 
     location: Yup.string()
       .min(5, "Location must be at least 5 characters")
