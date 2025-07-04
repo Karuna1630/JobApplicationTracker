@@ -7,7 +7,7 @@ import AboutUs from './Pages/AboutUs'
 import RegisterComponent from './Components/RegisterComponent'
 import Register from './Pages/Register'
 import Companies from './Pages/Companies'
-import ResumeManagement from './Pages/ResumeManagement'
+import Uploadresume from './Pages/Uploadresume.jsx'
 import JobRecommendation from './Pages/JobRecommendation'
 import CompanyR1 from './Pages/CompanyR1'
 import MessagesInbox from './Pages/MessagesInbox'
@@ -43,7 +43,7 @@ function App() {
           <Route path='/aboutus' element={<AboutUs/>}/>
           <Route path='/registercomp' element={<RegisterComponent/>}/>
           <Route path='/companies' element={<Companies/>}/>
-          <Route path='/resumemanagement' element={<ResumeManagement/>}/>
+          <Route path='/uploadresume' element={<Uploadresume/>}/>
           <Route path='/jobrecommendation' element={<JobRecommendation/>}/>
           <Route path='/companyR1' element={<CompanyR1/>}/>
           <Route path='/messagesinbox' element={<MessagesInbox/>}/>
