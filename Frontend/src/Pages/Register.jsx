@@ -11,6 +11,7 @@ import { RegisterSchema } from "../schemas";
 import { toast } from "react-toastify";
 import { FaLocationDot } from "react-icons/fa6";
 import { IoPersonCircleSharp } from "react-icons/io5";
+import axiosInstance from '../Utils/axiosInstance'
 
 const Register = () => {
   const initialValues = {
@@ -44,7 +45,7 @@ const Register = () => {
   const onSubmit = async (values, actions) => {
     console.log("values", values);
     try {
-      const response = await axiosInstance.post("/vending/register/", values);
+      const response = await axiosInstance.post("/addjobseeker", values);
       console.log("User Added:", response.data);
       actions.resetForm();
       toast.success("User registration successfully!");
