@@ -1,15 +1,33 @@
-import React from 'react';
-import { FaUser } from 'react-icons/fa';
+import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import axiosInstance from '../Utils/axiosInstance';
+import Navbar from '../Components/Navbar';
+import Footer from '../Components/Footer';
 import email_icon from "../assets/email.png";
 import password_icon from "../assets/password.png";
 import loginimage from "../assets/loginimage.png";
-import Footer from '../Components/Footer';
-import Navbar from '../Components/Navbar';
 
 const Login = () => {
-  const handleSubmit = (e) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert('Sign in successful!');
+
+    try {
+      const response = await axiosInstance.post("login", {
+        email,
+        password,
+      });
+      console.log("User Logged In:", response.data);
+      toast.success("User login successful!");
+      navigate("/");
+    } catch (error) {
+      console.error("Login Error:", error);
+      toast.error("Failed to login user.");
+    }
   };
 
   return (
@@ -17,7 +35,7 @@ const Login = () => {
       <Navbar />
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-300 px-4">
         <div className="bg-white rounded-2xl shadow-xl flex flex-col md:flex-row w-full max-w-4xl overflow-hidden">
-          
+
           {/* Left Image */}
           <div className="md:w-1/2 hidden md:block">
             <img
@@ -35,18 +53,6 @@ const Login = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
-
-              {/* Username
-              <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
-                <FaUser className="text-gray-500 mr-3" />
-                <input
-                  type="text"
-                  placeholder="Username"
-                  className="w-full bg-transparent outline-none text-base"
-                  required
-                />
-              </div> */}
-
               {/* Email */}
               <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                 <img src={email_icon} alt="email icon" className="w-5 mr-3" />
@@ -55,6 +61,8 @@ const Login = () => {
                   placeholder="Email"
                   className="w-full bg-transparent outline-none text-base"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
 
@@ -66,10 +74,11 @@ const Login = () => {
                   placeholder="Password"
                   className="w-full bg-transparent outline-none text-base"
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
 
-              {/* Options */}
               <div className="flex justify-between items-center text-sm text-gray-600">
                 <label className="flex items-center gap-2">
                   <input type="checkbox" className="accent-blue-600" /> Remember me
@@ -77,7 +86,6 @@ const Login = () => {
                 <a href="#" className="text-blue-600 hover:underline">Forgot Password?</a>
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 className="w-full bg-blue-800 text-white py-2 rounded-md font-semibold hover:bg-blue-700 transition duration-300"
@@ -85,10 +93,9 @@ const Login = () => {
                 Login
               </button>
 
-              {/* Register Link */}
               <p className="text-center text-sm">
                 Don’t have an account?{' '}
-                <a href="#" className="text-cyan-600 hover:underline">Register here</a>
+                <a href="/register" className="text-cyan-600 hover:underline">Register here</a>
               </p>
             </form>
           </div>
