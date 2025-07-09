@@ -12,44 +12,53 @@ import { toast } from "react-toastify";
 import { FaLocationDot } from "react-icons/fa6";
 import { IoPersonCircleSharp } from "react-icons/io5";
 import axiosInstance from '../Utils/axiosInstance'
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
+  const navigate = useNavigate();
   const initialValues = {
-    userId: "0",
+    // userId: "0",
     firstName: "",
     lastName: "",
     email: "",
-    phone: "",
+    phoneNumber: "",
     password: "",
     confirmPassword: "",
     location: "",
-    bio: "",
-    userType: "",
-    createdAt: "",
-    updatedAt: "",
-    isActive: "",
-    company: {
-      companiesId: "0",
-      companyName: "",
-      companyLogo: "",
-      industryId: "",
-      website: "",
-      location: "",
-      description: "",
-      createdAt: "",
-      updatedAt: "",
-    },
+    
+    // userType: "",
+    // createdAt: "",
+    // updatedAt: "",
+    // isActive: "",
+    // company: {
+    //   companiesId: "0",
+    //   companyName: "",
+    //   companyLogo: "",
+    //   industryId: "",
+    //   website: "",
+    //   location: "",
+    //   description: "",
+    //   createdAt: "",
+    //   updatedAt: "",
+    // },
   };
 
   //fetching backend data uisng API
-  const onSubmit = async (values, actions) => {
+  const handleSubmit = async (values, actions) => {
     console.log("values", values);
+    console.log(actions);
+    
     try {
-      const response = await axiosInstance.post("/addjobseeker", values);
+      const response = await axiosInstance.post("addjobseeker", values);
       console.log("User Added:", response.data);
       actions.resetForm();
+      navigate('/login')
       toast.success("User registration successfully!");
     } catch (error) {
+
+      console.log(error?.message);
+      
+
       console.error("Error while doing register:", error);
       toast.error("Failed to register user.");
     }
@@ -79,13 +88,14 @@ const Register = () => {
             <Formik
               initialValues={initialValues}
               validationSchema={RegisterSchema}
-              onSubmit={onSubmit}
+              onSubmit={handleSubmit}
             >
               {({ errors, touched }) => (
-                <Form className="space-y-4">
-                  <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
+                <Form className="space-y-4  ">
+                  <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md ">
                     <FaUser className="text-gray-500 mr-3" />
-                    <Field
+                    <Field className= "w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400 rounded-md"
+
                       type="text"
                       name="firstName"
                       placeholder="First Name"
@@ -100,7 +110,7 @@ const Register = () => {
                   </div>
                   <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                     <FaUser className="text-gray-500 mr-3" />
-                    <Field
+                    <Field className= "w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400 rounded-md"
                       type="text"
                       name="lastName"
                       placeholder="Last Name"
@@ -115,7 +125,7 @@ const Register = () => {
                   </div>
                   <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                     <MdEmail className="text-gray-500 mr-3 text-lg" />
-                    <Field
+                    <Field className= "w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400 rounded-md"
                       type="email"
                       name="email"
                       placeholder="Email Address"
@@ -145,7 +155,7 @@ const Register = () => {
                   </div>
                   <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                     <RiLockPasswordFill className="text-gray-500 mr-3 text-lg" />
-                    <Field
+                    <Field className= "w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400 rounded-md"
                       type="password"
                       name="confirmPassword"
                       placeholder="Confirm Password"
@@ -160,22 +170,22 @@ const Register = () => {
                   </div>
                   <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                     <FaPhone className="text-gray-500 mr-3" />
-                    <Field
-                      type="phonenumber"
-                      name="phone"
+                    <Field className= "w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400 rounded-md"
+                      type="text"
+                      name="phoneNumber"
                       placeholder="Phone Number"
                     />
                   </div>
                   <div className="error_container">
-                    {errors.phone && touched.phone && (
+                    {errors.phoneNumber && touched.phoneNumber && (
                       <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                        {errors.phone}
+                        {errors.phoneNumber}
                       </p>
                     )}
                   </div>
                   <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                     <FaLocationDot className="text-gray-500 mr-3" />
-                    <Field type="text" name="location" placeholder="Location" />
+                    <Field className= "w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400 rounded-md" type="text" name="location" placeholder="Location" />
                   </div>
                   <div className="error_container">
                     {errors.location && touched.location && (
@@ -184,7 +194,7 @@ const Register = () => {
                       </p>
                     )}
                   </div>
-                  <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
+                  {/* <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                     <IoPersonCircleSharp className="text-gray-500 mr-3" />
                     <Field type="text" name="bio" placeholder="Bio" />
                   </div>
@@ -194,7 +204,7 @@ const Register = () => {
                         {errors.bio}
                       </p>
                     )}
-                  </div>
+                  </div> */}
 
                   <button
                     type="submit"
