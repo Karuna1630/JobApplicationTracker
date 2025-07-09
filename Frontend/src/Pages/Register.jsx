@@ -10,7 +10,6 @@ import { Formik, Form, Field } from "formik";
 import { RegisterSchema } from "../schemas";
 import { toast } from "react-toastify";
 import { FaLocationDot } from "react-icons/fa6";
-import { IoPersonCircleSharp } from "react-icons/io5";
 import axiosInstance from '../Utils/axiosInstance'
 import { useNavigate } from "react-router-dom";
 

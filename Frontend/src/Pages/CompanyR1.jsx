@@ -5,7 +5,8 @@ import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import {  Formik, Form, Field } from "formik";
 import { companyRegister } from "../schemas/index1";
-import { AiFillCheckCircle } from "react-icons/ai";
+import { toast } from "react-toastify";
+import axiosInstance from '../Utils/axiosInstance'
 
 const CompanyR1 = () => {
   const navigate = useNavigate();
@@ -34,6 +35,20 @@ const CompanyR1 = () => {
     const onSubmit= async (values, actions) => {
     console.log("values", values);
     console.log(actions);
+    
+      try {
+      const response = await axiosInstance.post("addcompany", values);
+      console.log("User Added:", response.data);
+      actions.resetForm();
+      navigate('/login')
+      toast.success("User registration successfully!");
+    } catch (error) {
+
+      console.log(error?.message);
+      console.error("Error while doing register:", error);
+      toast.error("Failed to register user.");
+    }
+  };
 
   return (
     <>
@@ -83,8 +98,8 @@ const CompanyR1 = () => {
               <Formik initialValues={initialValues} validationSchema={companyRegister} onSubmit={onSubmit}>
                 {({errors, touched})=>(
                    <Form  className="space-y-5">
-                 
-                  <Field type = "text" name="company.companyName"  placeholder=" Company Name"/>
+                    
+                  <Field  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md" type = "text" name="company.companyName"  placeholder=" Company Name"/>
                   <div className="error_container">
                     {errors.company?.companyName &&
                       touched.company?.companyName && (
@@ -102,7 +117,8 @@ const CompanyR1 = () => {
                     placeholder="Location"
                     className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                   /> */}
-                     <Field type = "text" name="company.companylocation"  placeholder=" Location"/>
+                    <Field  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md" 
+                    type = "text" name="company.location"  placeholder=" Location"/>
                   <div className="error_container">
                     {errors.company?.location && touched.company?.location && (
                       <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
@@ -119,7 +135,8 @@ const CompanyR1 = () => {
                     placeholder=" Description"
                     className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                   /> */}
-                     <Field type = "text" name="company.description"  placeholder=" Description"/>
+                    <Field  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md" 
+                    type = "text" name="company.description"  placeholder=" Description"/>
                   <div className="error_container">
                     {errors.company?.description &&
                       touched.company?.description && (
@@ -152,5 +169,5 @@ const CompanyR1 = () => {
     </>
   );
 };
-}
+
 export default CompanyR1
