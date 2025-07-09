@@ -15,7 +15,8 @@ const CompanyR2 = () => {
   const initialValues = {
     userId: "0",
     companiesId: "",
-    personName: "",
+    firstName: "",
+    lastName:"",
     email: "",
     number: "",
     password: "",
@@ -106,17 +107,34 @@ const CompanyR2 = () => {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <input
                   type="text"
-                  name="personName"
-                  value={values.personName}
+                  name="firstName"
+                  value={values.firstName}
                   onBlur={handleBlur}
                   onChange={handleChange}
-                  placeholder="Person Name"
+                  placeholder="First Name"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                 />
                 <div className="error_container">
-                  {errors.personName && touched.personName && (
+                  {errors.firstName && touched.firstName && (
                     <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                      {errors.personName}
+                      {errors.firstName}
+                    </p>
+                  )}
+                </div>
+
+                <input
+                  type="text"
+                  name="lastName"
+                  value={values.lastName}
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  placeholder="Last Name"
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
+                />
+                <div className="error_container">
+                  {errors.lastName && touched.lastName && (
+                    <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
+                      {errors.lastName}
                     </p>
                   )}
                 </div>
