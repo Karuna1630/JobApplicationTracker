@@ -3,13 +3,13 @@ import crlogo from "../assets/CR.avif";
 import { Navigate, useNavigate } from "react-router-dom";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
-import { useFormik, Formik, Form, Field } from "formik";
+import {  Formik, Form, Field } from "formik";
 import { companyRegister } from "../schemas/index1";
 
 const CompanyR1 = () => {
   const navigate = useNavigate();
   const initialValues = {
-    userId: "0",
+    // userId: "0",
     firstName: "",
     lastName: "",
     email: "",
@@ -18,34 +18,21 @@ const CompanyR1 = () => {
     confirmPassword: "",
     location: "",
     bio: "",
-    userType: "",
-    createdAt: "",
-    updatedAt: "",
-    isActive: "",
     company: {
       companiesId: "0",
       companyName: "",
-      companyLogo: "",
-      industryId: "0",
-      website: "",
-      location: "",
-      description: "",
-      createdAt: "",
-      updatedAt: "",
+      location:"",
+      description:"",
     },
   };
-  const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
-    useFormik({
-      initialValues,
-      validationSchema: companyRegister,
-      onSubmit: (values) => {
-        // Save company data to localStorage
-        localStorage.setItem("companyData", JSON.stringify(values.company));
+  
 
-        // Navigate to the next step
-        navigate("/companyR2");
-      },
-    });
+        // // Navigate to the next step
+        // navigate("/companyR2");
+    
+    const onSubmit= async (values, actions) => {
+    console.log("values", values);
+    console.log(actions);
 
   return (
     <>
@@ -101,75 +88,71 @@ const CompanyR1 = () => {
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <input
-                  type="text"
-                  name="company.companyName"
-                  value={values.company?.companyName}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  placeholder=" Company Name"
-                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
-                />
-                <div className="error_container">
-                  {errors.company?.companyName &&
-                    touched.company?.companyName && (
+
+              <Formik initialValues={initialValues} validationSchema={companyRegister} onSubmit={onSubmit}>
+                {({errors, touched})=>(
+                   <Form  className="space-y-5">
+                 
+                  <Field type = "text" name="company.companyName"  placeholder=" Company Name"/>
+                  <div className="error_container">
+                    {errors.company?.companyName &&
+                      touched.company?.companyName && (
+                        <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
+                          {errors.company.companyName}
+                        </p>
+                      )}
+                  </div>
+                  {/* <input
+                    type="text"
+                    name="company.location"
+                    value={values.company?.location}
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    placeholder="Location"
+                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
+                  /> */}
+                     <Field type = "text" name="company.companylocation"  placeholder=" Location"/>
+                  <div className="error_container">
+                    {errors.company?.location && touched.company?.location && (
                       <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                        {errors.company.companyName}
+                        {errors.company.location}
                       </p>
                     )}
-                </div>
-
-                <input
-                  type="text"
-                  name="company.location"
-                  value={values.company?.location}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  placeholder="Location"
-                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
-                />
-                <div className="error_container">
-                  {errors.company?.location && touched.company?.location && (
-                    <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                      {errors.company.location}
-                    </p>
-                  )}
-                </div>
-
-                <input
-                  type="text"
-                  name="company.description"
-                  value={values.company?.description}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  placeholder=" Description"
-                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
-                />
-                <div className="error_container">
-                  {errors.company?.description &&
-                    touched.company?.description && (
-                      <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                        {errors.company.description}
-                      </p>
-                    )}
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-800 transition"
-                >
-                  Continue
-                </button>
-
-                {/* Login link */}
-                <p className="text-center text-sm mt-4">
-                  Already have a company account?{" "}
-                  <a href="/login" className="text-blue-600 hover:underline">
-                    Login Here
-                  </a>
-                </p>
-              </form>
+                  </div>
+                  {/* <input
+                    type="text"
+                    name="company.description"
+                    value={values.company?.description}
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    placeholder=" Description"
+                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
+                  /> */}
+                     <Field type = "text" name="company.description"  placeholder=" Description"/>
+                  <div className="error_container">
+                    {errors.company?.description &&
+                      touched.company?.description && (
+                        <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
+                          {errors.company.description}
+                        </p>
+                      )}
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-800 transition"
+                  >
+                    Continue
+                  </button>
+                  {/* Login link */}
+                  <p className="text-center text-sm mt-4">
+                    Already have a company account?{" "}
+                    <a href="/login" className="text-blue-600 hover:underline">
+                      Login Here
+                    </a>
+                  </p>
+                </Form>)}
+               
+              </Formik>
             </div>
           </div>
         </div>
@@ -178,5 +161,5 @@ const CompanyR1 = () => {
     </>
   );
 };
-
-export default CompanyR1;
+}
+export default CompanyR1

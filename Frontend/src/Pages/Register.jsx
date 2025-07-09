@@ -57,8 +57,6 @@ const Register = () => {
     } catch (error) {
 
       console.log(error?.message);
-      
-
       console.error("Error while doing register:", error);
       toast.error("Failed to register user.");
     }
