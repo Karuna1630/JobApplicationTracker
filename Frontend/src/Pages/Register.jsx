@@ -48,7 +48,7 @@ const Register = () => {
     console.log(actions);
     
     try {
-      const response = await axiosInstance.post("addjobseeker", values);
+      const response = await axiosInstance.post("register-user", values);
       console.log("User Added:", response.data);
       actions.resetForm();
       navigate('/login')

@@ -23,7 +23,7 @@ const Login = () => {
       });
       console.log("User Logged In:", response.data);
       toast.success("User login successful!");
-      navigate("/");
+      navigate("/userProfile");
     } catch (error) {
       console.error("Login Error:", error);
       toast.error("Failed to login user.");

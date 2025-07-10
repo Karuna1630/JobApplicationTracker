@@ -1,16 +1,36 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { IoSearch } from 'react-icons/io5';
 import logo from '../assets/logof.png';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  const role = localStorage.getItem('role'); // 'user', 'company', 'admin'
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    const userRole = localStorage.getItem('role');
+
+    setIsLoggedIn(loggedIn);
+    setRole(userRole);
+
+    // Optional: Listen for login/logout events across tabs or programmatically
+    const handleStorageChange = () => {
+      setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true');
+      setRole(localStorage.getItem('role'));
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('role');
+    setIsLoggedIn(false);
+    setRole(null);
     navigate('/login');
   };
 
