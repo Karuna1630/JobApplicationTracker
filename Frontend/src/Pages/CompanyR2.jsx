@@ -84,16 +84,16 @@ const CompanyR2 = () => {
                       2
                     </div>
                     <span className="text-sm mt-1 font-medium">
-                      Correspondence
+                      Sign Up
                     </span>
                   </div>
-                  <div className="flex-1 h-0.5 bg-green-500 mx-0 mt-0"></div>
+                  {/* <div className="flex-1 h-0.5 bg-green-500 mx-0 mt-0"></div>
                   <div className="flex flex-col items-center z-10">
                     <div className="h-10 w-10 rounded-full bg-white text-black border border-black flex items-center justify-center font-bold">
                       3
                     </div>
                     <span className="text-sm mt-1 font-medium">Sign Up</span>
-                  </div>
+                  </div> */}
                 </div>
                 <div className="pt-4">
                   <h2 className="text-1xl font-bold">Organization Details</h2>
