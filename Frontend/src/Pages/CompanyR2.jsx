@@ -1,52 +1,48 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AiFillCheckCircle } from "react-icons/ai";
 import crlogo from "../assets/CR.avif";
 import Footer from "../Components/Footer";
 import Navbar from "../Components/Navbar";
 import { useFormik } from "formik";
 import { CompanyUserSchema } from "../schemas/index2";
+import axiosInstance from "../Utils/axiosInstance";
+import { toast } from "react-toastify";
 
 const CompanyR2 = () => {
-  // Step 1: Load company data from localStorage
+  const navigate = useNavigate();
   const storedCompanyData = JSON.parse(localStorage.getItem("companyData"));
 
-  // Step 2: Define full initialValues (merge company + recruiter)
   const initialValues = {
-    userId: "0",
-    companiesId: "",
     firstName: "",
-    lastName:"",
+    lastName: "",
     email: "",
-    number: "",
+    phoneNumber: "",
     password: "",
     confirmPassword: "",
-    userType: "recruiter",
-    createdAt: "",
-    updatedAt: "",
-    isActive: "",
     company: storedCompanyData || {
-      companiesId: "0",
       companyName: "",
-      companyLogo: "",
-      industryId: "",
-      website: "",
       location: "",
       description: "",
-      createdAt: "",
-      updatedAt: "",
     },
   };
 
-  // Step 3: Formik setup
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
     useFormik({
       initialValues,
       validationSchema: CompanyUserSchema,
-      onSubmit: (values, actions) => {
-        console.log("Final submitted data:", values); // <- shows both company + user data
-        actions.resetForm();
-        localStorage.removeItem("companyData"); // optional: clean up
+      onSubmit: async (values, actions) => {
+        try {
+          const response = await axiosInstance.post("/register-user", values);
+          console.log("Registration successful:", response.data);
+          toast.success("Company and recruiter registered successfully!");
+          actions.resetForm();
+          localStorage.removeItem("companyData");
+          navigate("/login");
+        } catch (error) {
+          console.error("Registration failed:", error);
+          toast.error("Failed to register. Please try again.");
+        }
       },
     });
 
@@ -55,12 +51,10 @@ const CompanyR2 = () => {
       <Navbar />
       <div className="min-h-screen font-sans flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-300 p-10">
         <div className="flex w-full max-w-6xl bg-black shadow-lg rounded-lg overflow-hidden">
-          {/* Left image section */}
           <div className="hidden md:block md:w-1/2">
             <img src={crlogo} className="object-cover w-full h-full" />
           </div>
 
-          {/* Right form section */}
           <div className="w-full md:w-1/2 bg-white flex items-center justify-center p-8">
             <div className="max-w-sm w-full">
               <div className="text-center mb-6 ">
@@ -72,9 +66,7 @@ const CompanyR2 = () => {
                     <div className="h-10 w-10 rounded-full bg-white text-black border border-black flex items-center">
                       <AiFillCheckCircle className="text-green-600 text-6xl" />
                     </div>
-                    <span className="text-sm mt-1 font-medium">
-                      Organization
-                    </span>
+                    <span className="text-sm mt-1 font-medium">Organization</span>
                   </div>
 
                   <div className="flex-1 h-0.5 bg-green-500 mx-0 mt-0"></div>
@@ -83,23 +75,13 @@ const CompanyR2 = () => {
                     <div className="h-10 w-10 rounded-full bg-white text-black border border-black flex items-center justify-center font-bold">
                       2
                     </div>
-                    <span className="text-sm mt-1 font-medium">
-                      Sign Up
-                    </span>
-                  </div>
-                  {/* <div className="flex-1 h-0.5 bg-green-500 mx-0 mt-0"></div>
-                  <div className="flex flex-col items-center z-10">
-                    <div className="h-10 w-10 rounded-full bg-white text-black border border-black flex items-center justify-center font-bold">
-                      3
-                    </div>
                     <span className="text-sm mt-1 font-medium">Sign Up</span>
-                  </div> */}
+                  </div>
                 </div>
                 <div className="pt-4">
                   <h2 className="text-1xl font-bold">Organization Details</h2>
                   <h4 className="text-l">
-                    {" "}
-                    Provide Recruitment focal personal contact detalis{" "}
+                    Provide Recruitment focal personal contact detalis
                   </h4>
                 </div>
               </div>
@@ -114,13 +96,11 @@ const CompanyR2 = () => {
                   placeholder="First Name"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                 />
-                <div className="error_container">
-                  {errors.firstName && touched.firstName && (
-                    <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                      {errors.firstName}
-                    </p>
-                  )}
-                </div>
+                {errors.firstName && touched.firstName && (
+                  <p className="text-red-600 text-sm mt-1 ml-1 font-medium">
+                    {errors.firstName}
+                  </p>
+                )}
 
                 <input
                   type="text"
@@ -131,30 +111,27 @@ const CompanyR2 = () => {
                   placeholder="Last Name"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                 />
-                <div className="error_container">
-                  {errors.lastName && touched.lastName && (
-                    <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                      {errors.lastName}
-                    </p>
-                  )}
-                </div>
+                {errors.lastName && touched.lastName && (
+                  <p className="text-red-600 text-sm mt-1 ml-1 font-medium">
+                    {errors.lastName}
+                  </p>
+                )}
 
                 <input
                   type="tel"
-                  name="number"
-                  value={values.number}
+                  name="phoneNumber"
+                  value={values.phoneNumbernumber}
                   onBlur={handleBlur}
                   onChange={handleChange}
                   placeholder="person Phone Number"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                 />
-                <div className="error_container">
-                  {errors.number && touched.number && (
-                    <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                      {errors.number}
-                    </p>
-                  )}
-                </div>
+                {errors.phoneNumber && touched.phoneNumber && (
+                  <p className="text-red-600 text-sm mt-1 ml-1 font-medium">
+                    {errors.phoneNumber}
+                  </p>
+                )}
+
                 <input
                   type="text"
                   name="email"
@@ -164,14 +141,11 @@ const CompanyR2 = () => {
                   placeholder="person Email"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                 />
-
-                <div className="error_container">
-                  {errors.email && touched.email && (
-                    <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                      {errors.email}
-                    </p>
-                  )}
-                </div>
+                {errors.email && touched.email && (
+                  <p className="text-red-600 text-sm mt-1 ml-1 font-medium">
+                    {errors.email}
+                  </p>
+                )}
 
                 <input
                   type="password"
@@ -182,13 +156,12 @@ const CompanyR2 = () => {
                   placeholder="Password"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                 />
-                <div className="error_container">
-                  {errors.password && touched.password && (
-                    <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                      {errors.password}
-                    </p>
-                  )}
-                </div>
+                {errors.password && touched.password && (
+                  <p className="text-red-600 text-sm mt-1 ml-1 font-medium">
+                    {errors.password}
+                  </p>
+                )}
+
                 <input
                   type="password"
                   name="confirmPassword"
@@ -198,13 +171,11 @@ const CompanyR2 = () => {
                   placeholder="Confirm Password"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                 />
-                <div className="error_container">
-                  {errors.confirmPassword && touched.confirmPassword && (
-                    <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                      {errors.confirmPassword}
-                    </p>
-                  )}
-                </div>
+                {errors.confirmPassword && touched.confirmPassword && (
+                  <p className="text-red-600 text-sm mt-1 ml-1 font-medium">
+                    {errors.confirmPassword}
+                  </p>
+                )}
 
                 <button
                   type="submit"
@@ -213,9 +184,8 @@ const CompanyR2 = () => {
                   Create Account
                 </button>
 
-                {/* Login link */}
                 <p className="text-center text-sm mt-4">
-                  Already have a company account?{" "}
+                  Already have a company account?{' '}
                   <a href="/login" className="text-blue-600 hover:underline">
                     Login Here
                   </a>
@@ -229,4 +199,5 @@ const CompanyR2 = () => {
     </>
   );
 };
+
 export default CompanyR2;
