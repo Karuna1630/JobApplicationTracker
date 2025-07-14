@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { AiFillCheckCircle } from "react-icons/ai";
 import crlogo from "../assets/CR.avif";
 import Footer from "../Components/Footer";
@@ -13,13 +13,13 @@ const CompanyR2 = () => {
   const navigate = useNavigate();
   const storedCompanyData = JSON.parse(localStorage.getItem("companyData"));
 
-    useEffect(() => {
+  useEffect(() => {
     if (!storedCompanyData) {
       toast.error("Company information is missing. Please complete step 1.");
       navigate("/companyR1");
     }
   }, []);
-  
+
   const initialValues = {
     firstName: "",
     lastName: "",
@@ -27,47 +27,46 @@ const CompanyR2 = () => {
     phoneNumber: "",
     password: "",
     confirmPassword: "",
-    company: storedCompanyData || {
-      companyName: "",
-      location: "",
-      description: "",
-    },
   };
 
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
     useFormik({
       initialValues,
       validationSchema: CompanyUserSchema,
-     onSubmit: async (values, actions) => {
-  try {
-    const storedCompanyData = JSON.parse(localStorage.getItem("companyData"));
+      onSubmit: async (values, actions) => {
+        try {
+          const payload = {
+            firstName: values.firstName,
+            lastName: values.lastName,
+            email: values.email,
+            phoneNumber: values.phoneNumber,
+            password: values.password,
+            companyDto: {
+              companyName: storedCompanyData.companyName,
+              location: storedCompanyData.location,
+              description: storedCompanyData.description,
+            },
+          };
 
-    const payload = {
-      ...values,
-      company: storedCompanyData, // override or add company field explicitly
-    };
+          const response = await axiosInstance.post("/register-user", payload);
 
-    const response = await axiosInstance.post("/register-user", payload);
-
-    if (response.data?.isSuccess) {
-      toast.success(response.data.message || "Company and recruiter registered successfully!");
-      actions.resetForm();
-      localStorage.removeItem("companyData");
-      navigate("/login");
-    } else {
-      toast.error(response.data.message || "Something went wrong.");
-    }
-  } catch (error) {
-    console.error("Registration failed:", error);
-    if (error.response && error.response.data) {
-      toast.error(error.response.data.message || "Failed to register. Please try again.");
-    } else {
-      toast.error("Failed to register. Please try again.");
-    }
-  }
-}
-
- } );
+          if (response.data?.isSuccess) {
+            toast.success("Company and recruiter registered successfully!");
+            actions.resetForm();
+            localStorage.removeItem("companyData");
+            navigate("/login");
+          } else {
+            toast.error(response.data.message || "Something went wrong.");
+          }
+        } catch (error) {
+          console.error("Registration failed:", error);
+          toast.error(
+            error.response?.data?.message ||
+              "Failed to register. Please try again."
+          );
+        }
+      },
+    });
 
   return (
     <>
@@ -80,7 +79,7 @@ const CompanyR2 = () => {
 
           <div className="w-full md:w-1/2 bg-white flex items-center justify-center p-8">
             <div className="max-w-sm w-full">
-              <div className="text-center mb-6 ">
+              <div className="text-center mb-6">
                 <h2 className="text-2xl font-bold">
                   2 easy steps of Company Registration
                 </h2>
@@ -89,7 +88,9 @@ const CompanyR2 = () => {
                     <div className="h-10 w-10 rounded-full bg-white text-black border border-black flex items-center">
                       <AiFillCheckCircle className="text-green-600 text-6xl" />
                     </div>
-                    <span className="text-sm mt-1 font-medium">Organization</span>
+                    <span className="text-sm mt-1 font-medium">
+                      Organization
+                    </span>
                   </div>
 
                   <div className="flex-1 h-0.5 bg-green-500 mx-0 mt-0"></div>
@@ -102,9 +103,9 @@ const CompanyR2 = () => {
                   </div>
                 </div>
                 <div className="pt-4">
-                  <h2 className="text-1xl font-bold">Organization Details</h2>
+                  <h2 className="text-1xl font-bold">Recruiter Details</h2>
                   <h4 className="text-l">
-                    Provide Recruitment focal personal contact detalis
+                    Provide recruitment focal person's contact details
                   </h4>
                 </div>
               </div>
@@ -146,7 +147,7 @@ const CompanyR2 = () => {
                   value={values.phoneNumber}
                   onBlur={handleBlur}
                   onChange={handleChange}
-                  placeholder="person Phone Number"
+                  placeholder="Phone Number"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                 />
                 {errors.phoneNumber && touched.phoneNumber && (
@@ -161,7 +162,7 @@ const CompanyR2 = () => {
                   value={values.email}
                   onBlur={handleBlur}
                   onChange={handleChange}
-                  placeholder="person Email"
+                  placeholder="Email"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
                 />
                 {errors.email && touched.email && (
@@ -208,7 +209,7 @@ const CompanyR2 = () => {
                 </button>
 
                 <p className="text-center text-sm mt-4">
-                  Already have a company account?{' '}
+                  Already have a company account?{" "}
                   <a href="/login" className="text-blue-600 hover:underline">
                     Login Here
                   </a>
@@ -223,4 +224,4 @@ const CompanyR2 = () => {
   );
 };
 
-export default CompanyR2;
+export default CompanyR2;
