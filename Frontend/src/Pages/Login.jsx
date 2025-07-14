@@ -14,21 +14,48 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const response = await axiosInstance.post("login", {
-        email,
-        password,
-      });
-      console.log("User Logged In:", response.data);
-      toast.success("User login successful!");
-      navigate("/userProfile");
-    } catch (error) {
-      console.error("Login Error:", error);
-      toast.error("Failed to login user.");
+  try {
+    const response = await axiosInstance.post("login", {
+      email,
+      password,
+    });
+
+    const { token, role, fullName } = response.data;
+
+    // Store login status and role
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('role', role);         // e.g., "JobSeeker"
+    localStorage.setItem('fullName', fullName); // For display (like "KarunaG")
+
+    toast.success("User login successful!");
+
+    // Navigate to dashboard based on role
+    switch (role) {
+      case 'JobSeeker':
+        navigate('/userProfile');
+        break;
+      case 'Company':
+        navigate('/dashboard');
+        break;
+      case 'Admin':
+        navigate('/admin');
+        break;
+      case 'Recruiter':
+        navigate('/recruiter-dashboard');
+        break;
+      default:
+        navigate('/');
+        break;
     }
-  };
+
+  } catch (error) {
+    console.error("Login Error:", error);
+    toast.error("Failed to login user.");
+  }
+};
+
 
   return (
     <>
