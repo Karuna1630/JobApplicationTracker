@@ -13,6 +13,13 @@ const CompanyR2 = () => {
   const navigate = useNavigate();
   const storedCompanyData = JSON.parse(localStorage.getItem("companyData"));
 
+    useEffect(() => {
+    if (!storedCompanyData) {
+      toast.error("Company information is missing. Please complete step 1.");
+      navigate("/companyR1");
+    }
+  }, []);
+  
   const initialValues = {
     firstName: "",
     lastName: "",
@@ -31,20 +38,36 @@ const CompanyR2 = () => {
     useFormik({
       initialValues,
       validationSchema: CompanyUserSchema,
-      onSubmit: async (values, actions) => {
-        try {
-          const response = await axiosInstance.post("/register-user", values);
-          console.log("Registration successful:", response.data);
-          toast.success("Company and recruiter registered successfully!");
-          actions.resetForm();
-          localStorage.removeItem("companyData");
-          navigate("/login");
-        } catch (error) {
-          console.error("Registration failed:", error);
-          toast.error("Failed to register. Please try again.");
-        }
-      },
-    });
+     onSubmit: async (values, actions) => {
+  try {
+    const storedCompanyData = JSON.parse(localStorage.getItem("companyData"));
+
+    const payload = {
+      ...values,
+      company: storedCompanyData, // override or add company field explicitly
+    };
+
+    const response = await axiosInstance.post("/register-user", payload);
+
+    if (response.data?.isSuccess) {
+      toast.success(response.data.message || "Company and recruiter registered successfully!");
+      actions.resetForm();
+      localStorage.removeItem("companyData");
+      navigate("/login");
+    } else {
+      toast.error(response.data.message || "Something went wrong.");
+    }
+  } catch (error) {
+    console.error("Registration failed:", error);
+    if (error.response && error.response.data) {
+      toast.error(error.response.data.message || "Failed to register. Please try again.");
+    } else {
+      toast.error("Failed to register. Please try again.");
+    }
+  }
+}
+
+ } );
 
   return (
     <>
@@ -120,7 +143,7 @@ const CompanyR2 = () => {
                 <input
                   type="tel"
                   name="phoneNumber"
-                  value={values.phoneNumbernumber}
+                  value={values.phoneNumber}
                   onBlur={handleBlur}
                   onChange={handleChange}
                   placeholder="person Phone Number"
@@ -200,4 +223,4 @@ const CompanyR2 = () => {
   );
 };
 
-export default CompanyR2;
+export default CompanyR2;
