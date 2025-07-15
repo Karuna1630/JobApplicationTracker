@@ -11,59 +11,50 @@ import loginimage from "../assets/loginimage.png";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState({}); // Local validation errors
+  const [serverError, setServerError] = useState("");
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    const response = await axiosInstance.post("login", {
-      email,
-      password,
-    });
+  
 
-    const { token, role, fullName } = response.data;
+    // Simple client-side validation
+    const newErrors = {};
+    if (!email) newErrors.email = "Email is required.";
+    if (!password) newErrors.password = "Password is required.";
 
-    // Store login status and role
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('role', role);         // e.g., "JobSeeker"
-    localStorage.setItem('fullName', fullName); // For display (like "KarunaG")
-
-    toast.success("User login successful!");
-
-    // Navigate to dashboard based on role
-    switch (role) {
-      case 'JobSeeker':
-        navigate('/userProfile');
-        break;
-      case 'Company':
-        navigate('/dashboard');
-        break;
-      case 'Admin':
-        navigate('/admin');
-        break;
-      case 'Recruiter':
-        navigate('/recruiter-dashboard');
-        break;
-      default:
-        navigate('/');
-        break;
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
     }
 
-  } catch (error) {
-    console.error("Login Error:", error);
-    toast.error("Failed to login user.");
-  }
-};
+    try {
+      const response = await axiosInstance.post("login", {
+        email,
+        password,
+      });
+      localStorage.setItem("token",JSON.stringify(response.data.jwtToken))
+      toast.success("User login successful!");
+      console.log("login successfull",response)
 
+
+
+    } catch (error) {
+      console.error("Login Error:", error);
+      const msg = error?.response?.data?.message || "Invalid email or password.";
+      setServerError(msg);
+      toast.error(msg);
+    }
+  };
 
   return (
     <>
       <Navbar />
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-300 px-4">
         <div className="bg-white rounded-2xl shadow-xl flex flex-col md:flex-row w-full max-w-4xl overflow-hidden">
-
-          {/* Left Image */}
           <div className="md:w-1/2 hidden md:block">
             <img
               src={loginimage}
@@ -72,38 +63,49 @@ const Login = () => {
             />
           </div>
 
-          {/* Right Form */}
           <div className="md:w-1/2 w-full px-8 py-10 flex flex-col justify-center">
             <div className="mb-6 text-center">
               <h2 className="text-3xl font-bold text-blue-800">Welcome Back</h2>
               <p className="text-gray-600">Login to your account</p>
             </div>
 
+            {serverError && (
+              <div className="text-red-600 text-sm text-center mb-4">{serverError}</div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Email */}
-              <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
-                <img src={email_icon} alt="email icon" className="w-5 mr-3" />
-                <input
-                  type="email"
-                  placeholder="Email"
-                  className="w-full bg-transparent outline-none text-base"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
+              <div>
+                <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
+                  <img src={email_icon} alt="email icon" className="w-5 mr-3" />
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    className="w-full bg-transparent outline-none text-base"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                {errors.email && (
+                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                )}
               </div>
 
               {/* Password */}
-              <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
-                <img src={password_icon} alt="password icon" className="w-5 mr-3" />
-                <input
-                  type="password"
-                  placeholder="Password"
-                  className="w-full bg-transparent outline-none text-base"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+              <div>
+                <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
+                  <img src={password_icon} alt="password icon" className="w-5 mr-3" />
+                  <input
+                    type="password"
+                    placeholder="Password"
+                    className="w-full bg-transparent outline-none text-base"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+                {errors.password && (
+                  <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+                )}
               </div>
 
               <div className="flex justify-between items-center text-sm text-gray-600">

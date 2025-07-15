@@ -109,11 +109,8 @@ const Navbar = () => {
           </>
         )}
 
-        {isLoggedIn && role === 'Recruiter' && (
-          <>
-            <Link to="/recruiter-dashboard" className="hover:text-blue-600 transition">Recruiter Dashboard</Link>
-          </>
-        )}
+        
+        
       </nav>
 
       {/* Auth Buttons and Dropdown */}
@@ -146,22 +143,22 @@ const Navbar = () => {
             </div>
 
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-md z-10">
-                <Link
-                  to="/userprofile"
-                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                  onClick={() => setDropdownOpen(false)}
-                >
-                  <i className="fas fa-user mr-2"></i> Profile
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                >
-                  <i className="fas fa-sign-out-alt mr-2"></i> Logout
-                </button>
-              </div>
-            )}
+  <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-md z-10">
+    <Link
+      to="/userprofile"
+      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+      onClick={() => setDropdownOpen(false)}
+    >
+      <i className="fas fa-user mr-2"></i> Profile
+    </Link>
+    <button
+      onClick={handleLogout}
+      className="w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100"
+    >
+      <i className="fas fa-sign-out-alt mr-2"></i> Logout
+    </button>
+  </div>
+)}
           </div>
         )}
       </div>
