@@ -38,10 +38,8 @@ const Login = () => {
       });
       localStorage.setItem("token",JSON.stringify(response.data.jwtToken))
       toast.success("User login successful!");
+      navigate("/userProfile")
       console.log("login successfull",response)
-
-
-
     } catch (error) {
       console.error("Login Error:", error);
       const msg = error?.response?.data?.message || "Invalid email or password.";
