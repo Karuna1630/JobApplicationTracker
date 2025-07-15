@@ -1,55 +1,45 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { IoSearch } from 'react-icons/io5';
-import logo from '../assets/logof.png';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [role, setRole] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
+  const [role, setRole] = useState(Number(localStorage.getItem('role')));
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
+  // Update when token/role changes in localStorage
   useEffect(() => {
-    const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    const userRole = localStorage.getItem('role');
-
-    setIsLoggedIn(loggedIn);
-    setRole(userRole);
-
-    // Listen for localStorage changes from other tabs
-    const handleStorageChange = () => {
-      setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true');
-      setRole(localStorage.getItem('role'));
+    const updateAuthStatus = () => {
+      setIsLoggedIn(!!localStorage.getItem('token'));
+      setRole(Number(localStorage.getItem('role')));
     };
 
-    window.addEventListener('storage', handleStorageChange);
+    updateAuthStatus(); // Run on mount
 
-    return () => window.removeEventListener('storage', handleStorageChange);
+    // Optional: listen for changes across tabs
+    window.addEventListener('storage', updateAuthStatus);
+
+    return () => {
+      window.removeEventListener('storage', updateAuthStatus);
+    };
   }, []);
 
-  // Close dropdown when clicking outside
+  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleToggleDropdown = () => {
-    setDropdownOpen(prev => !prev);
-  };
-
   const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('token');
     localStorage.removeItem('role');
     localStorage.removeItem('fullName');
     setIsLoggedIn(false);
@@ -79,41 +69,44 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Nav Links */}
-      <nav className="flex gap-6 text-xl text-blue-800 font-medium">
-        <Link to="/" className="hover:text-blue-600 transition">Home</Link>
-        <Link to="/companies" className="hover:text-blue-600 transition">Companies</Link>
-        <Link to="/aboutus" className="hover:text-blue-600 transition">About Us</Link>
-        <Link to="/contactus" className="hover:text-blue-600 transition">Contact Us</Link>
+     <nav className="flex gap-6 text-xl text-blue-800 font-medium">
+  {/* 👇 Only show these when NOT logged in */}
+  {!isLoggedIn && (
+    <>
+      <Link to="/" className="hover:text-blue-600 transition">Home</Link>
+      <Link to="/companies" className="hover:text-blue-600 transition">Companies</Link>
+      <Link to="/aboutus" className="hover:text-blue-600 transition">About Us</Link>
+      <Link to="/contactus" className="hover:text-blue-600 transition">Contact Us</Link>
+    </>
+  )}
 
-        {isLoggedIn && role === 'JobSeeker' && (
-          <>
-            <Link to="/applications" className="hover:text-blue-600 transition">My Applications</Link>
-            <Link to="/userProfile" className="hover:text-blue-600 transition">Profile</Link>
-          </>
-        )}
+  {/* 👇 Role-specific links shown only when logged in */}
+  {isLoggedIn && role === 4 && (
+    <>
+      <Link to="/applications" className="hover:text-blue-600 transition">My Applications</Link>
+      {/* <Link to="/userProfile" className="hover:text-blue-600 transition">Profile</Link> */}
+    </>
+  )}
 
-        {isLoggedIn && role === 'Company' && (
-          <>
-            <Link to="/dashboard" className="hover:text-blue-600 transition">Dashboard</Link>
-            <Link to="/add-job" className="hover:text-blue-600 transition">Add Job</Link>
-            <Link to="/manage-jobs" className="hover:text-blue-600 transition">Manage Jobs</Link>
-          </>
-        )}
+  {isLoggedIn && role === 2 && (
+    <>
+      <Link to="/dashboard" className="hover:text-blue-600 transition">Dashboard</Link>
+      <Link to="/add-job" className="hover:text-blue-600 transition">Add Job</Link>
+      <Link to="/manage-jobs" className="hover:text-blue-600 transition">Manage Jobs</Link>
+    </>
+  )}
 
-        {isLoggedIn && role === 'Admin' && (
-          <>
-            <Link to="/admin" className="hover:text-blue-600 transition">Admin Dashboard</Link>
-            <Link to="/manage-users" className="hover:text-blue-600 transition">Manage Users</Link>
-            <Link to="/reports" className="hover:text-blue-600 transition">Reports</Link>
-          </>
-        )}
+  {isLoggedIn && role === 1 && (
+    <>
+      <Link to="/admin" className="hover:text-blue-600 transition">Admin Dashboard</Link>
+      <Link to="/manage-users" className="hover:text-blue-600 transition">Manage Users</Link>
+      <Link to="/reports" className="hover:text-blue-600 transition">Reports</Link>
+    </>
+  )}
+</nav>
 
-        
-        
-      </nav>
 
-      {/* Auth Buttons and Dropdown */}
+      {/* Auth Buttons / Profile Dropdown */}
       <div className="relative" ref={dropdownRef}>
         {!isLoggedIn ? (
           <div className="flex items-center gap-4 text-xl">
@@ -124,13 +117,13 @@ const Navbar = () => {
           <div className="relative inline-block text-left">
             <div
               className="flex items-center gap-2 cursor-pointer select-none"
-              onClick={handleToggleDropdown}
+              onClick={() => setDropdownOpen(prev => !prev)}
             >
               <div className="bg-blue-600 text-white font-semibold w-10 h-10 rounded-full flex items-center justify-center">
-                {localStorage.getItem("fullName")?.[0]?.toUpperCase()}
+                {localStorage.getItem("fullName")?.[0]?.toUpperCase() || 'U'}
               </div>
               <span className="text-blue-800 font-semibold">
-                {localStorage.getItem("fullName")}
+                {localStorage.getItem("fullName") || 'User'}
               </span>
               <svg
                 className={`w-4 h-4 text-gray-500 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
@@ -143,22 +136,22 @@ const Navbar = () => {
             </div>
 
             {dropdownOpen && (
-  <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-md z-10">
-    <Link
-      to="/userprofile"
-      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-      onClick={() => setDropdownOpen(false)}
-    >
-      <i className="fas fa-user mr-2"></i> Profile
-    </Link>
-    <button
-      onClick={handleLogout}
-      className="w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100"
-    >
-      <i className="fas fa-sign-out-alt mr-2"></i> Logout
-    </button>
-  </div>
-)}
+              <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-md z-10">
+                <Link
+                  to="/userprofile"
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  onClick={() => setDropdownOpen(false)}
+                >
+                  Profile
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

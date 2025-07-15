@@ -37,9 +37,26 @@ const Login = () => {
         password,
       });
       localStorage.setItem("token",JSON.stringify(response.data.jwtToken))
+      localStorage.setItem("role", response.data.userType.toString());
+      localStorage.setItem('isLoggedIn', 'true');
+
       toast.success("User login successful!");
-      navigate("/userProfile")
-      console.log("login successfull",response)
+
+      // Navigate based on role
+    const role = response.data.userType;
+    if (role === 1) {
+      navigate("/admin");
+    } else if (role === 2) {
+      navigate("/companyProfile");
+    } else if (role === 3) {
+      navigate("/staff-dashboard");
+    } else if (role === 4) {
+      navigate("/userProfile");
+    } else {
+      navigate("/");
+    }
+
+   console.log("login successful", response);
     } catch (error) {
       console.error("Login Error:", error);
       const msg = error?.response?.data?.message || "Invalid email or password.";
