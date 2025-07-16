@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import axiosInstance from '../Utils/axiosInstance';
-import Navbar from '../Components/Navbar';
-import Footer from '../Components/Footer';
+import axiosInstance from "../Utils/axiosInstance";
+import Navbar from "../Components/Navbar";
+import Footer from "../Components/Footer";
 import email_icon from "../assets/email.png";
 import password_icon from "../assets/password.png";
 import loginimage from "../assets/loginimage.png";
@@ -18,8 +18,6 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-  
 
     // Simple client-side validation
     const newErrors = {};
@@ -36,30 +34,38 @@ const Login = () => {
         email,
         password,
       });
-      localStorage.setItem("token",JSON.stringify(response.data.jwtToken))
-      localStorage.setItem("role", response.data.userType.toString());
-      localStorage.setItem('isLoggedIn', 'true');
+
+      console.log("Login Response:", response.data);
+     localStorage.setItem("token", JSON.stringify(response.data.jwtToken));
+localStorage.setItem("role", response.data.userType.toString());
+localStorage.setItem("firstName", response.data.firstName || "");
+localStorage.setItem("lastName", response.data.lastName || "");
+localStorage.setItem("isLoggedIn", "true");
+
 
       toast.success("User login successful!");
 
       // Navigate based on role
-    const role = response.data.userType;
-    if (role === 1) {
-      navigate("/admin");
-    } else if (role === 2) {
-      navigate("/companyProfile");
-    } else if (role === 3) {
-      navigate("/staff-dashboard");
-    } else if (role === 4) {
-      navigate("/userProfile");
-    } else {
-      navigate("/");
-    }
+      const role = response.data.userType;
+      if (role === 1) {
+        navigate("/admin");
+      } else if (role === 2) {
+        navigate("/companyProfile");
+      } else if (role === 3) {
+        navigate("/staff-dashboard");
+      } else if (role === 4) {
+        navigate("/userProfile");
+      } else {
+        navigate("/");
+      }
 
-   console.log("login successful", response);
+      console.log("login successful", response);
+      console.log("Login response:", response.data);
+
     } catch (error) {
       console.error("Login Error:", error);
-      const msg = error?.response?.data?.message || "Invalid email or password.";
+      const msg =
+        error?.response?.data?.message || "Invalid email or password.";
       setServerError(msg);
       toast.error(msg);
     }
@@ -85,7 +91,9 @@ const Login = () => {
             </div>
 
             {serverError && (
-              <div className="text-red-600 text-sm text-center mb-4">{serverError}</div>
+              <div className="text-red-600 text-sm text-center mb-4">
+                {serverError}
+              </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -109,7 +117,11 @@ const Login = () => {
               {/* Password */}
               <div>
                 <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
-                  <img src={password_icon} alt="password icon" className="w-5 mr-3" />
+                  <img
+                    src={password_icon}
+                    alt="password icon"
+                    className="w-5 mr-3"
+                  />
                   <input
                     type="password"
                     placeholder="Password"
@@ -125,9 +137,12 @@ const Login = () => {
 
               <div className="flex justify-between items-center text-sm text-gray-600">
                 <label className="flex items-center gap-2">
-                  <input type="checkbox" className="accent-blue-600" /> Remember me
+                  <input type="checkbox" className="accent-blue-600" /> Remember
+                  me
                 </label>
-                <a href="#" className="text-blue-600 hover:underline">Forgot Password?</a>
+                <a href="#" className="text-blue-600 hover:underline">
+                  Forgot Password?
+                </a>
               </div>
 
               <button
@@ -138,8 +153,10 @@ const Login = () => {
               </button>
 
               <p className="text-center text-sm">
-                Don’t have an account?{' '}
-                <a href="/register" className="text-cyan-600 hover:underline">Register here</a>
+                Don’t have an account?{" "}
+                <a href="/register" className="text-cyan-600 hover:underline">
+                  Register here
+                </a>
               </p>
             </form>
           </div>

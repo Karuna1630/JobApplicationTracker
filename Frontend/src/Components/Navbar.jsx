@@ -1,30 +1,41 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { IoSearch } from 'react-icons/io5';
+import React, { useEffect, useState, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { IoSearch } from "react-icons/io5";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
-  const [role, setRole] = useState(Number(localStorage.getItem('role')));
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+  const [role, setRole] = useState(Number(localStorage.getItem("role")));
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   // Update when token/role changes in localStorage
   useEffect(() => {
     const updateAuthStatus = () => {
-      setIsLoggedIn(!!localStorage.getItem('token'));
-      setRole(Number(localStorage.getItem('role')));
+      setIsLoggedIn(!!localStorage.getItem("token"));
+      setRole(Number(localStorage.getItem("role")));
     };
 
     updateAuthStatus(); // Run on mount
 
     // Optional: listen for changes across tabs
-    window.addEventListener('storage', updateAuthStatus);
+    window.addEventListener("storage", updateAuthStatus);
 
     return () => {
-      window.removeEventListener('storage', updateAuthStatus);
+      window.removeEventListener("storage", updateAuthStatus);
     };
   }, []);
+
+const firstName = localStorage.getItem("firstName") || "";
+const lastName = localStorage.getItem("lastName") || "";
+
+let initials = "U";
+if (firstName && lastName) {
+  initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+} else if (firstName) {
+  initials = `${firstName.charAt(0)}`.toUpperCase();
+}
+
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -34,18 +45,19 @@ const Navbar = () => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    localStorage.removeItem('fullName');
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("firstName");
+    localStorage.removeItem("lastName")
     setIsLoggedIn(false);
     setRole(null);
     setDropdownOpen(false);
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
@@ -69,69 +81,106 @@ const Navbar = () => {
         </button>
       </div>
 
-     <nav className="flex gap-6 text-xl text-blue-800 font-medium">
-  {/* 👇 Only show these when NOT logged in */}
-  {!isLoggedIn && (
-    <>
-      <Link to="/" className="hover:text-blue-600 transition">Home</Link>
-      <Link to="/companies" className="hover:text-blue-600 transition">Companies</Link>
-      <Link to="/aboutus" className="hover:text-blue-600 transition">About Us</Link>
-      <Link to="/contactus" className="hover:text-blue-600 transition">Contact Us</Link>
-    </>
-  )}
+      <nav className="flex gap-6 text-xl text-blue-800 font-medium">
+        {/* 👇 Only show these when NOT logged in */}
+        {!isLoggedIn && (
+          <>
+            <Link to="/" className="hover:text-blue-600 transition">
+              Home
+            </Link>
+            <Link to="/companies" className="hover:text-blue-600 transition">
+              Companies
+            </Link>
+            <Link to="/aboutus" className="hover:text-blue-600 transition">
+              About Us
+            </Link>
+            <Link to="/contactus" className="hover:text-blue-600 transition">
+              Contact Us
+            </Link>
+          </>
+        )}
 
-  {/* 👇 Role-specific links shown only when logged in */}
-  {isLoggedIn && role === 4 && (
-    <>
-      <Link to="/applications" className="hover:text-blue-600 transition">My Applications</Link>
-      {/* <Link to="/userProfile" className="hover:text-blue-600 transition">Profile</Link> */}
-    </>
-  )}
+        {/* 👇 Role-specific links shown only when logged in */}
+        {isLoggedIn && role === 4 && (
+          <>
+            <Link to="/applications" className="hover:text-blue-600 transition">
+              My Applications
+            </Link>
+            {/* <Link to="/userProfile" className="hover:text-blue-600 transition">Profile</Link> */}
+          </>
+        )}
 
-  {isLoggedIn && role === 2 && (
-    <>
-      <Link to="/dashboard" className="hover:text-blue-600 transition">Dashboard</Link>
-      <Link to="/add-job" className="hover:text-blue-600 transition">Add Job</Link>
-      <Link to="/manage-jobs" className="hover:text-blue-600 transition">Manage Jobs</Link>
-    </>
-  )}
+        {isLoggedIn && role === 2 && (
+          <>
+            <Link to="/dashboard" className="hover:text-blue-600 transition">
+              Dashboard
+            </Link>
+            <Link to="/add-job" className="hover:text-blue-600 transition">
+              Add Job
+            </Link>
+            <Link to="/manage-jobs" className="hover:text-blue-600 transition">
+              Manage Jobs
+            </Link>
+          </>
+        )}
 
-  {isLoggedIn && role === 1 && (
-    <>
-      <Link to="/admin" className="hover:text-blue-600 transition">Admin Dashboard</Link>
-      <Link to="/manage-users" className="hover:text-blue-600 transition">Manage Users</Link>
-      <Link to="/reports" className="hover:text-blue-600 transition">Reports</Link>
-    </>
-  )}
-</nav>
-
+        {isLoggedIn && role === 1 && (
+          <>
+            <Link to="/admin" className="hover:text-blue-600 transition">
+              Admin Dashboard
+            </Link>
+            <Link to="/manage-users" className="hover:text-blue-600 transition">
+              Manage Users
+            </Link>
+            <Link to="/reports" className="hover:text-blue-600 transition">
+              Reports
+            </Link>
+          </>
+        )}
+      </nav>
 
       {/* Auth Buttons / Profile Dropdown */}
       <div className="relative" ref={dropdownRef}>
         {!isLoggedIn ? (
           <div className="flex items-center gap-4 text-xl">
-            <Link to="/login" className="text-blue-800 font-semibold hover:text-blue-600 transition">Login</Link>
-            <Link to="/registercomp" className="bg-blue-800 text-white font-semibold px-4 py-2 rounded-xl hover:bg-blue-600 transition">Register</Link>
+            <Link
+              to="/login"
+              className="text-blue-800 font-semibold hover:text-blue-600 transition"
+            >
+              Login
+            </Link>
+            <Link
+              to="/registercomp"
+              className="bg-blue-800 text-white font-semibold px-4 py-2 rounded-xl hover:bg-blue-600 transition"
+            >
+              Register
+            </Link>
           </div>
         ) : (
           <div className="relative inline-block text-left">
             <div
               className="flex items-center gap-2 cursor-pointer select-none"
-              onClick={() => setDropdownOpen(prev => !prev)}
+              onClick={() => setDropdownOpen((prev) => !prev)}
             >
-              <div className="bg-blue-600 text-white font-semibold w-10 h-10 rounded-full flex items-center justify-center">
-                {localStorage.getItem("fullName")?.[0]?.toUpperCase() || 'U'}
-              </div>
-              <span className="text-blue-800 font-semibold">
-                {localStorage.getItem("fullName") || 'User'}
-              </span>
+   <div className="bg-blue-600 text-white font-semibold w-10 h-10 rounded-full flex items-center justify-center">
+  {initials}
+</div>
+<span className="text-blue-800 font-semibold">{initials}</span>
+
               <svg
-                className={`w-4 h-4 text-gray-500 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
+                className={`w-4 h-4 text-gray-500 transition-transform ${
+                  dropdownOpen ? "rotate-180" : ""
+                }`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </div>
 
