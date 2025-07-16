@@ -34,14 +34,11 @@ const Login = () => {
         email,
         password,
       });
-
-      console.log("Login Response:", response.data);
-     localStorage.setItem("token", JSON.stringify(response.data.jwtToken));
-localStorage.setItem("role", response.data.userType.toString());
-localStorage.setItem("firstName", response.data.firstName || "");
-localStorage.setItem("lastName", response.data.lastName || "");
-localStorage.setItem("isLoggedIn", "true");
-
+      localStorage.setItem("token", JSON.stringify(response.data.jwtToken));
+      localStorage.setItem("role", response.data.userType.toString());
+      localStorage.setItem("firstName", response.data.firstName);
+      localStorage.setItem("lastName", response.data.lastName);
+      localStorage.setItem("isLoggedIn", "true");
 
       toast.success("User login successful!");
 

@@ -162,10 +162,13 @@ if (firstName && lastName) {
               className="flex items-center gap-2 cursor-pointer select-none"
               onClick={() => setDropdownOpen((prev) => !prev)}
             >
-   <div className="bg-blue-600 text-white font-semibold w-10 h-10 rounded-full flex items-center justify-center">
+<div
+  className="bg-blue-600 text-white font-semibold w-10 h-10 rounded-full flex items-center justify-center"
+  title={`${firstName} ${lastName}`}
+  aria-label={`User: ${firstName} ${lastName}`}
+>
   {initials}
 </div>
-<span className="text-blue-800 font-semibold">{initials}</span>
 
               <svg
                 className={`w-4 h-4 text-gray-500 transition-transform ${
