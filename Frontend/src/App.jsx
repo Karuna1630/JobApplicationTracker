@@ -22,8 +22,7 @@ import CompanyProfile from './Pages/CompanyProfile.jsx'
 import Skill from './Pages/Skill'
 import CandidateScreening from './Pages/CandidateScreening.jsx'
 import PostJob from './Pages/PostJob.jsx'
-
-
+import AdminCompany from './Pages/AdminCompany.jsx'
 
 
 
@@ -56,7 +55,7 @@ function App() {
           <Route path='/jobpost' element={<JobPost/>}/>
           <Route path='/companyprofile' element={<CompanyProfile/>}/>
           <Route path='/postjob' element={<PostJob/>}/>
-
+          <Route path='/admincompany' element={<AdminCompany/>}/>
           <Route path='/skill' element={<Skill/>}/>
           <Route path='/candidatescreening' element={<CandidateScreening/>}/>
         
