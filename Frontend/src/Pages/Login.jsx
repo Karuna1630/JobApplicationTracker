@@ -34,10 +34,22 @@ const Login = () => {
         email,
         password,
       });
-      localStorage.setItem("token", JSON.stringify(response.data.jwtToken));
-      localStorage.setItem("role", response.data.userType.toString());
-      localStorage.setItem("firstName", response.data.firstName);
-      localStorage.setItem("lastName", response.data.lastName);
+      const { jwtToken, userType, firstName, lastName } = response.data;
+
+// Decode JWT to extract userId
+const payload = JSON.parse(atob(jwtToken.split(".")[1]));
+const userId = payload.userId;
+
+localStorage.setItem("token", jwtToken);
+localStorage.setItem("role", userType.toString());
+localStorage.setItem("firstName", firstName);
+localStorage.setItem("lastName", lastName);
+localStorage.setItem("userId", userId); // ✅ Set it here
+localStorage.setItem("isLoggedIn", "true");
+
+
+toast.success("User login successful!");
+
       localStorage.setItem("isLoggedIn", "true");
 
       toast.success("User login successful!");
