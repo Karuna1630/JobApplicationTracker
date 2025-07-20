@@ -230,12 +230,12 @@ function Admin() {
   return (
     <div className="min-h-screen flex bg-gray-100">
       {/* Sidebar */}
-      <aside className="w-64 bg-blue-800 text-white p-6 space-y-8">
+      <aside className="w-64 bg-blue-500 text-white p-6 space-y-8">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-white rounded-full" />
           <div>
             <p className="font-bold">Admin</p>
-            <p className="text-sm">Johen</p>
+            <p className="text-sm">Anshu</p>
           </div>
         </div>
         <nav className="space-y-5 text-sm font-medium">
@@ -340,30 +340,8 @@ function Admin() {
             />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredCompanies.map((company) => (
-                <div key={company._id} className="bg-white p-4 rounded-xl shadow">
+                <div key={company._id} className="bg-white rounded-xl shadow">
                   <CompanyCard company={company} />
-                  {/* Reject button */}
-                  <button
-                    className="mt-3 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                    onClick={() => {
-                      setSelectedItem(company);
-                      setSelectedType("company");
-                      handleReject(company._id);
-                    }}
-                  >
-                    Reject
-                  </button>
-                  {/* Approve button */}
-                  <button
-                    className="mt-1 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                    onClick={() => {
-                      setSelectedItem(company);
-                      setSelectedType("company");
-                      handleApprove(company._id);
-                    }}
-                  >
-                    Approve
-                  </button>
                 </div>
               ))}
             </div>
@@ -385,31 +363,9 @@ function Admin() {
                 filteredJobseekers.map((user) => (
                   <div
                     key={user._id}
-                    className="bg-white p-4 rounded-xl shadow mb-4 flex justify-between items-center"
+                    className="bg-white rounded-xl shadow mb-4  justify-between items-center"
                   >
                     <JobseekerCard user={user} />
-                    <div className="flex flex-col gap-2">
-                      <button
-                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                        onClick={() => {
-                          setSelectedItem(user);
-                          setSelectedType("jobseeker");
-                          handleReject(user._id);
-                        }}
-                      >
-                        Reject
-                      </button>
-                      <button
-                        className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                        onClick={() => {
-                          setSelectedItem(user);
-                          setSelectedType("jobseeker");
-                          handleApprove(user._id);
-                        }}
-                      >
-                        Approve
-                      </button>
-                    </div>
                   </div>
                 ))
               ) : (
