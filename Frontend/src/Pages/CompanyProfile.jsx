@@ -1,13 +1,17 @@
 import React from "react";
-import { FaSuitcase, FaUsers, FaUserCheck, FaUserClock, FaUserTie, FaGlobe, FaChartLine, FaUserPlus} from "react-icons/fa";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer
+import {
+  FaSuitcase, FaUsers, FaUserCheck, FaUserClock, FaUserTie,
+  FaGlobe, FaChartLine, FaUserPlus
+} from "react-icons/fa";
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip,
+  CartesianGrid, ResponsiveContainer
 } from "recharts";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import Logo from "../assets/logoc.png";
 import BannerBg from "../assets/banner.png";
-
 
 const dummyApplicationData = [
   { month: "Jan", applications: 50 },
@@ -83,6 +87,9 @@ const CompanyProfile = () => {
               </button>
               <button onClick={() => navigate("/insight")} className="bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700">
                 Company Insight
+              </button>
+              <button onClick={() => navigate("/registerstaff")} className="bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700">
+                Staff Register
               </button>
             </div>
           </div>
@@ -203,6 +210,23 @@ const CompanyProfile = () => {
               ))}
             </ul>
           </div>
+
+          {/* Inline Staff Registration Form */}
+          <div className="bg-white rounded-xl shadow-md p-6 mb-12">
+            <h2 className="text-xl font-semibold text-gray-700 mb-4">Register New Staff</h2>
+            <form className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <input type="text" placeholder="Full Name" className="border p-2 rounded" />
+              <input type="email" placeholder="Email" className="border p-2 rounded" />
+              <input type="text" placeholder="Role (e.g., HR, Recruiter)" className="border p-2 rounded" />
+              <input type="password" placeholder="Password" className="border p-2 rounded" />
+              <div className="sm:col-span-2">
+                <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+                  Register Staff
+                </button>
+              </div>
+            </form>
+          </div>
+
         </div>
         <Footer />
       </div>
