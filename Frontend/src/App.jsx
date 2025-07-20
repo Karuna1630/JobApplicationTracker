@@ -22,7 +22,12 @@ import CompanyProfile from './Pages/CompanyProfile.jsx'
 import Skill from './Pages/Skill'
 import CandidateScreening from './Pages/CandidateScreening.jsx'
 import PostJob from './Pages/PostJob.jsx'
+
 import CURegister from './Components/CURegister'
+
+import Admin from './Pages/Admin.jsx'
+import ProfileUser from './Components/ProfileUser.jsx'
+
 
 
 
@@ -56,10 +61,15 @@ function App() {
           <Route path='/jobpost' element={<JobPost/>}/>
           <Route path='/companyprofile' element={<CompanyProfile/>}/>
           <Route path='/postjob' element={<PostJob/>}/>
-
+          <Route path='/admin' element={<Admin/>}/>
           <Route path='/skill' element={<Skill/>}/>
           <Route path='/candidatescreening' element={<CandidateScreening/>}/>
+
           <Route path='/curegister' element={<CURegister/>}/>
+
+          <Route path='/profileuser/:userId' element={<ProfileUser/>}/>
+        
+
 
 
 
