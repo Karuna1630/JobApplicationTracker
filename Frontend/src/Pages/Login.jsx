@@ -36,20 +36,16 @@ const Login = () => {
       });
       const { jwtToken, userType, firstName, lastName } = response.data;
 
-// Decode JWT to extract userId
-const payload = JSON.parse(atob(jwtToken.split(".")[1]));
-const userId = payload.userId;
+      // Decode JWT to extract userId
+      const payload = JSON.parse(atob(jwtToken.split(".")[1]));
+      const userId = payload.userId;
 
-localStorage.setItem("token", jwtToken);
-localStorage.setItem("role", userType.toString());
-localStorage.setItem("firstName", firstName);
-localStorage.setItem("lastName", lastName);
-localStorage.setItem("userId", userId); // ✅ Set it here
-localStorage.setItem("isLoggedIn", "true");
-
-
-toast.success("User login successful!");
-
+      localStorage.setItem("token", jwtToken);
+      localStorage.setItem("role", userType.toString());
+      localStorage.setItem("firstName", firstName);
+      localStorage.setItem("lastName", lastName);
+      localStorage.setItem("userId", userId);
+      localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("isLoggedIn", "true");
 
       toast.success("User login successful!");
@@ -68,9 +64,7 @@ toast.success("User login successful!");
         navigate("/");
       }
 
-      console.log("login successful", response);
       console.log("Login response:", response.data);
-
     } catch (error) {
       console.error("Login Error:", error);
       const msg =
