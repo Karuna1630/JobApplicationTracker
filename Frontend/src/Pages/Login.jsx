@@ -7,6 +7,7 @@ import Footer from "../Components/Footer";
 import email_icon from "../assets/email.png";
 import password_icon from "../assets/password.png";
 import loginimage from "../assets/loginimage.png";
+import { getUserIdFromToken } from "../Utils/jwtUtils";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -34,18 +35,14 @@ const Login = () => {
         email,
         password,
       });
-      const { jwtToken, userType, firstName, lastName } = response.data;
-
-      // Decode JWT to extract userId
-      const payload = JSON.parse(atob(jwtToken.split(".")[1]));
-      const userId = payload.userId;
+      const { jwtToken: token, userType, firstName, lastName } = response.data;
+      const userId = getUserIdFromToken(token);
 
       localStorage.setItem("token", jwtToken);
       localStorage.setItem("role", userType.toString());
       localStorage.setItem("firstName", firstName);
       localStorage.setItem("lastName", lastName);
-      localStorage.setItem("userId", userId);
-      localStorage.setItem("isLoggedIn", "true");
+
       localStorage.setItem("isLoggedIn", "true");
 
       toast.success("User login successful!");

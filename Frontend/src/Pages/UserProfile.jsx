@@ -4,6 +4,7 @@ import { FiEdit } from "react-icons/fi";
 import BackgroundImage from "../assets/background.avif";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
+import { getUserIdFromToken } from "../Utils/jwtUtils";
 
 const UserProfile = () => {
   const [userInfo, setUserInfo] = useState({
@@ -21,26 +22,27 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const userId = localStorage.getItem("userId");
+    const token = localStorage.getItem("token");
+const userId = getUserIdFromToken(token);
 
-        if (!userId || userId === "0") {
-          setErrorMsg("User ID missing or invalid. Please log in again.");
-          return;
-        }
+      if (!userId || userId === 0) {
+        setErrorMsg("User ID missing or invalid. Please log in again.");
+        return;
+      }
 
         const response = await axiosInstance.get(`users/profile/${userId}`);
         const profileData = response.data;
 
         if (profileData && profileData.jobSeekerProfile) {
           const jobSeeker = profileData.jobSeekerProfile;
-        setUserInfo({
-  firstName: jobSeeker.firstName || "",
-  lastName: jobSeeker.lastName || "",
-  email: profileData.email || "",
-  phone: jobSeeker.phoneNumber || "Not Provided",
-  location: jobSeeker.location || "Not Specified",
-  bio: jobSeeker.bio || "No bio available",
-});
+          setUserInfo({
+            firstName: jobSeeker.firstName || "",
+            lastName: jobSeeker.lastName || "",
+            email: profileData.email || "",
+            phone: jobSeeker.phoneNumber || "Not Provided",
+            location: jobSeeker.location || "Not Specified",
+            bio: jobSeeker.bio || "No bio available",
+          });
         } else {
           setErrorMsg("Job Seeker profile not found.");
         }
