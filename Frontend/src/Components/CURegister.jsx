@@ -48,7 +48,7 @@ const Register = () => {
     console.log(actions);
 
     try {
-      const response = await axiosInstance.post("users/submitusers", values);
+      const response = await axiosInstance.post("register-user", values);
       console.log("User Added:", response.data);
 
       // Check if the response indicates success
@@ -274,7 +274,9 @@ const Register = () => {
       </div>
       <Footer />
     </>
-  );
+  )
 };
 
 export default Register;
+
+
