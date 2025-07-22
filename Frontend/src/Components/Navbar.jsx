@@ -115,11 +115,14 @@ if (firstName && lastName) {
             <Link to="/companyProfile" className="hover:text-blue-600 transition">
               Dashboard
             </Link>
-            <Link to="/add-job" className="hover:text-blue-600 transition">
+            <Link to="/postjob" className="hover:text-blue-600 transition">
               Add Job
             </Link>
             <Link to="/manage-jobs" className="hover:text-blue-600 transition">
               Manage Jobs
+            </Link>
+             <Link to="/companyinsight" className="hover:text-blue-600 transition">
+              Company Insights
             </Link>
           </>
         )}

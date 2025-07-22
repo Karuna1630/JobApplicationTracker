@@ -93,6 +93,7 @@ const UserProfile = () => {
             <h2 className="text-3xl font-semibold text-gray-800">
               {userInfo.firstName} {userInfo.lastName}
             </h2>
+            
             <p className="text-sm text-gray-500"></p>
             <p className="text-base text-gray-600 mt-2 max-w-3xl">{userInfo.bio}</p>
           </div>

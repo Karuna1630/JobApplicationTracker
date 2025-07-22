@@ -17,19 +17,14 @@ import CompanyR3 from './Pages/CompanyR3'
 import ApplicationReceived from './Pages/ApplicationReceived'
 import ContactUs from './Pages/ContactUs'
 import EditProfile from './Pages/EditProfile.jsx'
-import JobPost from './Pages/JobPost'
+
 import CompanyProfile from './Pages/CompanyProfile.jsx'
 import Skill from './Pages/Skill'
 import CandidateScreening from './Pages/CandidateScreening.jsx'
 import PostJob from './Pages/PostJob.jsx'
 import CURegister from './Components/CURegister'
 import Admin from './Pages/Admin.jsx'
-
-import ProfileUser from './Components/ProfileUser.jsx'
 import ViewApplications from './Pages/ViewApplications'
-
-
-
 import CompanyInsight from './Pages/CompanyInsight.jsx'
 
 
@@ -59,7 +54,7 @@ function App() {
           <Route path='/applicationreceived' element={<ApplicationReceived/>}/>
           <Route path='/contactus' element={<ContactUs/>}/>
           <Route path='/editProfile' element={<EditProfile/>}/>
-          <Route path='/jobpost' element={<JobPost/>}/>
+       
           <Route path='/companyprofile' element={<CompanyProfile/>}/>
           <Route path='/postjob' element={<PostJob/>}/>
            <Route path="/registerstaff" element={<CURegister />} />
@@ -69,7 +64,6 @@ function App() {
 
           <Route path='/viewapplications' element={<ViewApplications/>}/>
           <Route path='/companyinsight' element={<CompanyInsight/>}/>
-
           <Route path='/curegister' element={<CURegister/>}/>
 
 
