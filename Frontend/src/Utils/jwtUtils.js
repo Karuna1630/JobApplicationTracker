@@ -1,9 +1,9 @@
-import jwt_decode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 export const decodeToken = (token) => {
   try {
-    const decoded = jwt_decode(token);
-    console.log("Decoded JWT token:", decoded); // Debug
+    const decoded = jwtDecode(token);
+    console.log("Decoded JWT token:", decoded);
     return decoded;
   } catch (error) {
     console.error("Token decode error:", error);
@@ -13,6 +13,5 @@ export const decodeToken = (token) => {
 
 export const getUserIdFromToken = (token) => {
   const decoded = decodeToken(token);
-  // Ensure string or number support
   return decoded?.userId || decoded?.userid || decoded?.UserID || decoded?.UserId || null;
 };
