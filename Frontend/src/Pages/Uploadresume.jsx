@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const Uploadresume = ({ onSave, onClose }) => {
   const [resume, setResume] = useState(null);
@@ -8,14 +8,22 @@ const Uploadresume = ({ onSave, onClose }) => {
     email: "",
     phone: "",
     address: "",
-    careerObjective:"",
+    careerObjective: "",
     technicalSkills: "",
     softSkills: "",
     certifications: "",
     projects: "",
-    education:"",
+    education: "",
     reference: "",
   });
+
+  // Disable background scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -39,15 +47,19 @@ const Uploadresume = ({ onSave, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
-      <div className="bg-white w-full max-w-3xl rounded-lg shadow-lg p-6 relative max-h-[95vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center"
+      onClick={onClose} // close modal if click outside form
+    >
+      <div
+        className=" bg-black w-full max-w-3xl rounded-lg shadow-lg p-6 relative max-h-[95vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()} // prevent closing modal on clicking inside form container
+      >
         <form onSubmit={handleSubmit}>
-
           {/* Resume Summary Box */}
           <div className="bg-white border border-gray-200 rounded-xl shadow p-6">
             <h3 className="text-lg font-semibold mb-4">Resume Details</h3>
             <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
-
               {/* Name */}
               <div className="col-span-1">
                 <label><strong>Name:</strong></label>
@@ -59,7 +71,6 @@ const Uploadresume = ({ onSave, onClose }) => {
                   className="mt-1 w-full p-2 border rounded"
                 />
               </div>
-
               {/* Email */}
               <div className="col-span-1">
                 <label><strong>Email:</strong></label>
@@ -71,7 +82,6 @@ const Uploadresume = ({ onSave, onClose }) => {
                   className="mt-1 w-full p-2 border rounded"
                 />
               </div>
-
               {/* Phone */}
               <div className="col-span-1">
                 <label><strong>Phone:</strong></label>
@@ -83,7 +93,6 @@ const Uploadresume = ({ onSave, onClose }) => {
                   className="mt-1 w-full p-2 border rounded"
                 />
               </div>
-
               {/* Address */}
               <div className="col-span-1">
                 <label><strong>Address:</strong></label>
@@ -95,7 +104,6 @@ const Uploadresume = ({ onSave, onClose }) => {
                   className="mt-1 w-full p-2 border rounded"
                 />
               </div>
-
               {/* Career Objective */}
               <div className="col-span-2">
                 <label><strong>Career Objective:</strong></label>
@@ -107,7 +115,6 @@ const Uploadresume = ({ onSave, onClose }) => {
                   className="mt-1 w-full p-2 border rounded"
                 />
               </div>
-
               {/* Technical Skills */}
               <div className="col-span-2">
                 <label><strong>Technical Skills:</strong></label>
@@ -119,7 +126,6 @@ const Uploadresume = ({ onSave, onClose }) => {
                   className="mt-1 w-full p-2 border rounded"
                 />
               </div>
-
               {/* Soft Skills */}
               <div className="col-span-2">
                 <label><strong>Soft Skills:</strong></label>
@@ -131,7 +137,6 @@ const Uploadresume = ({ onSave, onClose }) => {
                   className="mt-1 w-full p-2 border rounded"
                 />
               </div>
-
               {/* Certifications */}
               <div className="col-span-2">
                 <label><strong>Certifications:</strong></label>
@@ -143,7 +148,6 @@ const Uploadresume = ({ onSave, onClose }) => {
                   className="mt-1 w-full p-2 border rounded"
                 />
               </div>
-
               {/* Projects */}
               <div className="col-span-2">
                 <label><strong>Projects:</strong></label>
@@ -155,7 +159,6 @@ const Uploadresume = ({ onSave, onClose }) => {
                   className="mt-1 w-full p-2 border rounded"
                 />
               </div>
-
               {/* Education */}
               <div className="col-span-2">
                 <label><strong>Education:</strong></label>
@@ -167,7 +170,6 @@ const Uploadresume = ({ onSave, onClose }) => {
                   className="mt-1 w-full p-2 border rounded"
                 />
               </div>
-
               {/* Reference */}
               <div className="col-span-2">
                 <label><strong>Reference:</strong></label>
@@ -177,6 +179,16 @@ const Uploadresume = ({ onSave, onClose }) => {
                   onChange={handleInputChange}
                   rows={2}
                   className="mt-1 w-full p-2 border rounded"
+                />
+              </div>
+              {/* Resume File Upload */}
+              <div className="col-span-2">
+                <label><strong>Upload Resume (PDF, DOCX):</strong></label>
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={handleFileChange}
+                  className="mt-1 w-full"
                 />
               </div>
             </div>
@@ -193,7 +205,7 @@ const Uploadresume = ({ onSave, onClose }) => {
             </button>
             <button
               type="submit"
-              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={!resume}
             >
               Save
@@ -201,14 +213,16 @@ const Uploadresume = ({ onSave, onClose }) => {
           </div>
         </form>
 
-        {/* Close icon */}
+        {/* Close icon button OUTSIDE the form */}
         <button
           onClick={onClose}
           className="absolute top-3 right-4 text-2xl text-gray-400 hover:text-gray-600"
+          aria-label="Close"
         >
           ×
         </button>
       </div>
+      
     </div>
   );
 };

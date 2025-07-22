@@ -1,24 +1,7 @@
 import React, { useState } from "react";
-import {
-  FiUsers,
-  FiCheckCircle,
-  FiCalendar,
-  FiEye,
-  FiMail,
-  FiHome,
-  FiBriefcase,
-  FiUser,
-  FiHelpCircle,
-  FiX,
+import {FiUsers, FiCheckCircle, FiCalendar, FiEye, FiMail, FiHome, FiBriefcase, FiUser, FiHelpCircle, FiX,
 } from "react-icons/fi";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 
 // Dummy Company List
