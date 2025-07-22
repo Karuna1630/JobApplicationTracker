@@ -4,8 +4,7 @@ const EditProfile = ({ userData, onSave, onClose }) => {
   const [formData, setFormData] = useState({
     firstName: userData?.firstName || "",
     lastName: userData?.lastName || "",
-    additionalName: "",
-    headline: userData?.bio || "",
+    bio: userData?.bio || "",
     phone: userData?.phone || "",
     email: userData?.email || "",
     location: userData?.location || "",
@@ -82,16 +81,6 @@ const EditProfile = ({ userData, onSave, onClose }) => {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Additional name</label>
-            <input
-              name="additionalName"
-              value={formData.additionalName}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md"
-              placeholder="Middle name or other"
-            />
-          </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">Email</label>
@@ -130,11 +119,11 @@ const EditProfile = ({ userData, onSave, onClose }) => {
 
           <div>
             <label className="block text-sm font-medium mb-1">
-              Headline <span className="text-red-500">*</span>
+              Bio <span className="text-red-500">*</span>
             </label>
             <textarea
               name="headline"
-              value={formData.headline}
+              value={formData.bio}
               onChange={handleChange}
               required
               rows={2}
