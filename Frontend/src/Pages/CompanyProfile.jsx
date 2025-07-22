@@ -14,7 +14,7 @@ import {
   FaUserPlus,
 } from "react-icons/fa";
 
-// ✅ Updated InfoCard to use color prop dynamically
+
 const InfoCard = ({ icon, label, value, color = "gray" }) => (
   <div className="flex items-center bg-white shadow-md rounded-xl p-5 w-full sm:w-[260px] gap-4 border border-gray-100 hover:scale-[1.02] transition duration-300 ease-in-out">
     <div className={`text-3xl p-4 rounded-full bg-${color}-100 text-${color}-700 shadow-inner`}>
@@ -99,8 +99,8 @@ const CompanyProfile = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-br from-purple-100 to-pink-50 flex items-center justify-center">
-        <div className="w-full max-w-6xl bg-white rounded-2xl shadow-md overflow-hidden relative">
+      <div className="min-h-screen bg-gradient-to-br from-blue-100 to-white flex items-center justify-center">
+        <div className="w-full max-w-6xl bg-white rounded-2xl shadow-md overflow-hidden relative mb-12 mt-12">
           {/* Banner */}
           <div className="h-56 flex items-end justify-between px-6 py-4 relative bg-gradient-to-r from-indigo-300 to-pink-200">
             <div className="absolute inset-0 bg-black opacity-10 rounded-t-2xl"></div>
@@ -141,7 +141,6 @@ const CompanyProfile = () => {
               </ul>
             </section>
 
-            {/* ✅ Company Dashboard with Colors */}
             <div className="bg-white rounded-2xl shadow-xl p-6 mb-12">
               <h2 className="text-2xl font-semibold mb-6 text-gray-700">Company Dashboard</h2>
               <div className="flex flex-wrap justify-center gap-6">
@@ -152,7 +151,7 @@ const CompanyProfile = () => {
               </div>
             </div>
 
-            {/* ✅ User Insights with Colors */}
+
             <div className="bg-white rounded-2xl shadow-xl p-6 mb-12">
               <h2 className="text-2xl font-semibold mb-6 text-gray-700">User Insights</h2>
               <div className="flex flex-wrap justify-center gap-6">
@@ -161,6 +160,35 @@ const CompanyProfile = () => {
                 <InfoCard icon={<FaChartLine />} label="HR Staff" value="6" color="pink" />
                 <InfoCard icon={<FaUserPlus />} label="New Signups (30d)" value="14" color="orange" />
               </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-xl p-6 mb-12">
+              <h2 className="text-xl font-semibold text-gray-700 mb-4">Recent Applications</h2>
+              <table className="w-full text-left text-sm">
+                <thead className="text-gray-500 border-b">
+                  <tr>
+                    <th className="py-2">Candidate</th>
+                    <th className="py-2">Job</th>
+                    <th className="py-2">Date</th>
+                    <th className="py-2">Status</th>
+                  </tr>
+                </thead>
+              </table>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-xl p-6 mb-12">
+              <h2 className="text-xl font-semibold text-gray-700 mb-4">Recent Job Postings</h2>
+              <table className="w-full text-left text-sm">
+                <thead className="text-gray-500 border-b">
+                  <tr>
+                    <th className="py-2">Job Title</th>
+                    <th className="py-2">Department</th>
+                    <th className="py-2">Posted On</th>
+                    <th className="py-2">Status</th>
+                  </tr>
+                </thead>
+              </table>
+
             </div>
           </div>
         </div>
