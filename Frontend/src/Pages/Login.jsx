@@ -35,14 +35,13 @@ const Login = () => {
         email,
         password,
       });
-     const { jwtToken: token, userType, firstName, lastName } = response.data;
-const userId = getUserIdFromToken(token);
-if (userId) {
-  localStorage.setItem("userId", userId);
-}
+      const { jwtToken, userType, firstName, lastName } = response.data;
+      const userId = getUserIdFromToken(jwtToken);
+      if (userId) {
+        localStorage.setItem("userId", userId);
+      }
 
-localStorage.setItem("token", token); // ✅ Corrected
-
+      localStorage.setItem("token", jwtToken); 
       localStorage.setItem("role", userType.toString());
       localStorage.setItem("firstName", firstName);
       localStorage.setItem("lastName", lastName);
@@ -65,7 +64,7 @@ localStorage.setItem("token", token); // ✅ Corrected
         navigate("/");
       }
 
-      console.log("Login response:", response.data);
+     
     } catch (error) {
       console.error("Login Error:", error);
       const msg =
