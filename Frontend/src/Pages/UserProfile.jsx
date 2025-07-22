@@ -30,7 +30,7 @@ const userId = getUserIdFromToken(token);
         return;
       }
 
-        const response = await axiosInstance.get(`users/profile/${userId}`);
+        const response = await axiosInstance.get(`profile/${userId}`);
         const profileData = response.data;
 
         if (profileData && profileData.jobSeekerProfile) {

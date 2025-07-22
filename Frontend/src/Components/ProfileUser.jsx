@@ -13,7 +13,7 @@ const ProfileUser = () => {
         }
 
     try {
-      const response =  axiosInstance.get("users/profile/${userId}", header);
+      const response =  axiosInstance.get("/profile/${userId}", header);
       console.log("User data", response.data);
 
       // Check if the response indicates success
