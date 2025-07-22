@@ -1,8 +1,8 @@
-import jwt_decode from "jwt-decode";
+import { jwtDecode } from "jwt-decode"; // ✅ Named import
 
 export const decodeToken = (token) => {
   try {
-    return jwt_decode(token);
+    return jwtDecode(token); // ✅ Use named function
   } catch (error) {
     console.error("Token decode error:", error);
     return null;
