@@ -112,7 +112,7 @@ if (firstName && lastName) {
 
         {isLoggedIn && role === 2 && (
           <>
-            <Link to="/dashboard" className="hover:text-blue-600 transition">
+            <Link to="/companyProfile" className="hover:text-blue-600 transition">
               Dashboard
             </Link>
             <Link to="/add-job" className="hover:text-blue-600 transition">
