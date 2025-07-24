@@ -17,17 +17,7 @@ const EditProfile = ({ userData, onSave, onClose }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setFormData((prev) => ({
-        ...prev,
-        profileImage: imageUrl,
-        profileFile: file,
-      }));
-    }
-  };
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -35,7 +25,7 @@ const EditProfile = ({ userData, onSave, onClose }) => {
     onSave({
       firstName: formData.firstName,
       lastName: formData.lastName,
-      bio: formData.headline,
+      bio: formData.bio,
       phone: formData.phone,
       email: formData.email,
       location: formData.location,
@@ -122,7 +112,7 @@ const EditProfile = ({ userData, onSave, onClose }) => {
               Bio <span className="text-red-500">*</span>
             </label>
             <textarea
-              name="headline"
+              name="bio"
               value={formData.bio}
               onChange={handleChange}
               required

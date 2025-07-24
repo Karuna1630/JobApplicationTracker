@@ -17,7 +17,6 @@ import CompanyR3 from './Pages/CompanyR3'
 import ApplicationReceived from './Pages/ApplicationReceived'
 import ContactUs from './Pages/ContactUs'
 import EditProfile from './Pages/EditProfile.jsx'
-
 import CompanyProfile from './Pages/CompanyProfile.jsx'
 import Skill from './Pages/Skill'
 import CandidateScreening from './Pages/CandidateScreening.jsx'
@@ -54,14 +53,12 @@ function App() {
           <Route path='/applicationreceived' element={<ApplicationReceived/>}/>
           <Route path='/contactus' element={<ContactUs/>}/>
           <Route path='/editProfile' element={<EditProfile/>}/>
-       
           <Route path='/companyprofile' element={<CompanyProfile/>}/>
           <Route path='/postjob' element={<PostJob/>}/>
-           <Route path="/registerstaff" element={<CURegister />} />
+          <Route path="/registerstaff" element={<CURegister />} />
           <Route path='/admin' element={<Admin/>}/>
           <Route path='/skill' element={<Skill/>}/>
           <Route path='/candidatescreening' element={<CandidateScreening/>}/>
-
           <Route path='/viewapplications' element={<ViewApplications/>}/>
           <Route path='/companyinsight' element={<CompanyInsight/>}/>
           <Route path='/curegister' element={<CURegister/>}/>

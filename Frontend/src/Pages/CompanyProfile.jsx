@@ -1,4 +1,4 @@
-import React, {useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axiosInstance from "../Utils/axiosInstance";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
 import Navbar from "../Components/Navbar";
@@ -22,7 +22,7 @@ const InfoCard = ({ icon, label, value, color = "gray" }) => (
 );
 
 const CompanyProfile = () => {
-   const navigate = useNavigate();
+  const navigate = useNavigate();
   const [companyInfo, setCompanyInfo] = useState({
     companyName: "",
     email: "",
@@ -101,7 +101,7 @@ const CompanyProfile = () => {
             <div className="absolute inset-0 bg-black opacity-10 rounded-t-2xl"></div>
           </div>
 
-              
+
           {/* Main Info */}
           <div className="pt-28 px-8 pb-4 relative z-30 bg-black">
             <h2 className="text-3xl font-bold text-gray-800">
@@ -114,12 +114,13 @@ const CompanyProfile = () => {
 
           <hr className="border-gray-300 w-11/12 mx-auto mb-6" />
 
-           <button onClick={() => navigate('/applicationreceived')}
-                  type="submit"
-                  className="ml-5 mt-5 px-4 mb-5 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 transition"
-                >
-                  Create Account
-                </button>
+
+          <button onClick={() => navigate('/applicationreceived')}
+            type="submit"
+            className="ml-5 mt-5 px-4 mb-5 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 transition"
+          >
+            View Application
+          </button>
 
 
           {/* Company Details */}
