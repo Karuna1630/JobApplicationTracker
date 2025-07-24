@@ -68,6 +68,39 @@ const UserProfile = () => {
     return <div className="flex justify-center items-center min-h-screen text-red-600 text-lg">{errorMsg}</div>;
   }
 
+
+  
+ const handleSaveProfile = async (updatedData) => {
+  try {
+    const token = localStorage.getItem("token");
+    const userId = getUserIdFromToken(token);
+
+    const payload = {
+      firstName: updatedData.firstName,
+      lastName: updatedData.lastName,
+      email: updatedData.email,
+      phoneNumber: updatedData.phone,
+      location: updatedData.location,
+      bio: updatedData.bio,
+      education: updatedData.education,
+    };
+
+    await axiosInstance.put(`/profile/${userId}`, payload); 
+    
+    setUserInfo((prev) => ({
+      ...prev,
+      ...updatedData,
+    }));
+
+    setShowEdit(false);
+  } catch (error) {
+    console.error("Profile update error:", error.response?.data || error.message);
+    alert("Failed to update profile");
+  }
+};
+
+
+
   return (
     <>
       <Navbar />
@@ -135,7 +168,13 @@ const UserProfile = () => {
         </div>
       </div>
       <Footer />
-      {showEdit && <EditProfile userData={userInfo} onClose={() => setShowEdit(false)} />}
+      {showEdit && (
+  <EditProfile
+    userData={userInfo}
+    onSave={handleSaveProfile}
+    onClose={() => setShowEdit(false)}
+  />
+)}
     </>
   );
 };
