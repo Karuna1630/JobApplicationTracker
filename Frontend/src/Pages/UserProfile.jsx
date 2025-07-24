@@ -7,6 +7,7 @@ import Footer from "../Components/Footer";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
 import EditProfile from "../Pages/EditProfile";
 import Uploadresume from "../Pages/Uploadresume";
+import Skill from "../Pages/Skill";
 
 const UserProfile = () => {
   const [userInfo, setUserInfo] = useState({
@@ -154,13 +155,9 @@ const UserProfile = () => {
           </div>
 
           <div className="border-t border-gray-300 px-8 py-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Skills</h3>
-            <p className="text-sm text-gray-500 mb-1">Soft Skills</p>
-            <p className="text-gray-600">No skills added yet.</p>
-            <p className="text-sm text-gray-500 mt-4 mb-1">Technical Skills</p>
-            <p className="text-gray-600">No skills added yet.</p>
-            <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded">Add Skills</button>
-          </div>
+  <h3 className="text-xl font-semibold text-gray-800 mb-2">Skills</h3>
+  <Skill />
+</div>
 
           {/* <div className="border-t border-gray-300 px-8 py-6">
             <Uploadresume/>
