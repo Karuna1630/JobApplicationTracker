@@ -21,10 +21,11 @@ import CompanyProfile from './Pages/CompanyProfile.jsx'
 import Skill from './Pages/Skill'
 import CandidateScreening from './Pages/CandidateScreening.jsx'
 import PostJob from './Pages/PostJob.jsx'
-import CURegister from './Components/CURegister'
+import CURegister from './Pages/CURegister'
 import Admin from './Pages/Admin.jsx'
 import ViewApplications from './Pages/ViewApplications'
 import CompanyInsight from './Pages/CompanyInsight.jsx'
+import ManageJobs from './Pages/ManageJobs'
 
 
 
@@ -63,7 +64,7 @@ function App() {
           <Route path='/companyinsight' element={<CompanyInsight/>}/>
           <Route path='/curegister' element={<CURegister/>}/>
 
-
+          <Route path='/manage-jobs' element={<ManageJobs/>}/>
          
         
 

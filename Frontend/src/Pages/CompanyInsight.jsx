@@ -78,7 +78,6 @@ const CompanyInsight = () => {
   
   return (
     <>
-    <Navbar/>
     <section className="bg-gradient-to-br from-indigo-50 via-white to-blue-100 rounded-xl shadow-inner px-6 py-12 md:px-10 m-4 md:m-10">
       <h2 className="text-4xl font-extrabold text-center text-black-500 mb-12 drop-shadow">
         Company Insights
@@ -131,7 +130,6 @@ const CompanyInsight = () => {
         />
       </div>
     </section>
-    <Footer/>
     </>
   );
 };

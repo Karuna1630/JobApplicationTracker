@@ -1,7 +1,5 @@
 import React from "react";
-import { FaArrowLeftLong } from "react-icons/fa6";
-import Navbar from "../Components/Navbar";
-import Footer from "../Components/Footer";
+import { FiX } from "react-icons/fi";
 
 const applications = [
   {
@@ -39,53 +37,58 @@ const applications = [
   },
 ];
 
-const ApplicationReceived = () => {
+const ApplicationReceived = ({ onClose }) => {
   return (
-    <>
-    <Navbar/>
-      
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+      <div className="bg-white rounded-xl shadow-lg w-full max-w-3xl p-6 relative">
+        {/* Close Button */}
+        <button
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+          onClick={onClose}
+        >
+          <FiX size={20} />
+        </button>
 
-      <div className="bg-gradient-to-br from-blue-100 via-white to-blue-300 min-h-screen py-10 px-6">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <h2 className="text-xl font-bold">Application Received</h2>
-            <p className="text-gray-600">Manage and review all job applications</p>
+        {/* Header */}
+        <div className="mb-6 border-b pb-3">
+          <h2 className="text-2xl font-bold text-gray-800">Applications Received</h2>
+          <p className="text-gray-600 text-sm">Manage and review all job applications</p>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-gray-50 rounded-lg p-4 shadow text-center">
+            <h3 className="text-2xl font-bold">47</h3>
+            <p className="text-sm text-gray-600">Total Applications</p>
           </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-lg p-4 shadow text-center">
-              <h3 className="text-2xl font-bold">47</h3>
-              <p className="text-sm text-gray-600">Total Applications</p>
-            </div>
-            <div className="bg-white rounded-lg p-4 shadow text-center">
-              <h3 className="text-2xl font-bold">12</h3>
-              <p className="text-sm text-gray-600">New Applications</p>
-            </div>
-            <div className="bg-white rounded-lg p-4 shadow text-center">
-              <h3 className="text-2xl font-bold">18</h3>
-              <p className="text-sm text-gray-600">Under Review</p>
-            </div>
-            <div className="bg-white rounded-lg p-4 shadow text-center">
-              <h3 className="text-2xl font-bold">8</h3>
-              <p className="text-sm text-gray-600">Interview Scheduled</p>
-            </div>
+          <div className="bg-gray-50 rounded-lg p-4 shadow text-center">
+            <h3 className="text-2xl font-bold">12</h3>
+            <p className="text-sm text-gray-600">New Applications</p>
           </div>
+          <div className="bg-gray-50 rounded-lg p-4 shadow text-center">
+            <h3 className="text-2xl font-bold">18</h3>
+            <p className="text-sm text-gray-600">Under Review</p>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-4 shadow text-center">
+            <h3 className="text-2xl font-bold">8</h3>
+            <p className="text-sm text-gray-600">Interview Scheduled</p>
+          </div>
+        </div>
 
-          {/* Search */}
-          <input
-            type="text"
-            placeholder="Search applications"
-            className="w-full p-3 mb-6 rounded-md border border-gray-200 shadow-sm"
-          />
+        {/* Search */}
+        <input
+          type="text"
+          placeholder="Search applications"
+          className="w-full p-3 mb-6 rounded-md border border-gray-200 shadow-sm"
+        />
 
-          {/* Applications List */}
+        {/* Applications List */}
+        <div className="max-h-80 overflow-y-auto pr-2">
           {applications.map((app, index) => (
-            <div key={index} className="bg-white p-5 rounded-lg shadow-sm mb-4">
+            <div key={index} className="bg-gray-50 p-5 rounded-lg shadow-sm mb-4">
               <div className="flex justify-between items-start mb-1">
                 <h3 className="text-lg font-semibold">{app.title}</h3>
-                <span className={`text-xs font-medium px-2 py-1 rounded-full {app.statusStyle}`}>
+                <span className={`text-xs font-medium px-2 py-1 rounded-full ${app.statusStyle}`}>
                   {app.status}
                 </span>
               </div>
@@ -105,21 +108,9 @@ const ApplicationReceived = () => {
               </div>
             </div>
           ))}
-
-          {/* Back Button */}
-          <div className="flex justify-end mt-8">
-            <button className="flex items-center bg-blue-600 py-2 rounded-md hover:bg-blue-00">
-              <FaArrowLeftLong className="mr-2" />
-              Back
-            </button>
-          </div>
         </div>
       </div>
-
-      <Footer/>
-      </>
-
-     
+    </div>
   );
 };
 

@@ -26,15 +26,15 @@ const Navbar = () => {
     };
   }, []);
 
-const firstName = localStorage.getItem("firstName") || "";
-const lastName = localStorage.getItem("lastName") || "";
+  const firstName = localStorage.getItem("firstName") || "";
+  const lastName = localStorage.getItem("lastName") || "";
 
-let initials = "U";
-if (firstName && lastName) {
-  initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-} else if (firstName) {
-  initials = `${firstName.charAt(0)}`.toUpperCase();
-}
+  let initials = "U";
+  if (firstName && lastName) {
+    initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  } else if (firstName) {
+    initials = `${firstName.charAt(0)}`.toUpperCase();
+  }
 
 
   // Close dropdown on outside click
@@ -121,7 +121,7 @@ if (firstName && lastName) {
             <Link to="/manage-jobs" className="hover:text-blue-600 transition">
               Manage Jobs
             </Link>
-             <Link to="/companyinsight" className="hover:text-blue-600 transition">
+            <Link to="/companyinsight" className="hover:text-blue-600 transition">
               Company Insights
             </Link>
           </>
@@ -165,18 +165,17 @@ if (firstName && lastName) {
               className="flex items-center gap-2 cursor-pointer select-none"
               onClick={() => setDropdownOpen((prev) => !prev)}
             >
-<div
-  className="bg-blue-600 text-white font-semibold w-10 h-10 rounded-full flex items-center justify-center"
-  title={`${firstName} ${lastName}`}
-  aria-label={`User: ${firstName} ${lastName}`}
->
-  {initials}
-</div>
+              <div
+                className="bg-blue-600 text-white font-semibold w-10 h-10 rounded-full flex items-center justify-center"
+                title={`${firstName} ${lastName}`}
+                aria-label={`User: ${firstName} ${lastName}`}
+              >
+                {initials}
+              </div>
 
               <svg
-                className={`w-4 h-4 text-gray-500 transition-transform ${
-                  dropdownOpen ? "rotate-180" : ""
-                }`}
+                className={`w-4 h-4 text-gray-500 transition-transform ${dropdownOpen ? "rotate-180" : ""
+                  }`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

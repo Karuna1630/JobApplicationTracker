@@ -26,7 +26,6 @@ const PostJob = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100">
-      <Navbar />
 
       <div className="flex-grow flex justify-center items-center px-4 py-10">
         <div className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden grid md:grid-cols-2">
@@ -135,7 +134,6 @@ const PostJob = () => {
         </div>
       </div>
 
-      <Footer />
     </div>
   );
 };
