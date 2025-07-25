@@ -74,65 +74,66 @@ const CustomLineChart = ({ title, data, xKey, yKey }) => (
 );
 
 // Main insights section
-const CompanyInsight = () => { 
-  
-  return (
-    <>
-    <Navbar/>
-    <section className="bg-gradient-to-br from-indigo-50 via-white to-blue-100 rounded-xl shadow-inner px-6 py-12 md:px-10 m-4 md:m-10">
-      <h2 className="text-4xl font-extrabold text-center text-black-500 mb-12 drop-shadow">
-        Company Insights
-      </h2>
+const CompanyInsight = ({ onClose }) => {
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        <CustomLineChart
-          title={
-            <span className="flex items-center justify-center gap-2">
-              <FaUserTie className="text-gray-600" />
-              Join Year Distribution
-            </span>
-          }
-          data={joinYearData}
-          xKey="year"
-          yKey="count"
-        />
-        <CustomLineChart
-          title={
-            <span className="flex items-center justify-center gap-2">
-              <FaRing className="text-gray-600" />
-              Marital Status Breakdown
-            </span>
-          }
-          data={maritalData}
-          xKey="status"
-          yKey="count"
-        />
-        <CustomLineChart
-          title={
-            <span className="flex items-center justify-center gap-2">
-              <FaVenusMars className="text-gray-600" />
-              Gender Distribution
-            </span>
-          }
-          data={genderData}
-          xKey="gender"
-          yKey="count"
-        />
-        <CustomLineChart
-          title={
-            <span className="flex items-center justify-center gap-2">
-              <FaMapMarkedAlt className="text-gray-600" />
-              Province Wise Distribution
-            </span>
-          }
-          data={provinceData}
-          xKey="province"
-          yKey="count"
-        />
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+      <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-6xl relative">
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-red-500 text-lg"
+        >
+          ✕
+        </button>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <CustomLineChart
+            title={
+              <span className="flex items-center justify-center gap-2">
+                <FaUserTie className="text-gray-600" />
+                Join Year Distribution
+              </span>
+            }
+            data={joinYearData}
+            xKey="year"
+            yKey="count"
+          />
+          <CustomLineChart
+            title={
+              <span className="flex items-center justify-center gap-2">
+                <FaRing className="text-gray-600" />
+                Marital Status Breakdown
+              </span>
+            }
+            data={maritalData}
+            xKey="status"
+            yKey="count"
+          />
+          <CustomLineChart
+            title={
+              <span className="flex items-center justify-center gap-2">
+                <FaVenusMars className="text-gray-600" />
+                Gender Distribution
+              </span>
+            }
+            data={genderData}
+            xKey="gender"
+            yKey="count"
+          />
+          <CustomLineChart
+            title={
+              <span className="flex items-center justify-center gap-2">
+                <FaMapMarkedAlt className="text-gray-600" />
+                Province Wise Distribution
+              </span>
+            }
+            data={provinceData}
+            xKey="province"
+            yKey="count"
+          />
+        </div>
       </div>
-    </section>
-    <Footer/>
-    </>
+    </div>
   );
 };
 

@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../Utils/axiosInstance";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
+import ApplicationReceived from "./ApplicationReceived";
+import PostJob from "./PostJob";
+import CompanyInsight from "./CompanyInsight";
+import ManageJobs from "./ManageJobs";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
+
 import { useNavigate } from 'react-router-dom';
 import {
   FaSuitcase, FaUsers, FaUserCheck, FaUserClock, FaUserTie, FaGlobe, FaChartLine, FaUserPlus,
@@ -22,7 +27,10 @@ const InfoCard = ({ icon, label, value, color = "gray" }) => (
 );
 
 const CompanyProfile = () => {
-  const navigate = useNavigate();
+  const [showApplications, setShowApplications] = useState(false);
+  const [showPostJob, setShowPostJob] = useState(false);
+  const [showManageJobs, setShowManageJobs] = useState(false);
+  const [showCompanyInsight, setShowCompanyInsight] = useState(false);
   const [companyInfo, setCompanyInfo] = useState({
     companyName: "",
     email: "",
@@ -98,12 +106,11 @@ const CompanyProfile = () => {
         <div className="w-full max-w-6xl bg-white rounded-2xl shadow-md overflow-hidden relative mb-12 mt-12">
           {/* Banner */}
           <div className="h-56 flex items-end justify-between px-6 py-4 relative bg-gradient-to-r from-indigo-300 to-pink-200">
-            <div className="absolute inset-0 bg-black opacity-10 rounded-t-2xl"></div>
+            <div className=" opacity-10 rounded-t-2xl"></div>
           </div>
 
-
           {/* Main Info */}
-          <div className="pt-28 px-8 pb-4 relative z-30 bg-black">
+          <div className="pt-28 px-8 pb-4 relative z-30">
             <h2 className="text-3xl font-bold text-gray-800">
               {companyInfo.companyName}
             </h2>
@@ -114,14 +121,33 @@ const CompanyProfile = () => {
 
           <hr className="border-gray-300 w-11/12 mx-auto mb-6" />
 
-
-          <button onClick={() => navigate('/applicationreceived')}
-            type="submit"
+          <button
+            onClick={() => setShowApplications(true)}
             className="ml-5 mt-5 px-4 mb-5 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 transition"
           >
-            View Application
+            View Applications
           </button>
 
+          <button
+            onClick={() => setShowPostJob(true)}
+            className="ml-5 mt-5 px-4 mb-5 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 transition"
+          >
+            Add Job
+          </button>
+
+          <button
+            onClick={() => setShowManageJobs(true)}
+            className="ml-5 mt-5 px-4 mb-5 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 transition"
+          >
+            Manage Jobs
+          </button>
+
+          <button
+            onClick={() => setShowCompanyInsight(true)}
+            className="ml-5 mt-5 px-4 mb-5 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 transition"
+          >
+            Company Insights
+          </button>
 
           {/* Company Details */}
           <div className="px-12 pb-12 space-y-8 relative z-30 ">
@@ -192,11 +218,16 @@ const CompanyProfile = () => {
                   </tr>
                 </thead>
               </table>
-
             </div>
           </div>
         </div>
       </div>
+
+      {showApplications && <ApplicationReceived onClose={() => setShowApplications(false)} />}
+      {showPostJob && <PostJob onClose={() => setShowPostJob(false)} />}
+      {showManageJobs && <ManageJobs onClose={() => setShowManageJobs(false)} />}
+      {showCompanyInsight && <CompanyInsight onClose={() => setShowCompanyInsight(false)} />}
+
       <Footer />
     </>
   );
