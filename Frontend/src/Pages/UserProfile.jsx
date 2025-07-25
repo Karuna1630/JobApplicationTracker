@@ -7,7 +7,8 @@ import Footer from "../Components/Footer";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
 import EditProfile from "../Pages/EditProfile";
 import Uploadresume from "../Pages/Uploadresume";
-import Skill from "../Pages/Skill";
+import Skills from "../Components/Skill";
+import Experience from "../Components/Experience";
 
 const UserProfile = () => {
   const [userInfo, setUserInfo] = useState({
@@ -45,7 +46,6 @@ const UserProfile = () => {
             location: jobSeeker.location || "Not Specified",
             bio: jobSeeker.bio || "No bio available",
             profileImageUrl: jobSeeker.profileImageUrl || "",
-            
           });
         } else {
           setErrorMsg("Job Seeker profile not found.");
@@ -69,38 +69,34 @@ const UserProfile = () => {
     return <div className="flex justify-center items-center min-h-screen text-red-600 text-lg">{errorMsg}</div>;
   }
 
+  const handleSaveProfile = async (updatedData) => {
+    try {
+      const token = localStorage.getItem("token");
+      const userId = getUserIdFromToken(token);
 
-  
- const handleSaveProfile = async (updatedData) => {
-  try {
-    const token = localStorage.getItem("token");
-    const userId = getUserIdFromToken(token);
+      const payload = {
+        firstName: updatedData.firstName,
+        lastName: updatedData.lastName,
+        email: updatedData.email,
+        phoneNumber: updatedData.phone,
+        location: updatedData.location,
+        bio: updatedData.bio,
+        education: updatedData.education,
+      };
 
-    const payload = {
-      firstName: updatedData.firstName,
-      lastName: updatedData.lastName,
-      email: updatedData.email,
-      phoneNumber: updatedData.phone,
-      location: updatedData.location,
-      bio: updatedData.bio,
-      education: updatedData.education,
-    };
+      await axiosInstance.put(`/profile/${userId}`, payload); 
+      
+      setUserInfo((prev) => ({
+        ...prev,
+        ...updatedData,
+      }));
 
-    await axiosInstance.put(`/profile/${userId}`, payload); 
-    
-    setUserInfo((prev) => ({
-      ...prev,
-      ...updatedData,
-    }));
-
-    setShowEdit(false);
-  } catch (error) {
-    console.error("Profile update error:", error.response?.data || error.message);
-    alert("Failed to update profile");
-  }
-};
-
-
+      setShowEdit(false);
+    } catch (error) {
+      console.error("Profile update error:", error.response?.data || error.message);
+      alert("Failed to update profile");
+    }
+  };
 
   return (
     <>
@@ -108,14 +104,6 @@ const UserProfile = () => {
       <div className="min-h-screen bg-gradient-to-br from-blue-100 to-white flex justify-center p-6">
         <div className="w-full max-w-5xl bg-white rounded-2xl shadow-lg overflow-hidden relative">
           <div className="h-56 bg-cover bg-center relative" style={{ backgroundImage: `url(${BackgroundImage})` }}>
-            {/* {/* <div className="absolute inset-0 bg-black opacity-40"></div> */}
-            {/*<div className="absolute left-8 -bottom-16 z-40">
-              <img
-                src={userInfo.profileImageUrl || "https://via.placeholder.com/150"}
-                alt="Profile"
-                className="w-32 h-32 rounded-full border-4 border-white object-cover"
-              />
-            </div> */}
             <div className="absolute top-4 right-4">
               <button onClick={() => setShowEdit(true)} className="bg-white p-2 rounded-full shadow">
                 <FiEdit className="text-gray-700" />
@@ -127,7 +115,6 @@ const UserProfile = () => {
             <h2 className="text-3xl font-semibold text-gray-800">
               {userInfo.firstName} {userInfo.lastName}
             </h2>
-            
             <p className="text-sm text-gray-500"></p>
             <p className="text-base text-gray-600 mt-2 max-w-3xl">{userInfo.bio}</p>
           </div>
@@ -141,12 +128,10 @@ const UserProfile = () => {
             </ul>
           </div>
 
+          {/* Experience Section */}
           <div className="border-t border-gray-300 px-8 py-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Experience Summary</h3>
-            <p className="text-gray-600">
-              Over 2 years of experience building modern, scalable, and user-centric web applications using React,
-              TypeScript, and other cutting-edge technologies...
-            </p>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">Experience</h3>
+            <Experience />
           </div>
 
           <div className="border-t border-gray-300 px-8 py-6">
@@ -154,11 +139,13 @@ const UserProfile = () => {
             <p className="text-gray-600">Add your education history here...</p>
           </div>
 
-          <div className="border-t border-gray-300 px-8 py-6">
-  <h3 className="text-xl font-semibold text-gray-800 mb-2">Skills</h3>
-  <Skill />
-</div>
+          {/* Skills Section */}
+          {/* <div className="border-t border-gray-300 px-8 py-6">
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">Skills</h3>
+            <Skills />
+          </div> */}
 
+          {/* Uncomment if you want to add resume upload section */}
           {/* <div className="border-t border-gray-300 px-8 py-6">
             <Uploadresume/>
           </div> */}
@@ -166,12 +153,12 @@ const UserProfile = () => {
       </div>
       <Footer />
       {showEdit && (
-  <EditProfile
-    userData={userInfo}
-    onSave={handleSaveProfile}
-    onClose={() => setShowEdit(false)}
-  />
-)}
+        <EditProfile
+          userData={userInfo}
+          onSave={handleSaveProfile}
+          onClose={() => setShowEdit(false)}
+        />
+      )}
     </>
   );
 };
