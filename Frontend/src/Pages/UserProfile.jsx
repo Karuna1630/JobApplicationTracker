@@ -7,7 +7,7 @@ import Footer from "../Components/Footer";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
 import EditProfile from "../Pages/EditProfile";
 import Uploadresume from "../Pages/Uploadresume";
-import Skills from "../Components/Skill";
+import Education from "../Components/Education";
 import Experience from "../Components/Experience";
 
 const UserProfile = () => {
@@ -135,8 +135,7 @@ const UserProfile = () => {
           </div>
 
           <div className="border-t border-gray-300 px-8 py-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Education</h3>
-            <p className="text-gray-600">Add your education history here...</p>
+           <Education/>
           </div>
 
           {/* Skills Section */}
