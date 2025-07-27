@@ -56,7 +56,7 @@ const CompanyProfile = () => {
           return;
         }
 
-        const response = await axiosInstance.get(`/profile/${userId}`);
+        const response = await axiosInstance.get(`/profile?userId=${userId}`);
         const data = response.data;
 
         if (data && data.companyProfile) {

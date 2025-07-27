@@ -33,7 +33,7 @@ const UserProfile = () => {
           setErrorMsg("User ID missing or invalid. Please log in again.");
           return;
         }
-        const response = await axiosInstance.get(`profile/${userId}`);
+        const response = await axiosInstance.get(`/Profile?userId=${userId}`);
         const profileData = response.data;
 
         if (profileData && profileData.jobSeekerProfile) {
