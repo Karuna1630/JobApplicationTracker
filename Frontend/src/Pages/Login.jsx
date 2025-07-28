@@ -68,7 +68,7 @@ const Login = () => {
     } catch (error) {
       console.error("Login Error:", error);
       const msg =
-        error?.response?.data?.message || "Invalid email or password.";
+        error?.response?.data?.message || "network error";
       setServerError(msg);
       toast.error(msg);
     }
