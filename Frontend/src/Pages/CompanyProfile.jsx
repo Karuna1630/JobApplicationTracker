@@ -7,8 +7,6 @@ import CompanyInsight from "./CompanyInsight";
 import ManageJobs from "./ManageJobs";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
-
-import { useNavigate } from 'react-router-dom';
 import {
   FaSuitcase, FaUsers, FaUserCheck, FaUserClock, FaUserTie, FaGlobe, FaChartLine, FaUserPlus,
 } from "react-icons/fa";

@@ -16,7 +16,7 @@ const PostJob = ({ onClose }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Job Posted:", jobData);
-    onClose(); // close modal after posting
+    onClose(); 
   };
 
   return (
