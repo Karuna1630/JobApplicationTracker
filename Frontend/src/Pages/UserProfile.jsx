@@ -6,7 +6,6 @@ import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
 import EditProfile from "../Pages/EditProfile";
-import Uploadresume from "../Pages/Uploadresume";
 import Education from "../Components/Education";
 import Experience from "../Components/Experience";
 
@@ -23,7 +22,6 @@ const UserProfile = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [showEdit, setShowEdit] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
 
   const fetchProfile = async () => {
     try {
@@ -33,7 +31,8 @@ const UserProfile = () => {
         setErrorMsg("User ID missing or invalid. Please log in again.");
         return;
       }
-      const response = await axiosInstance.get(`/Profile/${userId}`);
+
+      const response = await axiosInstance.get(`/profile/${userId}`);
       const profileData = response.data;
 
       if (profileData && profileData.jobSeekerProfile) {
@@ -45,7 +44,7 @@ const UserProfile = () => {
           phone: jobSeeker.phoneNumber || "Not Provided",
           location: jobSeeker.location || "Not Specified",
           bio: jobSeeker.bio || "No bio available",
-          profileImageUrl: jobSeeker.profileImageUrl || "",
+          profileImageUrl: jobSeeker.profilePicture || "", // Fixed: use profilePicture
         });
       } else {
         setErrorMsg("Job Seeker profile not found.");
@@ -66,16 +65,16 @@ const UserProfile = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("ProfileImage", file);
-
     const token = localStorage.getItem("token");
     const userId = getUserIdFromToken(token);
 
+    const formData = new FormData();
+    formData.append("ProfileImage", file);
+    formData.append("Bio", userInfo.bio || "");
+
     try {
-      // Fixed URL structure: userId as route parameter, Bio as query parameter
       const response = await axiosInstance.post(
-        `/uploadProfilePicture/${userId}?Bio=${encodeURIComponent(userInfo.bio || "")}`,
+        `/uploadProfilePicture/${userId}`,
         formData,
         {
           headers: {
@@ -86,11 +85,13 @@ const UserProfile = () => {
       );
 
       if (response.data.isSuccess) {
-        fetchProfile(); // Refresh profile to get updated image
-        alert("Profile picture updated successfully!");
+        fetchProfile(); // Refresh to get updated image
+        alert("Profile picture uploaded successfully!");
+      } else {
+        alert("Failed to upload image.");
       }
     } catch (error) {
-      console.error("Profile image upload failed:", error);
+      console.error("Upload failed:", error.response?.data || error.message);
       alert("Image upload failed.");
     }
   };
@@ -137,7 +138,7 @@ const UserProfile = () => {
       <Navbar />
       <div className="min-h-screen bg-gradient-to-br from-blue-100 to-white flex justify-center p-6">
         <div className="w-full max-w-5xl bg-white rounded-2xl shadow-lg overflow-hidden relative">
-          {/* Header Background */}
+          {/* Header */}
           <div className="h-56 bg-cover bg-center relative" style={{ backgroundImage: `url(${BackgroundImage})` }}>
             <div className="absolute top-4 right-4">
               <button onClick={() => setShowEdit(true)} className="bg-white p-2 rounded-full shadow">
@@ -161,7 +162,7 @@ const UserProfile = () => {
             </div>
           </div>
 
-          {/* Bio and Info */}
+          {/* Bio */}
           <div className="pt-6 px-8 pb-4 text-center">
             <h2 className="text-3xl font-semibold text-gray-800">
               {userInfo.firstName} {userInfo.lastName}
