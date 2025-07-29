@@ -15,21 +15,27 @@ const PostJob = ({ onClose, onJobPosted }) => {
     applicationDeadline: "",
   });
   const [errorMsg, setErrorMsg] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async () => {
-    // Basic validation
-    if (!formData.title || !formData.description || !formData.jobTypeId || !formData.experienceLevel) {
+    if (
+      !formData.title ||
+      !formData.description ||
+      !formData.jobTypeId ||
+      !formData.experienceLevel
+    ) {
       setErrorMsg("Please fill all required fields.");
       return;
     }
 
     try {
+      setIsSubmitting(true);
       const token = localStorage.getItem("token");
-      const companyId = getUserIdFromToken(token); // Replace with actual companyId if needed
+      const companyId = getUserIdFromToken(token);
 
       const payload = {
         ...formData,
@@ -46,15 +52,19 @@ const PostJob = ({ onClose, onJobPosted }) => {
       };
 
       const res = await axiosInstance.post("/api/Jobs/submitjobs", payload);
+
       if (res.status === 200 || res.status === 201) {
-        if (onJobPosted) onJobPosted(); // trigger reload in ManageJobs
-        onClose(); // close modal
+        const createdJob = res.data; // get created job from backend
+        if (onJobPosted) onJobPosted(createdJob); // pass created job to parent
+        onClose();
       } else {
         setErrorMsg("Failed to post job. Please try again.");
       }
     } catch (err) {
       console.error(err);
       setErrorMsg("Failed to post job. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -89,8 +99,12 @@ const PostJob = ({ onClose, onJobPosted }) => {
           <option value="3">Senior</option>
         </select>
         <input name="applicationDeadline" type="date" onChange={handleChange} className="border p-2 w-full mb-3" />
-        <button onClick={handleSubmit} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800">
-          Post Job
+        <button
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 disabled:bg-gray-400"
+        >
+          {isSubmitting ? "Posting..." : "Post Job"}
         </button>
       </div>
     </div>
