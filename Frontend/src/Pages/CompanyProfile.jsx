@@ -7,13 +7,18 @@ import CompanyInsight from "./CompanyInsight";
 import ManageJobs from "./ManageJobs";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
-
-import { useNavigate } from 'react-router-dom';
 import {
-  FaSuitcase, FaUsers, FaUserCheck, FaUserClock, FaUserTie, FaGlobe, FaChartLine, FaUserPlus,
+  FaSuitcase,
+  FaUsers,
+  FaUserCheck,
+  FaUserClock,
+  FaUserTie,
+  FaGlobe,
+  FaChartLine,
+  FaUserPlus,
 } from "react-icons/fa";
 
-
+// Info card component
 const InfoCard = ({ icon, label, value, color = "gray" }) => (
   <div className="flex items-center bg-white shadow-md rounded-xl p-5 w-full sm:w-[260px] gap-4 border border-gray-100 hover:scale-[1.02] transition duration-300 ease-in-out">
     <div className={`text-3xl p-4 rounded-full bg-${color}-100 text-${color}-700 shadow-inner`}>
@@ -31,6 +36,9 @@ const CompanyProfile = () => {
   const [showPostJob, setShowPostJob] = useState(false);
   const [showManageJobs, setShowManageJobs] = useState(false);
   const [showCompanyInsight, setShowCompanyInsight] = useState(false);
+  const [reloadJobs, setReloadJobs] = useState(false);
+
+  const [companyId, setCompanyId] = useState(null);
   const [companyInfo, setCompanyInfo] = useState({
     companyName: "",
     email: "",
@@ -41,12 +49,14 @@ const CompanyProfile = () => {
     lastName: "",
   });
 
+  const [jobPosts, setJobPosts] = useState([]); // New state for jobs
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    const fetchCompanyProfile = async () => {
+    const fetchProfileAndJobs = async () => {
       try {
+        // 1. Fetch company profile
         const token = localStorage.getItem("token");
         const userId = getUserIdFromToken(token);
 
@@ -56,32 +66,44 @@ const CompanyProfile = () => {
           return;
         }
 
-        const response = await axiosInstance.get(`/profile?userId=${userId}`);
-        const data = response.data;
+        const profileResponse = await axiosInstance.get(`/profile/${userId}`);
+        const profileData = profileResponse.data;
 
-        if (data && data.companyProfile) {
+        if (profileData && profileData.companyProfile) {
           setCompanyInfo({
-            companyName: data.companyProfile.companyName || "Unnamed Company",
-            description: data.companyProfile.description || "No description available",
-            location: data.companyProfile.location || "No location",
-            email: data.email || "No email provided",
-            phone: data.jobSeekerProfile?.phoneNumber || "No phone number",
-            firstName: data.jobSeekerProfile?.firstName || "No first name",
-            lastName: data.jobSeekerProfile?.lastName || "No last name",
+            companyName: profileData.companyProfile.companyName || "Unnamed Company",
+            description: profileData.companyProfile.description || "No description available",
+            location: profileData.companyProfile.location || "No location",
+            email: profileData.email || "No email provided",
+            phone: profileData.jobSeekerProfile?.phoneNumber || "No phone number",
+            firstName: profileData.jobSeekerProfile?.firstName || "No first name",
+            lastName: profileData.jobSeekerProfile?.lastName || "No last name",
           });
+
+          const compId = profileData.companyProfile.companyId;
+          setCompanyId(compId);
+
+          const jobsResponse = await axiosInstance.get(`/getcompanybyid?id=${compId}`);
+          const jobsData = jobsResponse.data;
+
+          if (jobsData.jobs) {
+            setJobPosts(jobsData.jobs);
+          } else {
+            setJobPosts([]); 
+          }
         } else {
           setErrorMsg("Company profile not found.");
         }
       } catch (error) {
-        setErrorMsg("Failed to fetch company profile.");
+        setErrorMsg("Failed to fetch company data.");
         console.error("Company Profile Fetch Error:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchCompanyProfile();
-  }, []);
+    fetchProfileAndJobs();
+  }, [reloadJobs]);
 
   if (isLoading) {
     return (
@@ -106,55 +128,52 @@ const CompanyProfile = () => {
         <div className="w-full max-w-6xl bg-white rounded-2xl shadow-md overflow-hidden relative mb-12 mt-12">
           {/* Banner */}
           <div className="h-56 flex items-end justify-between px-6 py-4 relative bg-gradient-to-r from-indigo-300 to-pink-200">
-            <div className=" opacity-10 rounded-t-2xl"></div>
+            <div className="opacity-10 rounded-t-2xl"></div>
           </div>
 
           {/* Main Info */}
           <div className="pt-28 px-8 pb-4 relative z-30">
-            <h2 className="text-3xl font-bold text-gray-800">
-              {companyInfo.companyName}
-            </h2>
-            <p className="text-base text-gray-600 mt-2">
-              {companyInfo.description}
-            </p>
+            <h2 className="text-3xl font-bold text-gray-800">{companyInfo.companyName}</h2>
+            <p className="text-base text-gray-600 mt-2">{companyInfo.description}</p>
           </div>
 
           <hr className="border-gray-300 w-11/12 mx-auto mb-6" />
 
-          <button
-            onClick={() => setShowApplications(true)}
-            className="ml-5 mt-5 px-4 mb-5 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 transition"
-          >
-            View Applications
-          </button>
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-4 px-6 mb-6">
+            <button
+              onClick={() => setShowApplications(true)}
+              className="px-4 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 transition"
+            >
+              View Applications
+            </button>
 
-          <button
-            onClick={() => setShowPostJob(true)}
-            className="ml-5 mt-5 px-4 mb-5 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 transition"
-          >
-            Add Job
-          </button>
+            <button
+              onClick={() => setShowPostJob(true)}
+              className="px-4 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 transition"
+            >
+              Add Job
+            </button>
 
-          <button
-            onClick={() => setShowManageJobs(true)}
-            className="ml-5 mt-5 px-4 mb-5 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 transition"
-          >
-            Manage Jobs
-          </button>
+            <button
+              onClick={() => setShowManageJobs(true)}
+              className="px-4 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 transition"
+            >
+              Manage Jobs
+            </button>
 
-          <button
-            onClick={() => setShowCompanyInsight(true)}
-            className="ml-5 mt-5 px-4 mb-5 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 transition"
-          >
-            Company Insights
-          </button>
+            <button
+              onClick={() => setShowCompanyInsight(true)}
+              className="px-4 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 transition"
+            >
+              Company Insights
+            </button>
+          </div>
 
           {/* Company Details */}
           <div className="px-12 pb-12 space-y-8 relative z-30 ">
             <section>
-              <h3 className="text-xl font-semibold text-gray-700 mb-3">
-                Company Information
-              </h3>
+              <h3 className="text-xl font-semibold text-gray-700 mb-3">Company Information</h3>
               <ul className="flex flex-wrap gap-x-32 text-gray-600 text-lg">
                 <li>
                   <strong>Recruiter Name:</strong>{" "}
@@ -172,16 +191,35 @@ const CompanyProfile = () => {
               </ul>
             </section>
 
+            {/* Dashboard Cards */}
             <div className="bg-white rounded-2xl shadow-xl p-6 mb-12">
               <h2 className="text-2xl font-semibold mb-6 text-gray-700">Company Dashboard</h2>
               <div className="flex flex-wrap justify-center gap-6">
-                <InfoCard icon={<FaSuitcase />} label="Total Jobs Posted" value="42" color="blue" />
+                <InfoCard icon={<FaSuitcase />} label="Total Jobs Posted" value={jobPosts.length} color="blue" />
                 <InfoCard icon={<FaUsers />} label="Total Applications" value="1,240" color="green" />
                 <InfoCard icon={<FaUserCheck />} label="Hired Candidates" value="120" color="indigo" />
                 <InfoCard icon={<FaUserClock />} label="Pending Interviews" value="45" color="yellow" />
               </div>
             </div>
 
+            {/* Job Posts Section */}
+            <div className="bg-white rounded-2xl shadow-xl p-6 mb-12">
+              <h2 className="text-2xl font-semibold mb-6 text-gray-700">Job Posts</h2>
+              {jobPosts.length > 0 ? (
+                <ul className="space-y-4">
+                  {jobPosts.map((job) => (
+                    <li key={job.jobId} className="p-4 border rounded-xl hover:bg-gray-50">
+                      <h4 className="text-lg font-bold">{job.title}</h4>
+                      <p className="text-gray-600">{job.description}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500">No job posts available.</p>
+              )}
+            </div>
+
+            {/* User Insights */}
             <div className="bg-white rounded-2xl shadow-xl p-6 mb-12">
               <h2 className="text-2xl font-semibold mb-6 text-gray-700">User Insights</h2>
               <div className="flex flex-wrap justify-center gap-6">
@@ -191,41 +229,29 @@ const CompanyProfile = () => {
                 <InfoCard icon={<FaUserPlus />} label="New Signups (30d)" value="14" color="orange" />
               </div>
             </div>
-
-            <div className="bg-white rounded-xl shadow-xl p-6 mb-12">
-              <h2 className="text-xl font-semibold text-gray-700 mb-4">Recent Applications</h2>
-              <table className="w-full text-left text-sm">
-                <thead className="text-gray-500 border-b">
-                  <tr>
-                    <th className="py-2">Candidate</th>
-                    <th className="py-2">Job</th>
-                    <th className="py-2">Date</th>
-                    <th className="py-2">Status</th>
-                  </tr>
-                </thead>
-              </table>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-xl p-6 mb-12">
-              <h2 className="text-xl font-semibold text-gray-700 mb-4">Recent Job Postings</h2>
-              <table className="w-full text-left text-sm">
-                <thead className="text-gray-500 border-b">
-                  <tr>
-                    <th className="py-2">Job Title</th>
-                    <th className="py-2">Department</th>
-                    <th className="py-2">Posted On</th>
-                    <th className="py-2">Status</th>
-                  </tr>
-                </thead>
-              </table>
-            </div>
           </div>
         </div>
       </div>
 
+      {/* Modals */}
       {showApplications && <ApplicationReceived onClose={() => setShowApplications(false)} />}
-      {showPostJob && <PostJob onClose={() => setShowPostJob(false)} />}
-      {showManageJobs && <ManageJobs onClose={() => setShowManageJobs(false)} />}
+     {showPostJob && (
+  <PostJob
+    onClose={() => setShowPostJob(false)}
+    onJobPosted={(newJob) => {
+      setJobPosts((prev) => [newJob, ...prev]); // instantly update dashboard job list
+      setReloadJobs(prev => !prev); // trigger ManageJobs to refresh
+    }}
+  />
+)}
+
+      {showManageJobs && (
+        <ManageJobs
+          onClose={() => setShowManageJobs(false)}
+          reloadTrigger={reloadJobs}
+          companyId={companyId}
+        />
+      )}
       {showCompanyInsight && <CompanyInsight onClose={() => setShowCompanyInsight(false)} />}
 
       <Footer />
