@@ -23,13 +23,46 @@ const UserProfile = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [showEdit, setShowEdit] = useState(false);
 
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const userId = getUserIdFromToken(token);
+        if (!userId || userId === 0) {
+          setErrorMsg("User ID missing or invalid. Please log in again.");
+          return;
+        }
+        const response = await axiosInstance.get(`/profile/${userId}`);
+        const profileData = response.data;
+
+        if (profileData && profileData.jobSeekerProfile) {
+          const jobSeeker = profileData.jobSeekerProfile;
+          setUserInfo({
+            firstName: jobSeeker.firstName || "",
+            lastName: jobSeeker.lastName || "",
+            email: profileData.email || "",
+            phone: jobSeeker.phoneNumber || "Not Provided",
+            location: jobSeeker.location || "Not Specified",
+            bio: jobSeeker.bio || "No bio available",
+            profileImageUrl: jobSeeker.profileImageUrl || "",
+          });
+        } else {
+          setErrorMsg("Job Seeker profile not found.");
+        }
+      } catch (error) {
+        setErrorMsg("Failed to fetch user profile.");
+        console.error("Profile Fetch Error:", error);
+      } finally {
+        setIsLoading(false);
+
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem("token");
       const userId = getUserIdFromToken(token);
       if (!userId || userId === 0) {
         setErrorMsg("User ID missing or invalid. Please log in again.");
-        return;
+
       }
 
       const response = await axiosInstance.get(`/profile/${userId}`);
