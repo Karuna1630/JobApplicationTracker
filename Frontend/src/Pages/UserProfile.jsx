@@ -23,64 +23,32 @@ const UserProfile = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [showEdit, setShowEdit] = useState(false);
 
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const userId = getUserIdFromToken(token);
-        if (!userId || userId === 0) {
-          setErrorMsg("User ID missing or invalid. Please log in again.");
-          return;
-        }
-        const response = await axiosInstance.get(`/profile/${userId}`);
-        const profileData = response.data;
-
-        if (profileData && profileData.jobSeekerProfile) {
-          const jobSeeker = profileData.jobSeekerProfile;
-          setUserInfo({
-            firstName: jobSeeker.firstName || "",
-            lastName: jobSeeker.lastName || "",
-            email: profileData.email || "",
-            phone: jobSeeker.phoneNumber || "Not Provided",
-            location: jobSeeker.location || "Not Specified",
-            bio: jobSeeker.bio || "No bio available",
-            profileImageUrl: jobSeeker.profileImageUrl || "",
-          });
-        } else {
-          setErrorMsg("Job Seeker profile not found.");
-        }
-      } catch (error) {
-        setErrorMsg("Failed to fetch user profile.");
-        console.error("Profile Fetch Error:", error);
-      } finally {
-        setIsLoading(false);
-
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem("token");
       const userId = getUserIdFromToken(token);
       if (!userId || userId === 0) {
         setErrorMsg("User ID missing or invalid. Please log in again.");
-
+        return;
       }
 
       const response = await axiosInstance.get(`/profile/${userId}`);
       const profileData = response.data;
 
-      if (profileData && profileData.jobSeekerProfile) {
-        const jobSeeker = profileData.jobSeekerProfile;
-        setUserInfo({
-          firstName: jobSeeker.firstName || "",
-          lastName: jobSeeker.lastName || "",
-          email: profileData.email || "",
-          phone: jobSeeker.phoneNumber || "Not Provided",
-          location: jobSeeker.location || "Not Specified",
-          bio: jobSeeker.bio || "No bio available",
-          profileImageUrl: jobSeeker.profilePicture || "", // Fixed: use profilePicture
-        });
+      if (profileData) {
+  setUserInfo({
+    firstName: profileData.firstName || "",
+    lastName: profileData.lastName || "",
+    email: profileData.email || "",
+    phone: profileData.phoneNumber || "Not Provided",
+    location: profileData.location || "Not Specified",
+    bio: profileData.bio || "No bio available",
+    profileImageUrl: profileData.profilePicture || "",
+  });
+
+
       } else {
-        setErrorMsg("Job Seeker profile not found.");
+        setErrorMsg("User profile not found.");
       }
     } catch (error) {
       setErrorMsg("Failed to fetch user profile.");
@@ -117,11 +85,14 @@ const UserProfile = () => {
         }
       );
 
-      if (response.data.isSuccess) {
-        fetchProfile(); // Refresh to get updated image
-        alert("Profile picture uploaded successfully!");
-      } else {
-        alert("Failed to upload image.");
+    if (response.data.isSuccess) {
+  // Refresh profile data
+  await fetchProfile();
+  alert("Profile picture uploaded successfully!");
+} else {
+  alert("Failed to upload image.");
+
+
       }
     } catch (error) {
       console.error("Upload failed:", error.response?.data || error.message);
@@ -140,7 +111,6 @@ const UserProfile = () => {
         email: updatedData.email,
         phoneNumber: updatedData.phone,
         location: updatedData.location,
-        bio: updatedData.bio,
         education: updatedData.education,
       };
 
@@ -179,29 +149,33 @@ const UserProfile = () => {
               </button>
             </div>
           </div>
+{/* Profile Section: Left-aligned image, name, and bio below */}
+<div className="px-8 pt-6 pb-4">
+  <div className="flex flex-col items-start gap-4">
+    {/* Profile Image */}
+    <div className="relative">
+      <img
+        src={userInfo.profileImageUrl || "https://via.placeholder.com/150"}
+        alt="Profile"
+        className="w-36 h-36 rounded-full border-4 border-white shadow-md object-cover"
+      />
+      <label className="absolute bottom-0 right-0 bg-blue-500 p-1 rounded-full cursor-pointer">
+        <FiCamera className="text-white" />
+        <input type="file" accept="image/*" onChange={handleProfileImageChange} className="hidden" />
+      </label>
+    </div>
 
-          {/* Profile Image */}
-          <div className="flex justify-center -mt-20">
-            <div className="relative">
-              <img
-                src={userInfo.profileImageUrl || "https://via.placeholder.com/150"}
-                alt="Profile"
-                className="w-36 h-36 rounded-full border-4 border-white shadow-md object-cover"
-              />
-              <label className="absolute bottom-0 right-0 bg-blue-500 p-1 rounded-full cursor-pointer">
-                <FiCamera className="text-white" />
-                <input type="file" accept="image/*" onChange={handleProfileImageChange} className="hidden" />
-              </label>
-            </div>
-          </div>
+    {/* Name */}
+    <h2 className="text-2xl font-semibold text-gray-800">
+      {userInfo.firstName} {userInfo.lastName}
+    </h2>
 
-          {/* Bio */}
-          <div className="pt-6 px-8 pb-4 text-center">
-            <h2 className="text-3xl font-semibold text-gray-800">
-              {userInfo.firstName} {userInfo.lastName}
-            </h2>
-            <p className="text-base text-gray-600 mt-2 max-w-3xl mx-auto">{userInfo.bio}</p>
-          </div>
+    {/* Bio */}
+    <p className="text-base text-gray-600 max-w-3xl">{userInfo.bio}</p>
+  </div>
+</div>
+
+
 
           {/* Contact Info */}
           <div className="border-t border-gray-300 px-8 py-6">

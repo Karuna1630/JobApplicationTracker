@@ -48,7 +48,7 @@ const CompanyR2 = () => {
             },
           };
 
-          const response = await axiosInstance.post("/register-user", payload);
+          const response = await axiosInstance.post("/registeruser", payload);
 
           if (response.data?.isSuccess) {
             toast.success("Company and recruiter registered successfully!");
