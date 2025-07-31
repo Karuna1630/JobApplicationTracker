@@ -4,7 +4,7 @@ import { getUserIdFromToken } from "../Utils/jwtUtils";
 import ApplicationReceived from "./ApplicationReceived";
 import PostJob from "./PostJob";
 import CompanyInsight from "./CompanyInsight";
-import ManageJobs from "./ManageJobs";
+import Jobs from "./Jobs";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import {
@@ -18,7 +18,6 @@ import {
   FaUserPlus,
 } from "react-icons/fa";
 
-// Info card component
 const InfoCard = ({ icon, label, value, color = "gray" }) => (
   <div className="flex items-center bg-white shadow-md rounded-xl p-5 w-full sm:w-[260px] gap-4 border border-gray-100 hover:scale-[1.02] transition duration-300 ease-in-out">
     <div className={`text-3xl p-4 rounded-full bg-${color}-100 text-${color}-700 shadow-inner`}>
@@ -34,7 +33,7 @@ const InfoCard = ({ icon, label, value, color = "gray" }) => (
 const CompanyProfile = () => {
   const [showApplications, setShowApplications] = useState(false);
   const [showPostJob, setShowPostJob] = useState(false);
-  const [showManageJobs, setShowManageJobs] = useState(false);
+  const [showJobs, setShowJobs] = useState(false);
   const [showCompanyInsight, setShowCompanyInsight] = useState(false);
   const [reloadJobs, setReloadJobs] = useState(false);
 
@@ -56,7 +55,6 @@ const CompanyProfile = () => {
   useEffect(() => {
     const fetchProfileAndJobs = async () => {
       try {
-        // 1. Fetch company profile
         const token = localStorage.getItem("token");
         const userId = getUserIdFromToken(token);
 
@@ -89,7 +87,7 @@ const CompanyProfile = () => {
           if (jobsData.jobs) {
             setJobPosts(jobsData.jobs);
           } else {
-            setJobPosts([]); 
+            setJobPosts([]);
           }
         } else {
           setErrorMsg("Company profile not found.");
@@ -156,10 +154,10 @@ const CompanyProfile = () => {
             </button>
 
             <button
-              onClick={() => setShowManageJobs(true)}
+              onClick={() => setShowJobs(true)}
               className="px-4 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 transition"
             >
-              Manage Jobs
+             Jobs
             </button>
 
             <button
@@ -235,19 +233,19 @@ const CompanyProfile = () => {
 
       {/* Modals */}
       {showApplications && <ApplicationReceived onClose={() => setShowApplications(false)} />}
-     {showPostJob && (
-  <PostJob
-    onClose={() => setShowPostJob(false)}
-    onJobPosted={(newJob) => {
-      setJobPosts((prev) => [newJob, ...prev]); // instantly update dashboard job list
-      setReloadJobs(prev => !prev); // trigger ManageJobs to refresh
-    }}
-  />
-)}
+      {showPostJob && (
+        <PostJob
+          onClose={() => setShowPostJob(false)}
+          onJobPosted={(newJob) => {
+            setJobPosts((prev) => [newJob, ...prev]); 
+            setReloadJobs(prev => !prev); 
+          }}
+        />
+      )}
 
-      {showManageJobs && (
-        <ManageJobs
-          onClose={() => setShowManageJobs(false)}
+      {showJobs && (
+        <Jobs
+          onClose={() => setShowJobs(false)}
           reloadTrigger={reloadJobs}
           companyId={companyId}
         />
