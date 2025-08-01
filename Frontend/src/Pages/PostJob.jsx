@@ -35,12 +35,16 @@ const PostJob = ({ onClose, onJobPosted }) => {
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("token");
-      const companyId = getUserIdFromToken(token);
+      const userId = getUserIdFromToken(token);
+
+      const profileRes = await axiosInstance.get(/profile/${userId});
+      const companyId = profileRes.data.companyProfile.companyId;
+
 
       const payload = {
         ...formData,
         companyId,
-        postedByUserId: companyId,
+        postedByUserId: userId,
         jobTypeId: parseInt(formData.jobTypeId),
         experienceLevel: parseInt(formData.experienceLevel),
         salaryRangeMin: parseFloat(formData.salaryRangeMin),
@@ -111,4 +115,4 @@ const PostJob = ({ onClose, onJobPosted }) => {
   );
 };
 
-export default PostJob;
+export default PostJob;
