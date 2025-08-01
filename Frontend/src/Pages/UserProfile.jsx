@@ -56,6 +56,7 @@ const UserProfile = () => {
           resumeUrl: profileData.resumeUrl || "",
           dateOfBirth: profileData.dateOfBirth || "",
         });
+        localStorage.setItem("profileImageUrl", profileData.profilePicture || "");
       } else {
         setErrorMsg("User profile not found.");
       }

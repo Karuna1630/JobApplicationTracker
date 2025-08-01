@@ -20,7 +20,7 @@ import {
 
 const InfoCard = ({ icon, label, value, color = "gray" }) => (
   <div className="flex items-center bg-white shadow-md rounded-xl p-5 w-full sm:w-[260px] gap-4 border border-gray-100 hover:scale-[1.02] transition duration-300 ease-in-out">
-    <div className={text-3xl p-4 rounded-full bg-${color}-100 text-${color}-700 shadow-inner}>
+    <div className={`text-3xl p-4 rounded-full bg-${color}-100 text-${color}-700 shadow-inner`}>
       {icon}
     </div>
     <div>
@@ -64,7 +64,7 @@ const CompanyProfile = () => {
           return;
         }
 
-        const profileResponse = await axiosInstance.get(/profile/${userId});
+        const profileResponse = await axiosInstance.get(`/profile/${userId}`);
         const profileData = profileResponse.data;
 
         if (profileData && profileData.companyProfile) {
@@ -81,7 +81,7 @@ const CompanyProfile = () => {
           const compId = profileData.companyProfile.companyId;
           setCompanyId(compId);
 
-          const jobsResponse = await axiosInstance.get(/getcompanybyid?id=${compId});
+          const jobsResponse = await axiosInstance.get(`/getcompanybyid?id=${compId}`);
           const jobsData = jobsResponse.data;
 
           if (jobsData.jobs) {

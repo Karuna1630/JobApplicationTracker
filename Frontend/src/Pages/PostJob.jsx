@@ -37,7 +37,7 @@ const PostJob = ({ onClose, onJobPosted }) => {
       const token = localStorage.getItem("token");
       const userId = getUserIdFromToken(token);
 
-      const profileRes = await axiosInstance.get(/profile/${userId});
+      const profileRes = await axiosInstance.get(`/profile/${userId}`);
       const companyId = profileRes.data.companyProfile.companyId;
 
 
