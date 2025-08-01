@@ -25,7 +25,7 @@ import CURegister from './Pages/CURegister'
 import Admin from './Pages/Admin.jsx'
 import ViewApplications from './Pages/ViewApplications'
 import CompanyInsight from './Pages/CompanyInsight.jsx'
-import ManageJobs from './Pages/ManageJobs'
+import Jobs from './Pages/Jobs'
 
 
 
@@ -64,7 +64,7 @@ function App() {
           <Route path='/companyinsight' element={<CompanyInsight/>}/>
           <Route path='/curegister' element={<CURegister/>}/>
 
-          <Route path='/manage-jobs' element={<ManageJobs/>}/>
+          <Route path='/jobs' element={<Jobs/>}/>
          
         
 

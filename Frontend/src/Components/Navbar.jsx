@@ -28,6 +28,8 @@ const Navbar = () => {
 
   const firstName = localStorage.getItem("firstName") || "";
   const lastName = localStorage.getItem("lastName") || "";
+  const profileImageUrl = localStorage.getItem("profileImageUrl");
+
 
   let initials = "U";
   if (firstName && lastName) {
@@ -165,13 +167,21 @@ const Navbar = () => {
               className="flex items-center gap-2 cursor-pointer select-none"
               onClick={() => setDropdownOpen((prev) => !prev)}
             >
-              <div
-                className="bg-blue-600 text-white font-semibold w-10 h-10 rounded-full flex items-center justify-center"
-                title={`${firstName} ${lastName}`}
-                aria-label={`User: ${firstName} ${lastName}`}
-              >
-                {initials}
-              </div>
+ {profileImageUrl ? (
+  <img
+    src={profileImageUrl}
+    alt="Profile"
+    className="w-10 h-10 rounded-full object-cover border border-blue-500"
+    title={`${firstName} ${lastName}`}
+  />
+) : (
+  <div
+    className="bg-blue-600 text-white font-semibold w-10 h-10 rounded-full flex items-center justify-center"
+    title={`${firstName} ${lastName}`}
+  >
+    {initials}
+  </div>
+)}
 
               <svg
                 className={`w-4 h-4 text-gray-500 transition-transform ${dropdownOpen ? "rotate-180" : ""

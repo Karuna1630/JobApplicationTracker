@@ -48,7 +48,7 @@ const Register = () => {
     console.log(actions);
 
     try {
-      const response = await axiosInstance.post("register-user", values);
+      const response = await axiosInstance.post("registeruser", values);
       console.log("User Added:", response.data);
 
       // Check if the response indicates success

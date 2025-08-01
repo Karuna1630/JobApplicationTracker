@@ -1,115 +1,118 @@
 import React, { useState } from "react";
+import axiosInstance from "../Utils/axiosInstance";
+import { getUserIdFromToken } from "../Utils/jwtUtils";
 
-const PostJob = ({ onClose }) => {
-  const [jobData, setJobData] = useState({
+const PostJob = ({ onClose, onJobPosted }) => {
+  const [formData, setFormData] = useState({
     title: "",
-    location: "",
-    type: "",
     description: "",
-    deadline: "",
+    requirements: "",
+    location: "",
+    salaryRangeMin: "",
+    salaryRangeMax: "",
+    jobTypeId: "",
+    experienceLevel: "",
+    applicationDeadline: "",
   });
+  const [errorMsg, setErrorMsg] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
-    setJobData({ ...jobData, [e.target.name]: e.target.value });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Job Posted:", jobData);
-    onClose(); // close modal after posting
+  const handleSubmit = async () => {
+    if (
+      !formData.title ||
+      !formData.description ||
+      !formData.jobTypeId ||
+      !formData.experienceLevel
+    ) {
+      setErrorMsg("Please fill all required fields.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const token = localStorage.getItem("token");
+      const userId = getUserIdFromToken(token);
+
+      const profileRes = await axiosInstance.get(`/profile/${userId}`);
+      const companyId = profileRes.data.companyProfile.companyId;
+
+
+      const payload = {
+        ...formData,
+        companyId,
+        postedByUserId: userId,
+        jobTypeId: parseInt(formData.jobTypeId),
+        experienceLevel: parseInt(formData.experienceLevel),
+        salaryRangeMin: parseFloat(formData.salaryRangeMin),
+        salaryRangeMax: parseFloat(formData.salaryRangeMax),
+        applicationDeadline: new Date(formData.applicationDeadline).toISOString(),
+        postedAt: new Date().toISOString(),
+        status: "A",
+        views: 0,
+      };
+
+      const res = await axiosInstance.post("/api/Jobs/submitjobs", payload);
+
+      if (res.status === 200 || res.status === 201) {
+        const createdJob = res.data; // get created job from backend
+        if (onJobPosted) onJobPosted(createdJob); // pass created job to parent
+        onClose();
+      } else {
+        setErrorMsg("Failed to post job. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Failed to post job. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
       <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-3xl relative">
-        {/* Close Button */}
         <button
-          onClick={onClose}
+          onClick={() => onClose()}
           className="absolute top-4 right-4 text-gray-500 hover:text-red-500 text-lg"
         >
           ✕
         </button>
+        <h2 className="text-xl font-bold mb-4">Post a New Job</h2>
+        {errorMsg && <p className="text-red-500 mb-3">{errorMsg}</p>}
 
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Post a New Job</h2>
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700">Job Title</label>
-            <input
-              type="text"
-              name="title"
-              value={jobData.title}
-              onChange={handleChange}
-              required
-              className="mt-1 w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700">Location</label>
-            <input
-              type="text"
-              name="location"
-              value={jobData.location}
-              onChange={handleChange}
-              required
-              className="mt-1 w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700">Job Type</label>
-            <select
-              name="type"
-              value={jobData.type}
-              onChange={handleChange}
-              required
-              className="mt-1 w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
-            >
-              <option value="">Select type</option>
-              <option value="Full-Time">Full-Time</option>
-              <option value="Part-Time">Part-Time</option>
-              <option value="Internship">Internship</option>
-              <option value="Remote">Remote</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700">Job Description</label>
-            <textarea
-              name="description"
-              value={jobData.description}
-              onChange={handleChange}
-              required
-              rows="4"
-              className="mt-1 w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
-            ></textarea>
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700">Application Deadline</label>
-            <input
-              type="date"
-              name="deadline"
-              value={jobData.deadline}
-              onChange={handleChange}
-              required
-              className="mt-1 w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
-
-          <div className="text-right">
-            <button
-              type="submit"
-              className="bg-blue-700 text-white px-6 py-2 rounded-md shadow-md hover:bg-blue-800 transition"
-            >
-              Post Job
-            </button>
-          </div>
-        </form>
+        <input name="title" placeholder="Job Title" onChange={handleChange} className="border p-2 w-full mb-3" />
+        <textarea name="description" placeholder="Job Description" onChange={handleChange} className="border p-2 w-full mb-3" />
+        <textarea name="requirements" placeholder="Requirements" onChange={handleChange} className="border p-2 w-full mb-3" />
+        <input name="location" placeholder="Location" onChange={handleChange} className="border p-2 w-full mb-3" />
+        <input name="salaryRangeMin" placeholder="Min Salary" type="number" onChange={handleChange} className="border p-2 w-full mb-3" />
+        <input name="salaryRangeMax" placeholder="Max Salary" type="number" onChange={handleChange} className="border p-2 w-full mb-3" />
+        <select name="jobTypeId" onChange={handleChange} className="border p-2 w-full mb-3">
+          <option value="">Select Job Type</option>
+          <option value="1">Full-Time</option>
+          <option value="2">Part-Time</option>
+          <option value="3">Contract</option>
+        </select>
+        <select name="experienceLevel" onChange={handleChange} className="border p-2 w-full mb-3">
+          <option value="">Select Experience Level</option>
+          <option value="1">Entry</option>
+          <option value="2">Mid</option>
+          <option value="3">Senior</option>
+        </select>
+        <input name="applicationDeadline" type="date" onChange={handleChange} className="border p-2 w-full mb-3" />
+        <button
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 disabled:bg-gray-400"
+        >
+          {isSubmitting ? "Posting..." : "Post Job"}
+        </button>
       </div>
     </div>
   );
 };
 
-export default PostJob;
+export default PostJob;
