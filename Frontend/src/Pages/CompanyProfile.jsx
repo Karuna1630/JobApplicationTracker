@@ -89,8 +89,8 @@ const CompanyProfile = () => {
           const jobsData = jobsResponse.data;
 
           if (Array.isArray(jobsData) && jobsData.length > 0) {
-            setTotalJobsCount(jobsData.length); // Set the total count
-            setJobPosts(jobsData); // Set all jobs for potential use
+            setTotalJobsCount(jobsData.length); 
+            setJobPosts(jobsData); 
           } else {
             setTotalJobsCount(0);
             setJobPosts([]);
@@ -112,7 +112,7 @@ const CompanyProfile = () => {
   // Handle job posting success
   const handleJobPosted = (newJob) => {
     setJobPosts((prev) => [newJob, ...prev]); 
-    setTotalJobsCount((prev) => prev + 1); // Increment the count
+    setTotalJobsCount((prev) => prev + 1); 
     setReloadJobs(prev => !prev); 
   };
 
