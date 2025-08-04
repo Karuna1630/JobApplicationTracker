@@ -16,6 +16,7 @@ import {
   FaGlobe,
   FaChartLine,
   FaUserPlus,
+  FaEye,
 } from "react-icons/fa";
 
 const InfoCard = ({ icon, label, value, color = "gray" }) => (
@@ -48,7 +49,8 @@ const CompanyProfile = () => {
     lastName: "",
   });
 
-  const [jobPosts, setJobPosts] = useState([]); // New state for jobs
+  const [jobPosts, setJobPosts] = useState([]);
+  const [totalJobsCount, setTotalJobsCount] = useState(0); // New state for total jobs count
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -73,20 +75,24 @@ const CompanyProfile = () => {
             description: profileData.companyProfile.description || "No description available",
             location: profileData.companyProfile.location || "No location",
             email: profileData.email || "No email provided",
-            phone: profileData.jobSeekerProfile?.phoneNumber || "No phone number",
-            firstName: profileData.jobSeekerProfile?.firstName || "No first name",
-            lastName: profileData.jobSeekerProfile?.lastName || "No last name",
+            phone: profileData.phoneNumber || "No phone number",
+            firstName: profileData.firstName || "No first name",
+            lastName: profileData.lastName || "No last name",
+            
           });
 
           const compId = profileData.companyProfile.companyId;
           setCompanyId(compId);
 
-          const jobsResponse = await axiosInstance.get(`/getcompanybyid?id=${compId}`);
+          // Fetch all jobs for the company to get the total count and display data
+          const jobsResponse = await axiosInstance.get(`/api/Jobs/getjobsbycompanyid?companyId=${compId}`);
           const jobsData = jobsResponse.data;
 
-          if (jobsData.jobs) {
-            setJobPosts(jobsData.jobs);
+          if (Array.isArray(jobsData) && jobsData.length > 0) {
+            setTotalJobsCount(jobsData.length); // Set the total count
+            setJobPosts(jobsData); // Set all jobs for potential use
           } else {
+            setTotalJobsCount(0);
             setJobPosts([]);
           }
         } else {
@@ -103,6 +109,13 @@ const CompanyProfile = () => {
     fetchProfileAndJobs();
   }, [reloadJobs]);
 
+  // Handle job posting success
+  const handleJobPosted = (newJob) => {
+    setJobPosts((prev) => [newJob, ...prev]); 
+    setTotalJobsCount((prev) => prev + 1); // Increment the count
+    setReloadJobs(prev => !prev); 
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen text-lg text-gray-700">
@@ -118,6 +131,9 @@ const CompanyProfile = () => {
       </div>
     );
   }
+
+  // Get only the first 2 jobs for display in the Job Posts section
+  const displayedJobs = jobPosts.slice(0, 2);
 
   return (
     <>
@@ -157,7 +173,7 @@ const CompanyProfile = () => {
               onClick={() => setShowJobs(true)}
               className="px-4 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 transition"
             >
-             Jobs
+              Jobs ({totalJobsCount})
             </button>
 
             <button
@@ -193,27 +209,76 @@ const CompanyProfile = () => {
             <div className="bg-white rounded-2xl shadow-xl p-6 mb-12">
               <h2 className="text-2xl font-semibold mb-6 text-gray-700">Company Dashboard</h2>
               <div className="flex flex-wrap justify-center gap-6">
-                <InfoCard icon={<FaSuitcase />} label="Total Jobs Posted" value={jobPosts.length} color="blue" />
+                <InfoCard icon={<FaSuitcase />} label="Total Jobs Posted" value={totalJobsCount} color="blue" />
                 <InfoCard icon={<FaUsers />} label="Total Applications" value="1,240" color="green" />
                 <InfoCard icon={<FaUserCheck />} label="Hired Candidates" value="120" color="indigo" />
                 <InfoCard icon={<FaUserClock />} label="Pending Interviews" value="45" color="yellow" />
               </div>
             </div>
 
-            {/* Job Posts Section */}
+            {/* Job Posts Section - Show only first 2 jobs */}
             <div className="bg-white rounded-2xl shadow-xl p-6 mb-12">
-              <h2 className="text-2xl font-semibold mb-6 text-gray-700">Job Posts</h2>
-              {jobPosts.length > 0 ? (
-                <ul className="space-y-4">
-                  {jobPosts.map((job) => (
-                    <li key={job.jobId} className="p-4 border rounded-xl hover:bg-gray-50">
-                      <h4 className="text-lg font-bold">{job.title}</h4>
-                      <p className="text-gray-600">{job.description}</p>
-                    </li>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-semibold text-gray-700">Recent Job Posts</h2>
+                {totalJobsCount > 2 && (
+                  <button
+                    onClick={() => setShowJobs(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium"
+                  >
+                    <FaEye />
+                    View All ({totalJobsCount})
+                  </button>
+                )}
+              </div>
+              
+              {displayedJobs.length > 0 ? (
+                <div className="space-y-4">
+                  {displayedJobs.map((job) => (
+                    <div key={job.jobId || job.id} className="p-4 border rounded-xl hover:bg-gray-50 transition-colors">
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="text-lg font-bold text-gray-800">
+                          {job.title || job.jobTitle || 'Untitled Position'}
+                        </h4>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            job.status === "A" || job.status === "active" || job.isActive
+                              ? "bg-green-100 text-green-700"
+                              : job.status === "I" || job.status === "inactive" || job.isActive === false
+                              ? "bg-red-100 text-red-700"
+                              : "bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {job.status === "A" || job.status === "active" || job.isActive ? "Active" : 
+                           job.status === "I" || job.status === "inactive" || job.isActive === false ? "Inactive" : 
+                           job.status || "Unknown"}
+                        </span>
+                      </div>
+                      <p className="text-gray-600 mb-2">
+                        {job.description || job.jobDescription || 'No description available'}
+                      </p>
+                      <div className="flex gap-4 text-sm text-gray-500">
+                        <span>📍 {job.location || job.jobLocation || 'Location not specified'}</span>
+                        {(job.salaryRangeMin && job.salaryRangeMax) && (
+                          <span>💰 ${job.salaryRangeMin.toLocaleString()} - ${job.salaryRangeMax.toLocaleString()}</span>
+                        )}
+                        {job.salary && (
+                          <span>💰 ${job.salary.toLocaleString()}</span>
+                        )}
+                      </div>
+                    </div>
                   ))}
-                </ul>
+                </div>
               ) : (
-                <p className="text-gray-500">No job posts available.</p>
+                <div className="text-center py-8">
+                  <FaSuitcase className="text-4xl text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500">No job posts available.</p>
+                  <button
+                    onClick={() => setShowPostJob(true)}
+                    className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Post Your First Job
+                  </button>
+                </div>
               )}
             </div>
 
@@ -236,10 +301,7 @@ const CompanyProfile = () => {
       {showPostJob && (
         <PostJob
           onClose={() => setShowPostJob(false)}
-          onJobPosted={(newJob) => {
-            setJobPosts((prev) => [newJob, ...prev]); 
-            setReloadJobs(prev => !prev); 
-          }}
+          onJobPosted={handleJobPosted}
         />
       )}
 
