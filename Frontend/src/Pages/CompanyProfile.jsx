@@ -7,11 +7,8 @@ import CompanyInsight from "./CompanyInsight";
 import Jobs from "./Jobs";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
-
-
 import EditCompanyModal from "../Components/EditCompanyModal";
 import { FaEdit } from "react-icons/fa";
-
 import {
   FaSuitcase,
   FaUsers,
@@ -21,16 +18,12 @@ import {
   FaGlobe,
   FaChartLine,
   FaUserPlus,
-
   FaEye,
-
 } from "react-icons/fa";
 
 const InfoCard = ({ icon, label, value, color = "gray" }) => (
   <div className="flex items-center bg-white shadow-md rounded-xl p-5 w-full sm:w-[260px] gap-4 border border-gray-100 hover:scale-[1.02] transition duration-300 ease-in-out">
-    <div
-      className={`text-3xl p-4 rounded-full bg-${color}-100 text-${color}-700 shadow-inner`}
-    >
+    <div className={`text-3xl p-4 rounded-full bg-${color}-100 text-${color}-700 shadow-inner`}>
       {icon}
     </div>
     <div>
@@ -46,9 +39,7 @@ const CompanyProfile = () => {
   const [showJobs, setShowJobs] = useState(false);
   const [showCompanyInsight, setShowCompanyInsight] = useState(false);
   const [reloadJobs, setReloadJobs] = useState(false);
-
-  const [showEditModal, setShowEditModal] = useState(false);
-
+const [showEditModal, setShowEditModal] = useState(false);
   const [companyId, setCompanyId] = useState(null);
   const [companyInfo, setCompanyInfo] = useState({
     companyName: "",
@@ -60,8 +51,6 @@ const CompanyProfile = () => {
     lastName: "",
   });
 
-
-  const [jobPosts, setJobPosts] = useState([]); // New state for jobs
   const [jobPosts, setJobPosts] = useState([]);
   const [totalJobsCount, setTotalJobsCount] = useState(0); // New state for total jobs count
   const [isLoading, setIsLoading] = useState(true);
@@ -84,51 +73,28 @@ const CompanyProfile = () => {
 
         if (profileData && profileData.companyProfile) {
           setCompanyInfo({
-
             companyName: profileData.companyProfile.companyName || "Unnamed Company",
             description: profileData.companyProfile.description || "No description available",
-            location: profileData.companyProfile.location || "No location",
-            email: profileData.email || "No email provided",
-            phone: profileData.jobSeekerProfile?.phoneNumber || "No phone number",
-            firstName: profileData.jobSeekerProfile?.firstName || "No first name",
-            lastName: profileData.jobSeekerProfile?.lastName || "No last name",
-
-            companyName:
-              profileData.companyProfile.companyName || "Unnamed Company",
-            description:
-              profileData.companyProfile.description ||
-              "No description available",
             location: profileData.companyProfile.location || "No location",
             email: profileData.email || "No email provided",
             phone: profileData.phoneNumber || "No phone number",
             firstName: profileData.firstName || "No first name",
             lastName: profileData.lastName || "No last name",
-
+            
           });
 
           const compId = profileData.companyProfile.companyId;
           setCompanyId(compId);
 
-
-          const jobsResponse = await axiosInstance.get(`/getcompanybyid?id=${compId}`);
-          const jobsData = jobsResponse.data;
-
-          if (jobsData.jobs) {
-            setJobPosts(jobsData.jobs);
-          } else {
-
           // Fetch all jobs for the company to get the total count and display data
-          const jobsResponse = await axiosInstance.get(
-            `/api/Jobs/getjobsbycompanyid?companyId=${compId}`
-          );
+          const jobsResponse = await axiosInstance.get(`/api/Jobs/getjobsbycompanyid?companyId=${compId}`);
           const jobsData = jobsResponse.data;
 
           if (Array.isArray(jobsData) && jobsData.length > 0) {
-            setTotalJobsCount(jobsData.length);
-            setJobPosts(jobsData);
+            setTotalJobsCount(jobsData.length); 
+            setJobPosts(jobsData); 
           } else {
             setTotalJobsCount(0);
-
             setJobPosts([]);
           }
         } else {
@@ -145,27 +111,25 @@ const CompanyProfile = () => {
     fetchProfileAndJobs();
   }, [reloadJobs]);
 
-
   // Handle job posting success
   const handleJobPosted = (newJob) => {
-    setJobPosts((prev) => [newJob, ...prev]);
-    setTotalJobsCount((prev) => prev + 1);
-    setReloadJobs((prev) => !prev);
+    setJobPosts((prev) => [newJob, ...prev]); 
+    setTotalJobsCount((prev) => prev + 1); 
+    setReloadJobs(prev => !prev); 
   };
+
   const handleUpdateSuccess = (updatedData) => {
-    setCompanyInfo((prev) => ({
-      ...prev,
-      companyName: updatedData.companyName,
-      description: updatedData.description,
-      location: updatedData.location,
-      email: updatedData.email,
-      phone: updatedData.phone,
-      firstName: updatedData.firstName,
-      lastName: updatedData.lastName,
-    }));
-  };
-
-
+  setCompanyInfo(prev => ({
+    ...prev,
+    companyName: updatedData.companyName,
+    description: updatedData.description,
+    location: updatedData.location,
+    email: updatedData.email,
+    phone: updatedData.phone,
+    firstName: updatedData.firstName,
+    lastName: updatedData.lastName,
+  }));
+};
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen text-lg text-gray-700">
@@ -193,15 +157,6 @@ const CompanyProfile = () => {
           {/* Banner */}
           <div className="h-56 flex items-end justify-between px-6 py-4 relative bg-gradient-to-r from-indigo-300 to-pink-200">
             <div className="opacity-10 rounded-t-2xl"></div>
-
-             <button 
-            onClick={() => setShowEditModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
-          >
-            <FaEdit />
-            Edit Profile
-          </button>
-
           </div>
 
           {/* Main Info */}
@@ -209,6 +164,14 @@ const CompanyProfile = () => {
             <h2 className="text-3xl font-bold text-gray-800">{companyInfo.companyName}</h2>
             <p className="text-base text-gray-600 mt-2">{companyInfo.description}</p>
           </div>
+          <button
+      onClick={() => setShowEditModal(true)}
+      className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+    >
+      <FaEdit />
+      Edit Profile
+    </button>
+
           <hr className="border-gray-300 w-11/12 mx-auto mb-6" />
 
           {/* Action Buttons */}
@@ -231,11 +194,7 @@ const CompanyProfile = () => {
               onClick={() => setShowJobs(true)}
               className="px-4 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 transition"
             >
-
-             Jobs
-
               Jobs ({totalJobsCount})
-
             </button>
 
             <button
@@ -253,9 +212,7 @@ const CompanyProfile = () => {
               <ul className="flex flex-wrap gap-x-32 text-gray-600 text-lg">
                 <li>
                   <strong>Recruiter Name:</strong>{" "}
-                  <span>
-                    {companyInfo.firstName} {companyInfo.lastName}
-                  </span>
+                  <span>{companyInfo.firstName} {companyInfo.lastName}</span>
                 </li>
                 <li>
                   <strong>Email:</strong> <span>{companyInfo.email}</span>
@@ -271,71 +228,19 @@ const CompanyProfile = () => {
 
             {/* Dashboard Cards */}
             <div className="bg-white rounded-2xl shadow-xl p-6 mb-12">
-              <h2 className="text-2xl font-semibold mb-6 text-gray-700">
-                Company Dashboard
-              </h2>
+              <h2 className="text-2xl font-semibold mb-6 text-gray-700">Company Dashboard</h2>
               <div className="flex flex-wrap justify-center gap-6">
-
-                <InfoCard icon={<FaSuitcase />} label="Total Jobs Posted" value={jobPosts.length} color="blue" />
+                <InfoCard icon={<FaSuitcase />} label="Total Jobs Posted" value={totalJobsCount} color="blue" />
                 <InfoCard icon={<FaUsers />} label="Total Applications" value="1,240" color="green" />
                 <InfoCard icon={<FaUserCheck />} label="Hired Candidates" value="120" color="indigo" />
                 <InfoCard icon={<FaUserClock />} label="Pending Interviews" value="45" color="yellow" />
               </div>
             </div>
 
-            {/* Job Posts Section */}
-            <div className="bg-white rounded-2xl shadow-xl p-6 mb-12">
-              <h2 className="text-2xl font-semibold mb-6 text-gray-700">Job Posts</h2>
-              {jobPosts.length > 0 ? (
-                <ul className="space-y-4">
-                  {jobPosts.map((job) => (
-                    <li key={job.jobId} className="p-4 border rounded-xl hover:bg-gray-50">
-                      <h4 className="text-lg font-bold">{job.title}</h4>
-                      <p className="text-gray-600">{job.description}</p>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-500">No job posts available.</p>
-              )}
-            </div>
-
-            {/* User Insights */}
-
-                <InfoCard
-                  icon={<FaSuitcase />}
-                  label="Total Jobs Posted"
-                  value={totalJobsCount}
-                  color="blue"
-                />
-                <InfoCard
-                  icon={<FaUsers />}
-                  label="Total Applications"
-                  value="1,240"
-                  color="green"
-                />
-                <InfoCard
-                  icon={<FaUserCheck />}
-                  label="Hired Candidates"
-                  value="120"
-                  color="indigo"
-                />
-                <InfoCard
-                  icon={<FaUserClock />}
-                  label="Pending Interviews"
-                  value="45"
-                  color="yellow"
-                />
-              </div>
-            </div>
-
             {/* Job Posts Section - Show only first 2 jobs */}
-
             <div className="bg-white rounded-2xl shadow-xl p-6 mb-12">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-semibold text-gray-700">
-                  Recent Job Posts
-                </h2>
+                <h2 className="text-2xl font-semibold text-gray-700">Recent Job Posts</h2>
                 {totalJobsCount > 2 && (
                   <button
                     onClick={() => setShowJobs(true)}
@@ -346,60 +251,36 @@ const CompanyProfile = () => {
                   </button>
                 )}
               </div>
-
-
+              
               {displayedJobs.length > 0 ? (
                 <div className="space-y-4">
                   {displayedJobs.map((job) => (
-                    <div
-                      key={job.jobId || job.id}
-                      className="p-4 border rounded-xl hover:bg-gray-50 transition-colors"
-                    >
+                    <div key={job.jobId || job.id} className="p-4 border rounded-xl hover:bg-gray-50 transition-colors">
                       <div className="flex justify-between items-start mb-2">
                         <h4 className="text-lg font-bold text-gray-800">
-                          {job.title || job.jobTitle || "Untitled Position"}
+                          {job.title || job.jobTitle || 'Untitled Position'}
                         </h4>
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            job.status === "A" ||
-                            job.status === "active" ||
-                            job.isActive
+                            job.status === "A" || job.status === "active" || job.isActive
                               ? "bg-green-100 text-green-700"
-                              : job.status === "I" ||
-                                job.status === "inactive" ||
-                                job.isActive === false
+                              : job.status === "I" || job.status === "inactive" || job.isActive === false
                               ? "bg-red-100 text-red-700"
                               : "bg-gray-100 text-gray-700"
                           }`}
                         >
-                          {job.status === "A" ||
-                          job.status === "active" ||
-                          job.isActive
-                            ? "Active"
-                            : job.status === "I" ||
-                              job.status === "inactive" ||
-                              job.isActive === false
-                            ? "Inactive"
-                            : job.status || "Unknown"}
+                          {job.status === "A" || job.status === "active" || job.isActive ? "Active" : 
+                           job.status === "I" || job.status === "inactive" || job.isActive === false ? "Inactive" : 
+                           job.status || "Unknown"}
                         </span>
                       </div>
                       <p className="text-gray-600 mb-2">
-                        {job.description ||
-                          job.jobDescription ||
-                          "No description available"}
+                        {job.description || job.jobDescription || 'No description available'}
                       </p>
                       <div className="flex gap-4 text-sm text-gray-500">
-                        <span>
-                          📍{" "}
-                          {job.location ||
-                            job.jobLocation ||
-                            "Location not specified"}
-                        </span>
-                        {job.salaryRangeMin && job.salaryRangeMax && (
-                          <span>
-                            💰 ${job.salaryRangeMin.toLocaleString()} - $
-                            {job.salaryRangeMax.toLocaleString()}
-                          </span>
+                        <span>📍 {job.location || job.jobLocation || 'Location not specified'}</span>
+                        {(job.salaryRangeMin && job.salaryRangeMax) && (
+                          <span>💰 ${job.salaryRangeMin.toLocaleString()} - ${job.salaryRangeMax.toLocaleString()}</span>
                         )}
                         {job.salary && (
                           <span>💰 ${job.salary.toLocaleString()}</span>
@@ -424,51 +305,24 @@ const CompanyProfile = () => {
 
             {/* User Insights */}
             <div className="bg-white rounded-2xl shadow-xl p-6 mb-12">
-              <h2 className="text-2xl font-semibold mb-6 text-gray-700">
-                User Insights
-              </h2>
+              <h2 className="text-2xl font-semibold mb-6 text-gray-700">User Insights</h2>
               <div className="flex flex-wrap justify-center gap-6">
-                <InfoCard
-                  icon={<FaUserTie />}
-                  label="Recruiters"
-                  value="18"
-                  color="purple"
-                />
-                <InfoCard
-                  icon={<FaGlobe />}
-                  label="Website Visitors"
-                  value="5,230"
-                  color="cyan"
-                />
-                <InfoCard
-                  icon={<FaChartLine />}
-                  label="HR Staff"
-                  value="6"
-                  color="pink"
-                />
-                <InfoCard
-                  icon={<FaUserPlus />}
-                  label="New Signups (30d)"
-                  value="14"
-                  color="orange"
-                />
+                <InfoCard icon={<FaUserTie />} label="Recruiters" value="18" color="purple" />
+                <InfoCard icon={<FaGlobe />} label="Website Visitors" value="5,230" color="cyan" />
+                <InfoCard icon={<FaChartLine />} label="HR Staff" value="6" color="pink" />
+                <InfoCard icon={<FaUserPlus />} label="New Signups (30d)" value="14" color="orange" />
               </div>
-
             </div>
           </div>
         </div>
       </div>
 
       {/* Modals */}
-
       {showApplications && <ApplicationReceived onClose={() => setShowApplications(false)} />}
       {showPostJob && (
         <PostJob
           onClose={() => setShowPostJob(false)}
-          onJobPosted={(newJob) => {
-            setJobPosts((prev) => [newJob, ...prev]); 
-            setReloadJobs(prev => !prev); 
-          }}
+          onJobPosted={handleJobPosted}
         />
       )}
 
@@ -480,35 +334,12 @@ const CompanyProfile = () => {
         />
       )}
       {showCompanyInsight && <CompanyInsight onClose={() => setShowCompanyInsight(false)} />}
-
-      {showApplications && (
-        <ApplicationReceived onClose={() => setShowApplications(false)} />
-      )}
-      {showPostJob && (
-        <PostJob
-          onClose={() => setShowPostJob(false)}
-          onJobPosted={handleJobPosted}
-        />
-      )}
-
-
-      {showJobs && (
-        <Jobs
-          onClose={() => setShowJobs(false)}
-          reloadTrigger={reloadJobs}
-          companyId={companyId}
-        />
-      )}
-      {showCompanyInsight && (
-        <CompanyInsight onClose={() => setShowCompanyInsight(false)} />
-      )}
- 
-{showEditModal && (
+      
+      {showEditModal && (
   <EditCompanyModal
     isOpen={showEditModal}
     onClose={() => setShowEditModal(false)}
     companyInfo={companyInfo}
-    companyId={companyId} 
     onUpdateSuccess={handleUpdateSuccess}
   />
 )}
@@ -517,4 +348,4 @@ const CompanyProfile = () => {
   );
 };
 
-export default CompanyProfile;
+export default CompanyProfile;

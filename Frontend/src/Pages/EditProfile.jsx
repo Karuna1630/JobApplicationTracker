@@ -1,8 +1,4 @@
-
-import React, { useState } from "react";
-
 import React, { useState, useEffect } from "react";
-
 import axiosInstance from "../Utils/axiosInstance";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
 import { toast } from "react-toastify";
@@ -22,7 +18,7 @@ const EditProfile = ({ userData, onSave, onClose }) => {
     linkedinProfile: userData?.linkedinProfile || "",
     headline: userData?.headline || "",
 
-    linkedinProfile: userData?.linkedinProfile || "",
+   
 
     bio: userData?.bio || "",
     dateOfBirth: userData?.dateOfBirth || "",
@@ -51,11 +47,9 @@ const EditProfile = ({ userData, onSave, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+  
 
-
-    try {
-      const token = localStorage.getItem("token");
-      const userId = Number(getUserIdFromToken(token));
+   
 
 
 
@@ -73,14 +67,11 @@ const EditProfile = ({ userData, onSave, onClose }) => {
         phoneNumber: formData.phoneNumber || null,
         location: formData.location || null,
         profilePicture: formData.profilePicture || null,
-
         resumeUrl: formData.resumeUrl || null,
         portfolioUrl: formData.portfolioUrl || null,
         linkedinProfile: formData.linkedinProfile || null,
         headline: formData.headline || null,
-
-        linkedinProfile: formData.linkedinProfile || null,
-
+     
         bio: formData.bio || null,
         dateOfBirth: formData.dateOfBirth || null,
         // Don't send passwordHash, companyId, userType unless they're being updated
@@ -92,8 +83,6 @@ const EditProfile = ({ userData, onSave, onClose }) => {
           delete payload[key];
         }
       });
-
-      console.log("Submitting payload:", payload);
 
       const response = await axiosInstance.post("/submituser", payload);
 
@@ -124,8 +113,9 @@ const EditProfile = ({ userData, onSave, onClose }) => {
     } finally {
       setIsLoading(false);
     }
-
-  };
+  }
+  
+  
 
   const handleClose = () => {
     // Restore scrolling when closing
@@ -205,24 +195,6 @@ const EditProfile = ({ userData, onSave, onClose }) => {
               placeholder="City, Country"
             />
           </div>
-
-
-          {/* Headline */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Headline</label>
-            <input
-              name="headline"
-              value={formData.headline}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="e.g., Frontend Developer | UI/UX Designer"
-            />
-          </div>
-
-          {/* Bio */}
-          <div>
-
-
           {/* Bio */}
           <div>
 
@@ -263,25 +235,6 @@ const EditProfile = ({ userData, onSave, onClose }) => {
               placeholder="https://yourportfolio.com"
             />
           </div>
-
-          {/* Resume URL */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Resume URL</label>
-            <input
-              type="url"
-              name="resumeUrl"
-              value={formData.resumeUrl}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="https://drive.google.com/your-resume"
-            />
-          </div>
-
-
-            />
-          </div>
-
-        
           {/* Date of Birth */}
           <div>
             <label className="block text-sm font-medium mb-1">Date of Birth</label>
@@ -298,11 +251,7 @@ const EditProfile = ({ userData, onSave, onClose }) => {
           <div className="flex justify-end mt-6 gap-4">
             <button
               type="button"
-
-              onClick={onClose}
-
               onClick={handleClose}
-
               disabled={isLoading}
               className="px-4 py-2 rounded-md border text-gray-700 hover:bg-gray-100 disabled:opacity-50"
             >
@@ -334,6 +283,7 @@ const EditProfile = ({ userData, onSave, onClose }) => {
       </div>
     </div>
   );
-};
+  }
+
 
 export default EditProfile;
