@@ -1,4 +1,8 @@
+
+import React, { useState } from "react";
+
 import React, { useState, useEffect } from "react";
+
 import axiosInstance from "../Utils/axiosInstance";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
 import { toast } from "react-toastify";
@@ -12,12 +16,20 @@ const EditProfile = ({ userData, onSave, onClose }) => {
     location: userData?.location || "",
     education: userData?.education || "",
     profilePicture: userData?.profilePicture || "",
+
+    resumeUrl: userData?.resumeUrl || "",
+    portfolioUrl: userData?.portfolioUrl || "",
     linkedinProfile: userData?.linkedinProfile || "",
+    headline: userData?.headline || "",
+
+    linkedinProfile: userData?.linkedinProfile || "",
+
     bio: userData?.bio || "",
     dateOfBirth: userData?.dateOfBirth || "",
   });
 
   const [isLoading, setIsLoading] = useState(false);
+
 
   // Prevent background scroll when modal is open
   useEffect(() => {
@@ -30,6 +42,7 @@ const EditProfile = ({ userData, onSave, onClose }) => {
     };
   }, []); // Empty dependency array since this modal is always "open" when rendered
 
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -39,9 +52,17 @@ const EditProfile = ({ userData, onSave, onClose }) => {
     e.preventDefault();
     setIsLoading(true);
 
+
     try {
       const token = localStorage.getItem("token");
       const userId = Number(getUserIdFromToken(token));
+
+
+
+    try {
+      const token = localStorage.getItem("token");
+      const userId = Number(getUserIdFromToken(token));
+
 
       // Send data directly without wrapping in usersDto
       const payload = {
@@ -52,7 +73,14 @@ const EditProfile = ({ userData, onSave, onClose }) => {
         phoneNumber: formData.phoneNumber || null,
         location: formData.location || null,
         profilePicture: formData.profilePicture || null,
+
+        resumeUrl: formData.resumeUrl || null,
+        portfolioUrl: formData.portfolioUrl || null,
         linkedinProfile: formData.linkedinProfile || null,
+        headline: formData.headline || null,
+
+        linkedinProfile: formData.linkedinProfile || null,
+
         bio: formData.bio || null,
         dateOfBirth: formData.dateOfBirth || null,
         // Don't send passwordHash, companyId, userType unless they're being updated
@@ -96,12 +124,14 @@ const EditProfile = ({ userData, onSave, onClose }) => {
     } finally {
       setIsLoading(false);
     }
+
   };
 
   const handleClose = () => {
     // Restore scrolling when closing
     document.body.style.overflow = 'unset';
     onClose();
+
   };
 
   return (
@@ -177,8 +207,25 @@ const EditProfile = ({ userData, onSave, onClose }) => {
           </div>
 
 
+          {/* Headline */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Headline</label>
+            <input
+              name="headline"
+              value={formData.headline}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="e.g., Frontend Developer | UI/UX Designer"
+            />
+          </div>
+
           {/* Bio */}
           <div>
+
+
+          {/* Bio */}
+          <div>
+
             <label className="block text-sm font-medium mb-1">Bio</label>
             <textarea
               name="bio"
@@ -200,6 +247,37 @@ const EditProfile = ({ userData, onSave, onClose }) => {
               onChange={handleChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="https://linkedin.com/in/yourprofile"
+
+            />
+          </div>
+
+          {/* Portfolio URL */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Portfolio URL</label>
+            <input
+              type="url"
+              name="portfolioUrl"
+              value={formData.portfolioUrl}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="https://yourportfolio.com"
+            />
+          </div>
+
+          {/* Resume URL */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Resume URL</label>
+            <input
+              type="url"
+              name="resumeUrl"
+              value={formData.resumeUrl}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="https://drive.google.com/your-resume"
+            />
+          </div>
+
+
             />
           </div>
 
@@ -220,7 +298,11 @@ const EditProfile = ({ userData, onSave, onClose }) => {
           <div className="flex justify-end mt-6 gap-4">
             <button
               type="button"
+
+              onClick={onClose}
+
               onClick={handleClose}
+
               disabled={isLoading}
               className="px-4 py-2 rounded-md border text-gray-700 hover:bg-gray-100 disabled:opacity-50"
             >

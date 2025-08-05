@@ -7,8 +7,11 @@ import CompanyInsight from "./CompanyInsight";
 import Jobs from "./Jobs";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
+
+
 import EditCompanyModal from "../Components/EditCompanyModal";
 import { FaEdit } from "react-icons/fa";
+
 import {
   FaSuitcase,
   FaUsers,
@@ -18,7 +21,9 @@ import {
   FaGlobe,
   FaChartLine,
   FaUserPlus,
+
   FaEye,
+
 } from "react-icons/fa";
 
 const InfoCard = ({ icon, label, value, color = "gray" }) => (
@@ -41,7 +46,9 @@ const CompanyProfile = () => {
   const [showJobs, setShowJobs] = useState(false);
   const [showCompanyInsight, setShowCompanyInsight] = useState(false);
   const [reloadJobs, setReloadJobs] = useState(false);
+
   const [showEditModal, setShowEditModal] = useState(false);
+
   const [companyId, setCompanyId] = useState(null);
   const [companyInfo, setCompanyInfo] = useState({
     companyName: "",
@@ -53,6 +60,8 @@ const CompanyProfile = () => {
     lastName: "",
   });
 
+
+  const [jobPosts, setJobPosts] = useState([]); // New state for jobs
   const [jobPosts, setJobPosts] = useState([]);
   const [totalJobsCount, setTotalJobsCount] = useState(0); // New state for total jobs count
   const [isLoading, setIsLoading] = useState(true);
@@ -75,6 +84,15 @@ const CompanyProfile = () => {
 
         if (profileData && profileData.companyProfile) {
           setCompanyInfo({
+
+            companyName: profileData.companyProfile.companyName || "Unnamed Company",
+            description: profileData.companyProfile.description || "No description available",
+            location: profileData.companyProfile.location || "No location",
+            email: profileData.email || "No email provided",
+            phone: profileData.jobSeekerProfile?.phoneNumber || "No phone number",
+            firstName: profileData.jobSeekerProfile?.firstName || "No first name",
+            lastName: profileData.jobSeekerProfile?.lastName || "No last name",
+
             companyName:
               profileData.companyProfile.companyName || "Unnamed Company",
             description:
@@ -85,10 +103,19 @@ const CompanyProfile = () => {
             phone: profileData.phoneNumber || "No phone number",
             firstName: profileData.firstName || "No first name",
             lastName: profileData.lastName || "No last name",
+
           });
 
           const compId = profileData.companyProfile.companyId;
           setCompanyId(compId);
+
+
+          const jobsResponse = await axiosInstance.get(`/getcompanybyid?id=${compId}`);
+          const jobsData = jobsResponse.data;
+
+          if (jobsData.jobs) {
+            setJobPosts(jobsData.jobs);
+          } else {
 
           // Fetch all jobs for the company to get the total count and display data
           const jobsResponse = await axiosInstance.get(
@@ -101,6 +128,7 @@ const CompanyProfile = () => {
             setJobPosts(jobsData);
           } else {
             setTotalJobsCount(0);
+
             setJobPosts([]);
           }
         } else {
@@ -116,6 +144,7 @@ const CompanyProfile = () => {
 
     fetchProfileAndJobs();
   }, [reloadJobs]);
+
 
   // Handle job posting success
   const handleJobPosted = (newJob) => {
@@ -135,6 +164,7 @@ const CompanyProfile = () => {
       lastName: updatedData.lastName,
     }));
   };
+
 
   if (isLoading) {
     return (
@@ -163,6 +193,7 @@ const CompanyProfile = () => {
           {/* Banner */}
           <div className="h-56 flex items-end justify-between px-6 py-4 relative bg-gradient-to-r from-indigo-300 to-pink-200">
             <div className="opacity-10 rounded-t-2xl"></div>
+
              <button 
             onClick={() => setShowEditModal(true)}
             className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
@@ -170,16 +201,13 @@ const CompanyProfile = () => {
             <FaEdit />
             Edit Profile
           </button>
+
           </div>
 
           {/* Main Info */}
           <div className="pt-28 px-8 pb-4 relative z-30">
-            <h2 className="text-3xl font-bold text-gray-800">
-              {companyInfo.companyName}
-            </h2>
-            <p className="text-base text-gray-600 mt-2">
-              {companyInfo.description}
-            </p>
+            <h2 className="text-3xl font-bold text-gray-800">{companyInfo.companyName}</h2>
+            <p className="text-base text-gray-600 mt-2">{companyInfo.description}</p>
           </div>
           <hr className="border-gray-300 w-11/12 mx-auto mb-6" />
 
@@ -203,7 +231,11 @@ const CompanyProfile = () => {
               onClick={() => setShowJobs(true)}
               className="px-4 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 transition"
             >
+
+             Jobs
+
               Jobs ({totalJobsCount})
+
             </button>
 
             <button
@@ -217,9 +249,7 @@ const CompanyProfile = () => {
           {/* Company Details */}
           <div className="px-12 pb-12 space-y-8 relative z-30 ">
             <section>
-              <h3 className="text-xl font-semibold text-gray-700 mb-3">
-                Company Information
-              </h3>
+              <h3 className="text-xl font-semibold text-gray-700 mb-3">Company Information</h3>
               <ul className="flex flex-wrap gap-x-32 text-gray-600 text-lg">
                 <li>
                   <strong>Recruiter Name:</strong>{" "}
@@ -245,6 +275,33 @@ const CompanyProfile = () => {
                 Company Dashboard
               </h2>
               <div className="flex flex-wrap justify-center gap-6">
+
+                <InfoCard icon={<FaSuitcase />} label="Total Jobs Posted" value={jobPosts.length} color="blue" />
+                <InfoCard icon={<FaUsers />} label="Total Applications" value="1,240" color="green" />
+                <InfoCard icon={<FaUserCheck />} label="Hired Candidates" value="120" color="indigo" />
+                <InfoCard icon={<FaUserClock />} label="Pending Interviews" value="45" color="yellow" />
+              </div>
+            </div>
+
+            {/* Job Posts Section */}
+            <div className="bg-white rounded-2xl shadow-xl p-6 mb-12">
+              <h2 className="text-2xl font-semibold mb-6 text-gray-700">Job Posts</h2>
+              {jobPosts.length > 0 ? (
+                <ul className="space-y-4">
+                  {jobPosts.map((job) => (
+                    <li key={job.jobId} className="p-4 border rounded-xl hover:bg-gray-50">
+                      <h4 className="text-lg font-bold">{job.title}</h4>
+                      <p className="text-gray-600">{job.description}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500">No job posts available.</p>
+              )}
+            </div>
+
+            {/* User Insights */}
+
                 <InfoCard
                   icon={<FaSuitcase />}
                   label="Total Jobs Posted"
@@ -273,6 +330,7 @@ const CompanyProfile = () => {
             </div>
 
             {/* Job Posts Section - Show only first 2 jobs */}
+
             <div className="bg-white rounded-2xl shadow-xl p-6 mb-12">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-semibold text-gray-700">
@@ -288,6 +346,7 @@ const CompanyProfile = () => {
                   </button>
                 )}
               </div>
+
 
               {displayedJobs.length > 0 ? (
                 <div className="space-y-4">
@@ -394,12 +453,34 @@ const CompanyProfile = () => {
                   color="orange"
                 />
               </div>
+
             </div>
           </div>
         </div>
       </div>
 
       {/* Modals */}
+
+      {showApplications && <ApplicationReceived onClose={() => setShowApplications(false)} />}
+      {showPostJob && (
+        <PostJob
+          onClose={() => setShowPostJob(false)}
+          onJobPosted={(newJob) => {
+            setJobPosts((prev) => [newJob, ...prev]); 
+            setReloadJobs(prev => !prev); 
+          }}
+        />
+      )}
+
+      {showJobs && (
+        <Jobs
+          onClose={() => setShowJobs(false)}
+          reloadTrigger={reloadJobs}
+          companyId={companyId}
+        />
+      )}
+      {showCompanyInsight && <CompanyInsight onClose={() => setShowCompanyInsight(false)} />}
+
       {showApplications && (
         <ApplicationReceived onClose={() => setShowApplications(false)} />
       )}
@@ -409,6 +490,7 @@ const CompanyProfile = () => {
           onJobPosted={handleJobPosted}
         />
       )}
+
 
       {showJobs && (
         <Jobs
@@ -435,4 +517,4 @@ const CompanyProfile = () => {
   );
 };
 
-export default CompanyProfile;
+export default CompanyProfile;

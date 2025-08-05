@@ -17,7 +17,6 @@ const Uploadresume = ({ onSave, onClose }) => {
     reference: "",
   });
 
-  // Disable background scroll when modal is open
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -27,10 +26,7 @@ const Uploadresume = ({ onSave, onClose }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (e) => {
@@ -48,181 +44,108 @@ const Uploadresume = ({ onSave, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center"
-      onClick={onClose} // close modal if click outside form
+      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-300"
+      onClick={onClose}
     >
       <div
-        className=" bg-black w-full max-w-3xl rounded-lg shadow-lg p-6 relative max-h-[95vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()} // prevent closing modal on clicking inside form container
+        className="relative w-full max-w-4xl bg-white rounded-xl shadow-xl overflow-y-auto max-h-[90vh]"
+        onClick={(e) => e.stopPropagation()}
       >
-        <form onSubmit={handleSubmit}>
-          {/* Resume Summary Box */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow p-6">
-            <h3 className="text-lg font-semibold mb-4">Resume Details</h3>
-            <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
-              {/* Name */}
-              <div className="col-span-1">
-                <label><strong>Name:</strong></label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="mt-1 w-full p-2 border rounded"
-                />
-              </div>
-              {/* Email */}
-              <div className="col-span-1">
-                <label><strong>Email:</strong></label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="mt-1 w-full p-2 border rounded"
-                />
-              </div>
-              {/* Phone */}
-              <div className="col-span-1">
-                <label><strong>Phone:</strong></label>
-                <input
-                  type="text"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="mt-1 w-full p-2 border rounded"
-                />
-              </div>
-              {/* Address */}
-              <div className="col-span-1">
-                <label><strong>Address:</strong></label>
-                <input
-                  type="text"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  className="mt-1 w-full p-2 border rounded"
-                />
-              </div>
-              {/* Career Objective */}
-              <div className="col-span-2">
-                <label><strong>Career Objective:</strong></label>
-                <textarea
-                  name="careerObjective"
-                  value={formData.careerObjective}
-                  onChange={handleInputChange}
-                  rows={3}
-                  className="mt-1 w-full p-2 border rounded"
-                />
-              </div>
-              {/* Technical Skills */}
-              <div className="col-span-2">
-                <label><strong>Technical Skills:</strong></label>
-                <input
-                  type="text"
-                  name="technicalSkills"
-                  value={formData.technicalSkills}
-                  onChange={handleInputChange}
-                  className="mt-1 w-full p-2 border rounded"
-                />
-              </div>
-              {/* Soft Skills */}
-              <div className="col-span-2">
-                <label><strong>Soft Skills:</strong></label>
-                <input
-                  type="text"
-                  name="softSkills"
-                  value={formData.softSkills}
-                  onChange={handleInputChange}
-                  className="mt-1 w-full p-2 border rounded"
-                />
-              </div>
-              {/* Certifications */}
-              <div className="col-span-2">
-                <label><strong>Certifications:</strong></label>
-                <textarea
-                  name="certifications"
-                  value={formData.certifications}
-                  onChange={handleInputChange}
-                  rows={4}
-                  className="mt-1 w-full p-2 border rounded"
-                />
-              </div>
-              {/* Projects */}
-              <div className="col-span-2">
-                <label><strong>Projects:</strong></label>
-                <textarea
-                  name="projects"
-                  value={formData.projects}
-                  onChange={handleInputChange}
-                  rows={4}
-                  className="mt-1 w-full p-2 border rounded"
-                />
-              </div>
-              {/* Education */}
-              <div className="col-span-2">
-                <label><strong>Education:</strong></label>
-                <textarea
-                  name="education"
-                  value={formData.education}
-                  onChange={handleInputChange}
-                  rows={3}
-                  className="mt-1 w-full p-2 border rounded"
-                />
-              </div>
-              {/* Reference */}
-              <div className="col-span-2">
-                <label><strong>Reference:</strong></label>
-                <textarea
-                  name="reference"
-                  value={formData.reference}
-                  onChange={handleInputChange}
-                  rows={2}
-                  className="mt-1 w-full p-2 border rounded"
-                />
-              </div>
-              {/* Resume File Upload */}
-              <div className="col-span-2">
-                <label><strong>Upload Resume (PDF, DOCX):</strong></label>
-                <input
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  onChange={handleFileChange}
-                  className="mt-1 w-full"
-                />
-              </div>
+        <div className="p-6">
+          <h2 className="text-2xl font-bold text-blue-700 mb-6 text-center">
+            Upload Resume & Personal Info
+          </h2>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Inputs */}
+              {[
+                { label: "Name", name: "name", type: "text" },
+                { label: "Email", name: "email", type: "email" },
+                { label: "Phone", name: "phone", type: "text" },
+                { label: "Address", name: "address", type: "text" },
+              ].map(({ label, name, type }) => (
+                <div key={name}>
+                  <label className="block text-sm font-medium text-gray-700">
+                    {label}
+                  </label>
+                  <input
+                    type={type}
+                    name={name}
+                    value={formData[name]}
+                    onChange={handleInputChange}
+                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200"
+                  />
+                </div>
+              ))}
             </div>
-          </div>
 
-          {/* Action Buttons */}
-          <div className="flex justify-end mt-6 gap-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-md border text-gray-700 hover:bg-gray-100"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={!resume}
-            >
-              Save
-            </button>
-          </div>
-        </form>
+            {/* Text Areas */}
+            {[
+              { label: "Career Objective", name: "careerObjective", rows: 3 },
+              { label: "Technical Skills", name: "technicalSkills", rows: 2 },
+              { label: "Soft Skills", name: "softSkills", rows: 2 },
+              { label: "Certifications", name: "certifications", rows: 3 },
+              { label: "Projects", name: "projects", rows: 3 },
+              { label: "Education", name: "education", rows: 3 },
+              { label: "Reference", name: "reference", rows: 2 },
+            ].map(({ label, name, rows }) => (
+              <div key={name}>
+                <label className="block text-sm font-medium text-gray-700">
+                  {label}
+                </label>
+                <textarea
+                  name={name}
+                  rows={rows}
+                  value={formData[name]}
+                  onChange={handleInputChange}
+                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200"
+                />
+              </div>
+            ))}
 
-        {/* Close icon button OUTSIDE the form */}
+            {/* Resume File Upload */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Upload Resume (PDF, DOCX)
+              </label>
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx"
+                onChange={handleFileChange}
+                className="mt-1 w-full"
+              />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-4 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={!resume}
+                className="px-5 py-3 bg-blue-700 text-white rounded hover:bg-blue-800"
+              >
+                Save
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-4 text-2xl text-gray-400 hover:text-gray-600"
+          className="absolute top-4 right-5 text-gray-500 text-2xl hover:text-red-500"
           aria-label="Close"
         >
-          ×
+          
         </button>
       </div>
-      
     </div>
   );
 };
