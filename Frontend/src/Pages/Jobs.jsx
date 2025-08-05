@@ -96,6 +96,7 @@ const Jobs = ({ onClose, reloadTrigger, companyId }) => {
     return matchesSearch && matchesStatus;
   });
 
+  // DELETE Job API call
   const handleDeleteJob = async (jobId) => {
     if (
       !window.confirm(
@@ -106,34 +107,18 @@ const Jobs = ({ onClose, reloadTrigger, companyId }) => {
     }
 
     try {
-      await axiosInstance.delete(`/api/Jobs/${jobId}`);
+      // Call the new API endpoint
+      await axiosInstance.delete(`/api/Jobs/delete/${jobId}`);
+
+      // Remove the deleted job from state
       setJobs((prevJobs) => prevJobs.filter((job) => (job.jobId || job.id) !== jobId));
+      alert("Job deleted successfully!");
     } catch (error) {
       console.error("Delete job error:", error);
-      alert("Failed to delete job. Please try again.");
-    }
-  };
-
-  const handleToggleStatus = async (jobId, currentStatus) => {
-    try {
-      // Note: We no longer use status to determine active/inactive, but to keep API consistent:
-      const newStatus =
-        currentStatus === "A" || currentStatus === "active" || currentStatus === true
-          ? "I"
-          : "A";
-
-      await axiosInstance.put(`/api/Jobs/${jobId}/status`, { status: newStatus });
-
-      setJobs((prevJobs) =>
-        prevJobs.map((job) =>
-          (job.jobId || job.id) === jobId
-            ? { ...job, status: newStatus, isActive: newStatus === "A" }
-            : job
-        )
+      alert(
+        error.response?.data?.message ||
+          "Failed to delete job. Please try again."
       );
-    } catch (error) {
-      console.error("Toggle status error:", error);
-      alert("Failed to update job status. Please try again.");
     }
   };
 
