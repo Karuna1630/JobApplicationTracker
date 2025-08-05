@@ -157,6 +157,13 @@ const [showEditModal, setShowEditModal] = useState(false);
           {/* Banner */}
           <div className="h-56 flex items-end justify-between px-6 py-4 relative bg-gradient-to-r from-indigo-300 to-pink-200">
             <div className="opacity-10 rounded-t-2xl"></div>
+                <button
+      onClick={() => setShowEditModal(true)}
+      className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+    >
+      <FaEdit />
+      Edit Profile
+    </button>
           </div>
 
           {/* Main Info */}
@@ -164,13 +171,7 @@ const [showEditModal, setShowEditModal] = useState(false);
             <h2 className="text-3xl font-bold text-gray-800">{companyInfo.companyName}</h2>
             <p className="text-base text-gray-600 mt-2">{companyInfo.description}</p>
           </div>
-          <button
-      onClick={() => setShowEditModal(true)}
-      className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
-    >
-      <FaEdit />
-      Edit Profile
-    </button>
+      
 
           <hr className="border-gray-300 w-11/12 mx-auto mb-6" />
 
