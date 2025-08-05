@@ -79,9 +79,19 @@ const PostJob = ({ onClose, onJobPosted }) => {
 
       const res = await axiosInstance.post("/api/Jobs/submitjobs", payload);
 
+
       if (res.status === 200 || res.status === 201) {
         const createdJob = res.data;
         if (onJobPosted) onJobPosted(createdJob);
+
+
+      if (res.status === 200 || res.status === 201) {
+
+      if (res.status === 200 || ressubmitjobs.status === 201) {
+
+        const createdJob = res.data; // get created job from backend
+        if (onJobPosted) onJobPosted(createdJob); // pass created job to parent
+
         onClose();
       } else {
         setErrorMsg("Failed to post job. Please try again.");
