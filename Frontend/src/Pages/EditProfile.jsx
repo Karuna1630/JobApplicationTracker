@@ -1,5 +1,9 @@
 
+
 import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
+
 import axiosInstance from "../Utils/axiosInstance";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
 import { toast } from "react-toastify";
@@ -19,7 +23,7 @@ const EditProfile = ({ userData, onSave, onClose }) => {
     linkedinProfile: userData?.linkedinProfile || "",
     headline: userData?.headline || "",
 
-    linkedinProfile: userData?.linkedinProfile || "",
+   
 
     bio: userData?.bio || "",
     dateOfBirth: userData?.dateOfBirth || "",
@@ -48,7 +52,7 @@ const EditProfile = ({ userData, onSave, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
+  
     try {
       const token = localStorage.getItem("token");
       const userId = Number(getUserIdFromToken(token));
@@ -63,7 +67,6 @@ const EditProfile = ({ userData, onSave, onClose }) => {
         phoneNumber: formData.phoneNumber || null,
         location: formData.location || null,
         profilePicture: formData.profilePicture || null,
-
         resumeUrl: formData.resumeUrl || null,
         portfolioUrl: formData.portfolioUrl || null,
         linkedinProfile: formData.linkedinProfile || null,
@@ -80,8 +83,6 @@ const EditProfile = ({ userData, onSave, onClose }) => {
           delete payload[key];
         }
       });
-
-      console.log("Submitting payload:", payload);
 
       const response = await axiosInstance.post("/submituser", payload);
 
@@ -112,8 +113,9 @@ const EditProfile = ({ userData, onSave, onClose }) => {
     } finally {
       setIsLoading(false);
     }
-
-  };
+  }
+  
+  
 
   const handleClose = () => {
     // Restore scrolling when closing
@@ -193,8 +195,6 @@ const EditProfile = ({ userData, onSave, onClose }) => {
               placeholder="City, Country"
             />
           </div>
-
-
           {/* Headline */}
           <div>
             <label className="block text-sm font-medium mb-1">Headline</label>
@@ -248,6 +248,7 @@ const EditProfile = ({ userData, onSave, onClose }) => {
             />
           </div>
 
+
           {/* Resume URL */}
           <div>
             <label className="block text-sm font-medium mb-1">Resume URL</label>
@@ -278,7 +279,6 @@ const EditProfile = ({ userData, onSave, onClose }) => {
             <button
               type="button"
               onClick={handleClose}
-
               disabled={isLoading}
               className="px-4 py-2 rounded-md border text-gray-700 hover:bg-gray-100 disabled:opacity-50"
             >
@@ -310,6 +310,7 @@ const EditProfile = ({ userData, onSave, onClose }) => {
       </div>
     </div>
   );
-};
+  }
+
 
 export default EditProfile;

@@ -19,14 +19,7 @@ const UserProfile = () => {
     location: "",
     bio: "",
     profileImageUrl: "",
-
-    headline: "",
     linkedinProfile: "",
-    portfolioUrl: "",
-    resumeUrl: "",
-
-    linkedinProfile: "",
-
     dateOfBirth: "",
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -53,15 +46,8 @@ const UserProfile = () => {
           phone: profileData.phoneNumber || "Not Provided",
           location: profileData.location || "Not Specified",
           bio: profileData.bio || "No bio available",
-          profileImageUrl: profileData.profilePicture || "",
-
-          headline: profileData.headline || "",
+          profileImageUrl: profileData.profilePicture || "",         
           linkedinProfile: profileData.linkedinProfile || "",
-          portfolioUrl: profileData.portfolioUrl || "",
-          resumeUrl: profileData.resumeUrl || "",
-
-          linkedinProfile: profileData.linkedinProfile || "",
-
           dateOfBirth: profileData.dateOfBirth || "",
         });
         localStorage.setItem("profileImageUrl", profileData.profilePicture || "");
@@ -117,7 +103,7 @@ const UserProfile = () => {
   };
 
   // Updated handleSaveProfile to refresh data from server after successful update
-  const handleSaveProfile = async (updatedData) => {
+  const handleSaveProfile = async () => {
     try {
       // Since EditProfile component already handles the API call and shows success message,
       // we just need to refresh the profile data from the server
@@ -181,10 +167,6 @@ const UserProfile = () => {
                   {userInfo.firstName} {userInfo.lastName}
                 </h2>
 
-                {userInfo.headline && (
-                  <p className="text-lg text-blue-600 font-medium mt-1">{userInfo.headline}</p>
-                )}
-
               </div>
 
               {/* Bio */}
@@ -203,6 +185,7 @@ const UserProfile = () => {
                       LinkedIn
                     </a>
                   )}
+
 
                   {userInfo.portfolioUrl && (
                     <a 
@@ -224,6 +207,7 @@ const UserProfile = () => {
                       Resume
                     </a>
                   )}
+
                 </div>
               )}
             </div>
@@ -278,14 +262,7 @@ const UserProfile = () => {
             phoneNumber: userInfo.phone,
             location: userInfo.location,
             bio: userInfo.bio,
-
-            headline: userInfo.headline,
-            linkedinProfile: userInfo.linkedinProfile,
-            portfolioUrl: userInfo.portfolioUrl,
-            resumeUrl: userInfo.resumeUrl,
-
-            linkedinProfile: userInfo.linkedinProfile,
-
+            linkedinProfile: userInfo.linkedinProfile,        
             dateOfBirth: userInfo.dateOfBirth,
             profilePicture: userInfo.profileImageUrl,
           }}

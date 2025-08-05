@@ -22,6 +22,7 @@ const PostJob = ({ onClose, onJobPosted }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+
   const handleSubmit = async () => {
     if (
       !formData.title ||
@@ -87,9 +88,79 @@ const PostJob = ({ onClose, onJobPosted }) => {
       console.error("Post job error:", err);
       setErrorMsg("Failed to post job. Please try again.");
     } finally {
+
+ const handleSubmit = async () => {
+  // Basic validation for required fields
+  if (
+    !formData.title ||
+    !formData.description ||
+    !formData.jobTypeId ||
+    !formData.experienceLevel ||
+    !formData.applicationDeadline
+  ) {
+    setErrorMsg("Please fill all required fields, including application deadline.");
+    return;
+  }
+
+  try {
+    setIsSubmitting(true);
+    setErrorMsg("");
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setErrorMsg("You must be logged in to post a job.");
       setIsSubmitting(false);
+      return;
     }
-  };
+
+    const userId = getUserIdFromToken(token);
+    if (!userId) {
+      setErrorMsg("Invalid user token.");
+
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Fetch company profile to get companyId
+    const profileRes = await axiosInstance.get(`/profile/${userId}`);
+    const companyId = profileRes.data.companyProfile?.companyId;
+    if (!companyId) {
+      setErrorMsg("Company profile not found.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Prepare payload
+    const payload = {
+      ...formData,
+      companyId,
+      postedByUserId: userId,
+      jobTypeId: parseInt(formData.jobTypeId, 10),
+      experienceLevel: parseInt(formData.experienceLevel, 10),
+      salaryRangeMin: formData.salaryRangeMin ? parseFloat(formData.salaryRangeMin) : null,
+      salaryRangeMax: formData.salaryRangeMax ? parseFloat(formData.salaryRangeMax) : null,
+      applicationDeadline: new Date(formData.applicationDeadline).toISOString(),
+      postedAt: new Date().toISOString(),
+      status: "A",
+      views: 0,
+    };
+
+    const res = await axiosInstance.post("/api/Jobs/submitjobs", payload);
+
+    if (res.status === 200 || res.status === 201) {
+      const createdJob = res.data;
+      if (onJobPosted) onJobPosted(createdJob);
+      onClose();
+    } else {
+      setErrorMsg("Failed to post job. Please try again.");
+    }
+  } catch (err) {
+    console.error("Post job error:", err);
+    setErrorMsg("Failed to post job. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50 p-4">
