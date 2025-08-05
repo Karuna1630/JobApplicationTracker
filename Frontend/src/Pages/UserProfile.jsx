@@ -185,6 +185,29 @@ const UserProfile = () => {
                       LinkedIn
                     </a>
                   )}
+
+
+                  {userInfo.portfolioUrl && (
+                    <a 
+                      href={userInfo.portfolioUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 underline"
+                    >
+                      Portfolio
+                    </a>
+                  )}
+                  {userInfo.resumeUrl && (
+                    <a 
+                      href={userInfo.resumeUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 underline"
+                    >
+                      Resume
+                    </a>
+                  )}
+
                 </div>
               )}
             </div>

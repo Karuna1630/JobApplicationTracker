@@ -33,13 +33,18 @@ const InfoCard = ({ icon, label, value, color = "gray" }) => (
   </div>
 );
 
+
 const CompanyProfile = () => {
   const [showApplications, setShowApplications] = useState(false);
   const [showPostJob, setShowPostJob] = useState(false);
   const [showJobs, setShowJobs] = useState(false);
   const [showCompanyInsight, setShowCompanyInsight] = useState(false);
   const [reloadJobs, setReloadJobs] = useState(false);
+
+  const [showEditModal, setShowEditModal] = useState(false);
+
 const [showEditModal, setShowEditModal] = useState(false);
+
   const [companyId, setCompanyId] = useState(null);
   const [companyInfo, setCompanyInfo] = useState({
     companyName: "",
@@ -73,14 +78,22 @@ const [showEditModal, setShowEditModal] = useState(false);
 
         if (profileData && profileData.companyProfile) {
           setCompanyInfo({
+
+            companyName:
+              profileData.companyProfile.companyName || "Unnamed Company",
+            description:
+              profileData.companyProfile.description ||
+              "No description available",
+
             companyName: profileData.companyProfile.companyName || "Unnamed Company",
             description: profileData.companyProfile.description || "No description available",
+
             location: profileData.companyProfile.location || "No location",
             email: profileData.email || "No email provided",
             phone: profileData.phoneNumber || "No phone number",
             firstName: profileData.firstName || "No first name",
             lastName: profileData.lastName || "No last name",
-            
+
           });
 
           const compId = profileData.companyProfile.companyId;
@@ -118,6 +131,7 @@ const [showEditModal, setShowEditModal] = useState(false);
     setReloadJobs(prev => !prev); 
   };
 
+
   const handleUpdateSuccess = (updatedData) => {
   setCompanyInfo(prev => ({
     ...prev,
@@ -130,6 +144,7 @@ const [showEditModal, setShowEditModal] = useState(false);
     lastName: updatedData.lastName,
   }));
 };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen text-lg text-gray-700">
@@ -157,12 +172,24 @@ const [showEditModal, setShowEditModal] = useState(false);
           {/* Banner */}
           <div className="h-56 flex items-end justify-between px-6 py-4 relative bg-gradient-to-r from-indigo-300 to-pink-200">
             <div className="opacity-10 rounded-t-2xl"></div>
+
+             <button 
+            onClick={() => setShowEditModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+          >
+            <FaEdit />
+            Edit Profile
+          </button>
           </div>
 
           {/* Main Info */}
           <div className="pt-28 px-8 pb-4 relative z-30">
-            <h2 className="text-3xl font-bold text-gray-800">{companyInfo.companyName}</h2>
-            <p className="text-base text-gray-600 mt-2">{companyInfo.description}</p>
+            <h2 className="text-3xl font-bold text-gray-800">
+              {companyInfo.companyName}
+            </h2>
+            <p className="text-base text-gray-600 mt-2">
+              {companyInfo.description}
+            </p>
           </div>
           <button
       onClick={() => setShowEditModal(true)}
@@ -208,7 +235,9 @@ const [showEditModal, setShowEditModal] = useState(false);
           {/* Company Details */}
           <div className="px-12 pb-12 space-y-8 relative z-30 ">
             <section>
-              <h3 className="text-xl font-semibold text-gray-700 mb-3">Company Information</h3>
+              <h3 className="text-xl font-semibold text-gray-700 mb-3">
+                Company Information
+              </h3>
               <ul className="flex flex-wrap gap-x-32 text-gray-600 text-lg">
                 <li>
                   <strong>Recruiter Name:</strong>{" "}
@@ -230,10 +259,37 @@ const [showEditModal, setShowEditModal] = useState(false);
             <div className="bg-white rounded-2xl shadow-xl p-6 mb-12">
               <h2 className="text-2xl font-semibold mb-6 text-gray-700">Company Dashboard</h2>
               <div className="flex flex-wrap justify-center gap-6">
+
+                <InfoCard
+                  icon={<FaSuitcase />}
+                  label="Total Jobs Posted"
+                  value={totalJobsCount}
+                  color="blue"
+                />
+                <InfoCard
+                  icon={<FaUsers />}
+                  label="Total Applications"
+                  value="1,240"
+                  color="green"
+                />
+                <InfoCard
+                  icon={<FaUserCheck />}
+                  label="Hired Candidates"
+                  value="120"
+                  color="indigo"
+                />
+                <InfoCard
+                  icon={<FaUserClock />}
+                  label="Pending Interviews"
+                  value="45"
+                  color="yellow"
+                />
+
                 <InfoCard icon={<FaSuitcase />} label="Total Jobs Posted" value={totalJobsCount} color="blue" />
                 <InfoCard icon={<FaUsers />} label="Total Applications" value="1,240" color="green" />
                 <InfoCard icon={<FaUserCheck />} label="Hired Candidates" value="120" color="indigo" />
                 <InfoCard icon={<FaUserClock />} label="Pending Interviews" value="45" color="yellow" />
+
               </div>
             </div>
 
@@ -251,7 +307,7 @@ const [showEditModal, setShowEditModal] = useState(false);
                   </button>
                 )}
               </div>
-              
+
               {displayedJobs.length > 0 ? (
                 <div className="space-y-4">
                   {displayedJobs.map((job) => (
@@ -318,7 +374,12 @@ const [showEditModal, setShowEditModal] = useState(false);
       </div>
 
       {/* Modals */}
+      {showApplications && (
+        <ApplicationReceived onClose={() => setShowApplications(false)} />
+      )}
+
       {showApplications && <ApplicationReceived onClose={() => setShowApplications(false)} />}
+
       {showPostJob && (
         <PostJob
           onClose={() => setShowPostJob(false)}

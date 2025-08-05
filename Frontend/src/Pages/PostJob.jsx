@@ -22,6 +22,73 @@ const PostJob = ({ onClose, onJobPosted }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+
+  const handleSubmit = async () => {
+    if (
+      !formData.title ||
+      !formData.description ||
+      !formData.jobTypeId ||
+      !formData.experienceLevel ||
+      !formData.applicationDeadline
+    ) {
+      setErrorMsg("Please fill all required fields, including application deadline.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setErrorMsg("");
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setErrorMsg("You must be logged in to post a job.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const userId = getUserIdFromToken(token);
+      if (!userId) {
+        setErrorMsg("Invalid user token.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const profileRes = await axiosInstance.get(`/profile/${userId}`);
+      const companyId = profileRes.data.companyProfile?.companyId;
+      if (!companyId) {
+        setErrorMsg("Company profile not found.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const payload = {
+        ...formData,
+        companyId,
+        postedByUserId: userId,
+        jobTypeId: parseInt(formData.jobTypeId, 10),
+        experienceLevel: parseInt(formData.experienceLevel, 10),
+        salaryRangeMin: formData.salaryRangeMin ? parseFloat(formData.salaryRangeMin) : null,
+        salaryRangeMax: formData.salaryRangeMax ? parseFloat(formData.salaryRangeMax) : null,
+        applicationDeadline: new Date(formData.applicationDeadline).toISOString(),
+        postedAt: new Date().toISOString(),
+        status: "A",
+        views: 0,
+      };
+
+      const res = await axiosInstance.post("/api/Jobs/submitjobs", payload);
+
+      if (res.status === 200 || res.status === 201) {
+        const createdJob = res.data;
+        if (onJobPosted) onJobPosted(createdJob);
+        onClose();
+      } else {
+        setErrorMsg("Failed to post job. Please try again.");
+      }
+    } catch (err) {
+      console.error("Post job error:", err);
+      setErrorMsg("Failed to post job. Please try again.");
+    } finally {
+
  const handleSubmit = async () => {
   // Basic validation for required fields
   if (
@@ -49,6 +116,7 @@ const PostJob = ({ onClose, onJobPosted }) => {
     const userId = getUserIdFromToken(token);
     if (!userId) {
       setErrorMsg("Invalid user token.");
+
       setIsSubmitting(false);
       return;
     }
@@ -185,15 +253,13 @@ const PostJob = ({ onClose, onJobPosted }) => {
           <option value="3">Senior</option>
         </select>
 
-        <label className="block mb-1 font-semibold text-gray-700">
-        </label>
         <input
           name="applicationDeadline"
           type="date"
           value={formData.applicationDeadline}
           onChange={handleChange}
           className="border p-2 w-full mb-4"
-          min={new Date().toISOString().split("T")[0]} // prevent past dates
+          min={new Date().toISOString().split("T")[0]}
         />
 
         <button
