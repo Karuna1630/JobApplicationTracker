@@ -12,6 +12,8 @@ const EditCompanyModal = ({ isOpen, onClose, companyInfo, companyId, onUpdateSuc
     phoneNumber: companyInfo.phone || "",
     firstName: companyInfo.firstName || "",
     lastName: companyInfo.lastName || "",
+    websiteUrl: companyInfo.websiteUrl || "",
+    companyLogo: companyInfo.companyLogo || "",
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -55,6 +57,8 @@ const EditCompanyModal = ({ isOpen, onClose, companyInfo, companyId, onUpdateSuc
         phoneNumber: formData.phoneNumber || null,
         firstName: formData.firstName || null,
         lastName: formData.lastName || null,
+        websiteUrl: formData.websiteUrl || null,
+        companyLogo: formData.companyLogo || null,
       };
 
       // Remove null/empty values to only update fields that have data
@@ -197,6 +201,32 @@ const EditCompanyModal = ({ isOpen, onClose, companyInfo, companyId, onUpdateSuc
               onChange={handleChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="City, State, Country"
+            />
+          </div>
+
+          {/* Website URL */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Website URL</label>
+            <input
+              type="url"
+              name="websiteUrl"
+              value={formData.websiteUrl}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="https://yourcompany.com"
+            />
+          </div>
+
+          {/* Company Logo */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Company Logo URL</label>
+            <input
+              type="url"
+              name="companyLogo"
+              value={formData.companyLogo}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="https://yourcompany.com/logo.png"
             />
           </div>
 

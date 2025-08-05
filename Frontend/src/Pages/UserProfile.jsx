@@ -19,10 +19,7 @@ const UserProfile = () => {
     location: "",
     bio: "",
     profileImageUrl: "",
-    headline: "",
     linkedinProfile: "",
-    portfolioUrl: "",
-    resumeUrl: "",
     dateOfBirth: "",
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -50,10 +47,7 @@ const UserProfile = () => {
           location: profileData.location || "Not Specified",
           bio: profileData.bio || "No bio available",
           profileImageUrl: profileData.profilePicture || "",
-          headline: profileData.headline || "",
           linkedinProfile: profileData.linkedinProfile || "",
-          portfolioUrl: profileData.portfolioUrl || "",
-          resumeUrl: profileData.resumeUrl || "",
           dateOfBirth: profileData.dateOfBirth || "",
         });
         localStorage.setItem("profileImageUrl", profileData.profilePicture || "");
@@ -172,9 +166,7 @@ const UserProfile = () => {
                 <h2 className="text-2xl font-semibold text-gray-800">
                   {userInfo.firstName} {userInfo.lastName}
                 </h2>
-                {userInfo.headline && (
-                  <p className="text-lg text-blue-600 font-medium mt-1">{userInfo.headline}</p>
-                )}
+              
               </div>
 
               {/* Bio */}
@@ -193,26 +185,8 @@ const UserProfile = () => {
                       LinkedIn
                     </a>
                   )}
-                  {userInfo.portfolioUrl && (
-                    <a 
-                      href={userInfo.portfolioUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 underline"
-                    >
-                      Portfolio
-                    </a>
-                  )}
-                  {userInfo.resumeUrl && (
-                    <a 
-                      href={userInfo.resumeUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 underline"
-                    >
-                      Resume
-                    </a>
-                  )}
+                 
+                 
                 </div>
               )}
             </div>
@@ -267,10 +241,7 @@ const UserProfile = () => {
             phoneNumber: userInfo.phone,
             location: userInfo.location,
             bio: userInfo.bio,
-            headline: userInfo.headline,
             linkedinProfile: userInfo.linkedinProfile,
-            portfolioUrl: userInfo.portfolioUrl,
-            resumeUrl: userInfo.resumeUrl,
             dateOfBirth: userInfo.dateOfBirth,
             profilePicture: userInfo.profileImageUrl,
           }}

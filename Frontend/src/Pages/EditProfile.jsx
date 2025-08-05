@@ -12,10 +12,7 @@ const EditProfile = ({ userData, onSave, onClose }) => {
     location: userData?.location || "",
     education: userData?.education || "",
     profilePicture: userData?.profilePicture || "",
-    resumeUrl: userData?.resumeUrl || "",
-    portfolioUrl: userData?.portfolioUrl || "",
     linkedinProfile: userData?.linkedinProfile || "",
-    headline: userData?.headline || "",
     bio: userData?.bio || "",
     dateOfBirth: userData?.dateOfBirth || "",
   });
@@ -55,10 +52,7 @@ const EditProfile = ({ userData, onSave, onClose }) => {
         phoneNumber: formData.phoneNumber || null,
         location: formData.location || null,
         profilePicture: formData.profilePicture || null,
-        resumeUrl: formData.resumeUrl || null,
-        portfolioUrl: formData.portfolioUrl || null,
         linkedinProfile: formData.linkedinProfile || null,
-        headline: formData.headline || null,
         bio: formData.bio || null,
         dateOfBirth: formData.dateOfBirth || null,
         // Don't send passwordHash, companyId, userType unless they're being updated
@@ -182,17 +176,6 @@ const EditProfile = ({ userData, onSave, onClose }) => {
             />
           </div>
 
-          {/* Headline */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Headline</label>
-            <input
-              name="headline"
-              value={formData.headline}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="e.g., Frontend Developer | UI/UX Designer"
-            />
-          </div>
 
           {/* Bio */}
           <div>
@@ -220,32 +203,7 @@ const EditProfile = ({ userData, onSave, onClose }) => {
             />
           </div>
 
-          {/* Portfolio URL */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Portfolio URL</label>
-            <input
-              type="url"
-              name="portfolioUrl"
-              value={formData.portfolioUrl}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="https://yourportfolio.com"
-            />
-          </div>
-
-          {/* Resume URL */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Resume URL</label>
-            <input
-              type="url"
-              name="resumeUrl"
-              value={formData.resumeUrl}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="https://drive.google.com/your-resume"
-            />
-          </div>
-
+        
           {/* Date of Birth */}
           <div>
             <label className="block text-sm font-medium mb-1">Date of Birth</label>
