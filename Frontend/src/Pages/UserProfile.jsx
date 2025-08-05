@@ -223,7 +223,7 @@ const UserProfile = () => {
                     >
                       Resume
                     </a>
-
+                  )}
                 </div>
               )}
             </div>

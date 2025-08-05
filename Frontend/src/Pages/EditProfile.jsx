@@ -1,8 +1,5 @@
 
 import React, { useState } from "react";
-
-import React, { useState, useEffect } from "react";
-
 import axiosInstance from "../Utils/axiosInstance";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
 import { toast } from "react-toastify";
@@ -52,13 +49,6 @@ const EditProfile = ({ userData, onSave, onClose }) => {
     e.preventDefault();
     setIsLoading(true);
 
-
-    try {
-      const token = localStorage.getItem("token");
-      const userId = Number(getUserIdFromToken(token));
-
-
-
     try {
       const token = localStorage.getItem("token");
       const userId = Number(getUserIdFromToken(token));
@@ -78,8 +68,6 @@ const EditProfile = ({ userData, onSave, onClose }) => {
         portfolioUrl: formData.portfolioUrl || null,
         linkedinProfile: formData.linkedinProfile || null,
         headline: formData.headline || null,
-
-        linkedinProfile: formData.linkedinProfile || null,
 
         bio: formData.bio || null,
         dateOfBirth: formData.dateOfBirth || null,
@@ -222,10 +210,6 @@ const EditProfile = ({ userData, onSave, onClose }) => {
           {/* Bio */}
           <div>
 
-
-          {/* Bio */}
-          <div>
-
             <label className="block text-sm font-medium mb-1">Bio</label>
             <textarea
               name="bio"
@@ -276,11 +260,6 @@ const EditProfile = ({ userData, onSave, onClose }) => {
               placeholder="https://drive.google.com/your-resume"
             />
           </div>
-
-
-            />
-          </div>
-
         
           {/* Date of Birth */}
           <div>
@@ -298,9 +277,6 @@ const EditProfile = ({ userData, onSave, onClose }) => {
           <div className="flex justify-end mt-6 gap-4">
             <button
               type="button"
-
-              onClick={onClose}
-
               onClick={handleClose}
 
               disabled={isLoading}
