@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axiosInstance from "../Utils/axiosInstance";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
 import { toast } from "react-toastify";
@@ -21,6 +21,17 @@ const EditProfile = ({ userData, onSave, onClose }) => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+
+  // Prevent background scroll when modal is open
+  useEffect(() => {
+    // Add style to prevent scrolling when component mounts
+    document.body.style.overflow = 'hidden';
+
+    // Cleanup function to restore scrolling when component unmounts
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []); // Empty dependency array since this modal is always "open" when rendered
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -91,6 +102,12 @@ const EditProfile = ({ userData, onSave, onClose }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleClose = () => {
+    // Restore scrolling when closing
+    document.body.style.overflow = 'unset';
+    onClose();
   };
 
   return (
@@ -245,7 +262,7 @@ const EditProfile = ({ userData, onSave, onClose }) => {
           <div className="flex justify-end mt-6 gap-4">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               disabled={isLoading}
               className="px-4 py-2 rounded-md border text-gray-700 hover:bg-gray-100 disabled:opacity-50"
             >
@@ -269,7 +286,7 @@ const EditProfile = ({ userData, onSave, onClose }) => {
         </form>
 
         <button
-          onClick={onClose}
+          onClick={handleClose}
           className="absolute top-3 right-4 text-2xl text-gray-400 hover:text-gray-600"
         >
           ×

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axiosInstance from "../Utils/axiosInstance";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
 import { toast } from "react-toastify";
@@ -15,6 +15,22 @@ const EditCompanyModal = ({ isOpen, onClose, companyInfo, companyId, onUpdateSuc
   });
 
   const [isLoading, setIsLoading] = useState(false);
+
+  // Prevent background scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      // Add class to prevent scrolling
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Remove class to restore scrolling
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup function to restore scrolling when component unmounts
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
