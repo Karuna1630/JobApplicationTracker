@@ -1,47 +1,38 @@
-
-import React, { useState } from "react";
-
 import React, { useState, useEffect } from "react";
-
 import axiosInstance from "../Utils/axiosInstance";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
 import { toast } from "react-toastify";
 
-const EditProfile = ({ userData, onSave, onClose }) => {
+const EditCompanyModal = ({ isOpen, onClose, companyInfo, companyId, onUpdateSuccess }) => {
   const [formData, setFormData] = useState({
-    firstName: userData?.firstName || "",
-    lastName: userData?.lastName || "",
-    phoneNumber: userData?.phoneNumber || userData?.phone || "", 
-    email: userData?.email || "",
-    location: userData?.location || "",
-    education: userData?.education || "",
-    profilePicture: userData?.profilePicture || "",
-
-    resumeUrl: userData?.resumeUrl || "",
-    portfolioUrl: userData?.portfolioUrl || "",
-    linkedinProfile: userData?.linkedinProfile || "",
-    headline: userData?.headline || "",
-
-    linkedinProfile: userData?.linkedinProfile || "",
-
-    bio: userData?.bio || "",
-    dateOfBirth: userData?.dateOfBirth || "",
+    companyName: companyInfo.companyName || "",
+    description: companyInfo.description || "",
+    location: companyInfo.location || "",
+    email: companyInfo.email || "",
+    phoneNumber: companyInfo.phone || "",
+    firstName: companyInfo.firstName || "",
+    lastName: companyInfo.lastName || "",
+    websiteUrl: companyInfo.websiteUrl || "",
+    companyLogo: companyInfo.companyLogo || "",
   });
 
   const [isLoading, setIsLoading] = useState(false);
 
-
   // Prevent background scroll when modal is open
   useEffect(() => {
-    // Add style to prevent scrolling when component mounts
-    document.body.style.overflow = 'hidden';
+    if (isOpen) {
+      // Add class to prevent scrolling
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Remove class to restore scrolling
+      document.body.style.overflow = 'unset';
+    }
 
     // Cleanup function to restore scrolling when component unmounts
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, []); // Empty dependency array since this modal is always "open" when rendered
-
+  }, [isOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -52,38 +43,22 @@ const EditProfile = ({ userData, onSave, onClose }) => {
     e.preventDefault();
     setIsLoading(true);
 
-
     try {
       const token = localStorage.getItem("token");
       const userId = Number(getUserIdFromToken(token));
 
-
-
-    try {
-      const token = localStorage.getItem("token");
-      const userId = Number(getUserIdFromToken(token));
-
-
-      // Send data directly without wrapping in usersDto
       const payload = {
         userId,
-        firstName: formData.firstName || null,
-        lastName: formData.lastName || null,
+        companyId: companyId, // Include companyId for update
+        companyName: formData.companyName || null,
+        description: formData.description || null,
+        location: formData.location || null,
         email: formData.email || null,
         phoneNumber: formData.phoneNumber || null,
-        location: formData.location || null,
-        profilePicture: formData.profilePicture || null,
-
-        resumeUrl: formData.resumeUrl || null,
-        portfolioUrl: formData.portfolioUrl || null,
-        linkedinProfile: formData.linkedinProfile || null,
-        headline: formData.headline || null,
-
-        linkedinProfile: formData.linkedinProfile || null,
-
-        bio: formData.bio || null,
-        dateOfBirth: formData.dateOfBirth || null,
-        // Don't send passwordHash, companyId, userType unless they're being updated
+        firstName: formData.firstName || null,
+        lastName: formData.lastName || null,
+        websiteUrl: formData.websiteUrl || null,
+        companyLogo: formData.companyLogo || null,
       };
 
       // Remove null/empty values to only update fields that have data
@@ -95,17 +70,17 @@ const EditProfile = ({ userData, onSave, onClose }) => {
 
       console.log("Submitting payload:", payload);
 
-      const response = await axiosInstance.post("/submituser", payload);
+      const response = await axiosInstance.post("/submitcompany", payload);
 
       if (response.data.isSuccess) {
-        toast.success("Profile updated successfully!");
-        onSave(formData);
+        toast.success("Company profile updated successfully!");
+        onUpdateSuccess(formData);
         onClose();
       } else {
         toast.error(response.data.message || "Update failed");
       }
     } catch (error) {
-      console.error("Error updating profile:", error);
+      console.error("Error updating company profile:", error);
       
       if (error.response) {
         console.error("Error data:", error.response.data);
@@ -116,7 +91,7 @@ const EditProfile = ({ userData, onSave, onClose }) => {
           });
         }
         
-        toast.error(error.response.data.message || "Failed to update profile");
+        toast.error(error.response.data.message || "Failed to update company profile");
       } else {
         console.error("Error:", error.message);
         toast.error("Something went wrong while updating.");
@@ -124,26 +99,49 @@ const EditProfile = ({ userData, onSave, onClose }) => {
     } finally {
       setIsLoading(false);
     }
-
   };
 
-  const handleClose = () => {
-    // Restore scrolling when closing
-    document.body.style.overflow = 'unset';
-    onClose();
-
-  };
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
       <div className="bg-white w-full max-w-2xl rounded-lg shadow-lg p-6 relative max-h-[95vh] overflow-y-auto">
-        <h2 className="text-2xl font-semibold mb-4">Edit Profile</h2>
+        <h2 className="text-2xl font-semibold mb-4">Edit Company Profile</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Company Name */}
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Company Name
+            </label>
+            <input
+              name="companyName"
+              value={formData.companyName}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Company Name"
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Company Description
+            </label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              rows={3}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Describe your company..."
+            />
+          </div>
+
           {/* First Name */}
           <div>
             <label className="block text-sm font-medium mb-1">
-              First name
+              First Name
             </label>
             <input
               name="firstName"
@@ -157,7 +155,7 @@ const EditProfile = ({ userData, onSave, onClose }) => {
           {/* Last Name */}
           <div>
             <label className="block text-sm font-medium mb-1">
-              Last name
+              Last Name
             </label>
             <input
               name="lastName"
@@ -177,20 +175,20 @@ const EditProfile = ({ userData, onSave, onClose }) => {
               value={formData.email}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="example@email.com"
+              placeholder="company@example.com"
             />
           </div>
 
           {/* Phone */}
           <div>
-            <label className="block text-sm font-medium mb-1">Phone</label>
+            <label className="block text-sm font-medium mb-1">Phone Number</label>
             <input
               type="tel"
               name="phoneNumber"
               value={formData.phoneNumber}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="123-456-7890"
+              placeholder="+1 (555) 123-4567"
             />
           </div>
 
@@ -202,95 +200,33 @@ const EditProfile = ({ userData, onSave, onClose }) => {
               value={formData.location}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="City, Country"
+              placeholder="City, State, Country"
             />
           </div>
 
-
-          {/* Headline */}
+          {/* Website URL */}
           <div>
-            <label className="block text-sm font-medium mb-1">Headline</label>
-            <input
-              name="headline"
-              value={formData.headline}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="e.g., Frontend Developer | UI/UX Designer"
-            />
-          </div>
-
-          {/* Bio */}
-          <div>
-
-
-          {/* Bio */}
-          <div>
-
-            <label className="block text-sm font-medium mb-1">Bio</label>
-            <textarea
-              name="bio"
-              value={formData.bio}
-              onChange={handleChange}
-              rows={3}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Tell us about yourself..."
-            />
-          </div>
-
-          {/* LinkedIn Profile */}
-          <div>
-            <label className="block text-sm font-medium mb-1">LinkedIn Profile</label>
+            <label className="block text-sm font-medium mb-1">Website URL</label>
             <input
               type="url"
-              name="linkedinProfile"
-              value={formData.linkedinProfile}
+              name="websiteUrl"
+              value={formData.websiteUrl}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="https://linkedin.com/in/yourprofile"
-
+              placeholder="https://yourcompany.com"
             />
           </div>
 
-          {/* Portfolio URL */}
+          {/* Company Logo */}
           <div>
-            <label className="block text-sm font-medium mb-1">Portfolio URL</label>
+            <label className="block text-sm font-medium mb-1">Company Logo URL</label>
             <input
               type="url"
-              name="portfolioUrl"
-              value={formData.portfolioUrl}
+              name="companyLogo"
+              value={formData.companyLogo}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="https://yourportfolio.com"
-            />
-          </div>
-
-          {/* Resume URL */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Resume URL</label>
-            <input
-              type="url"
-              name="resumeUrl"
-              value={formData.resumeUrl}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="https://drive.google.com/your-resume"
-            />
-          </div>
-
-
-            />
-          </div>
-
-        
-          {/* Date of Birth */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Date of Birth</label>
-            <input
-              type="date"
-              name="dateOfBirth"
-              value={formData.dateOfBirth}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="https://yourcompany.com/logo.png"
             />
           </div>
 
@@ -298,11 +234,7 @@ const EditProfile = ({ userData, onSave, onClose }) => {
           <div className="flex justify-end mt-6 gap-4">
             <button
               type="button"
-
               onClick={onClose}
-
-              onClick={handleClose}
-
               disabled={isLoading}
               className="px-4 py-2 rounded-md border text-gray-700 hover:bg-gray-100 disabled:opacity-50"
             >
@@ -326,7 +258,7 @@ const EditProfile = ({ userData, onSave, onClose }) => {
         </form>
 
         <button
-          onClick={handleClose}
+          onClick={onClose}
           className="absolute top-3 right-4 text-2xl text-gray-400 hover:text-gray-600"
         >
           ×
@@ -336,4 +268,4 @@ const EditProfile = ({ userData, onSave, onClose }) => {
   );
 };
 
-export default EditProfile;
+export default EditCompanyModal;
