@@ -127,7 +127,7 @@ const PostJob = ({ onClose, onJobPosted }) => {
 
         <textarea
           name="requirements"
-          placeholder="Requirements"
+          placeholder="Requirements *"
           value={formData.requirements}
           onChange={handleChange}
           className="border p-2 w-full mb-3"
@@ -136,7 +136,7 @@ const PostJob = ({ onClose, onJobPosted }) => {
 
         <input
           name="location"
-          placeholder="Location"
+          placeholder="Location *"
           value={formData.location}
           onChange={handleChange}
           className="border p-2 w-full mb-3"
@@ -145,7 +145,7 @@ const PostJob = ({ onClose, onJobPosted }) => {
         <div className="flex gap-4 mb-3">
           <input
             name="salaryRangeMin"
-            placeholder="Min Salary"
+            placeholder="Min Salary *"
             type="number"
             value={formData.salaryRangeMin}
             onChange={handleChange}
@@ -153,7 +153,7 @@ const PostJob = ({ onClose, onJobPosted }) => {
           />
           <input
             name="salaryRangeMax"
-            placeholder="Max Salary"
+            placeholder="Max Salary *"
             type="number"
             value={formData.salaryRangeMax}
             onChange={handleChange}
@@ -186,7 +186,6 @@ const PostJob = ({ onClose, onJobPosted }) => {
         </select>
 
         <label className="block mb-1 font-semibold text-gray-700">
-          Application Deadline *
         </label>
         <input
           name="applicationDeadline"
