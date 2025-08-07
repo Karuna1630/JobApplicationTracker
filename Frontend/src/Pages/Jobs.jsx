@@ -8,12 +8,10 @@ const Jobs = ({ onClose, reloadTrigger, companyId }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
-  // Helper function to determine if job is active based on applicationDeadline
   const isJobActive = (job) => {
     if (!job.applicationDeadline) return false;
     const deadlineDate = new Date(job.applicationDeadline);
     const today = new Date();
-    // Normalize times for day comparison
     deadlineDate.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
     return deadlineDate >= today;

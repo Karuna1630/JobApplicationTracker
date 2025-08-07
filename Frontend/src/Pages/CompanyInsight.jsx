@@ -14,8 +14,6 @@ import {
   FaVenusMars,
   FaMapMarkedAlt,
 } from "react-icons/fa";
-import Navbar from "../Components/Navbar";
-import Footer from "../Components/Footer";
 
 // Sample data
 const joinYearData = [
