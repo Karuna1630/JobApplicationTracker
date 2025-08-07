@@ -8,6 +8,7 @@ import { getUserIdFromToken } from "../Utils/jwtUtils";
 import EditProfile from "../Pages/EditProfile";
 import Education from "../Components/Education";
 import Experience from "../Components/Experience";
+import Skill from "../Components/Skill"; // Import the new Skills component
 import { toast } from "react-toastify";
 
 const UserProfile = () => {
@@ -213,6 +214,12 @@ const UserProfile = () => {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Skills Section */}
+          <div className="border-t border-gray-300 px-8 py-6">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">Skills</h3>
+            <Skill />
           </div>
 
           {/* Experience */}

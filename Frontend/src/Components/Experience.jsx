@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   IoClose,
   IoAdd,
@@ -10,48 +10,6 @@ const Experience = () => {
   const [experiences, setExperiences] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editingExperience, setEditingExperience] = useState(null);
-  const [skillInput, setSkillInput] = useState("");
-  const [showSkillSuggestions, setShowSkillSuggestions] = useState(false);
-
-  const skillInputRef = useRef(null);
-
-  const predefinedSkills = [
-    "Communication",
-    "Leadership",
-    "Project Management",
-    "JavaScript",
-    "React",
-    "Node.js",
-    "Python",
-    "Data Analysis",
-    "Marketing",
-    "Sales",
-    "Customer Service",
-    "Team Management",
-    "Strategic Planning",
-    "Problem Solving",
-    "Creative Writing",
-    "Social Media Marketing",
-    "E-Commerce",
-    "Community Outreach",
-    "Public Speaking",
-    "Negotiation",
-    "Time Management",
-    "Microsoft Office",
-    "Adobe Creative Suite",
-    "SQL",
-    "HTML/CSS",
-    "Agile Methodology",
-    "Business Development",
-    "Content Creation",
-    "Digital Marketing",
-    "Financial Analysis",
-    "Quality Assurance",
-    "UX/UI Design",
-    "Machine Learning",
-    "Cloud Computing",
-    "DevOps",
-  ];
 
   const [formData, setFormData] = useState({
     jobTitle: "",
@@ -63,7 +21,6 @@ const Experience = () => {
     endYear: "",
     currentRole: false,
     description: "",
-    skills: [],
   });
 
   const months = [
@@ -95,9 +52,7 @@ const Experience = () => {
       endYear: "",
       currentRole: false,
       description: "",
-      skills: [],
     });
-    setSkillInput("");
     setEditingExperience(null);
   };
 
@@ -114,10 +69,8 @@ const Experience = () => {
     if (experience) {
       setFormData(experience);
       setEditingExperience(experience.id);
-      setShowSkillSuggestions(false);
     } else {
       resetForm();
-      setShowSkillSuggestions(false);
     }
     setShowModal(true);
   };
@@ -133,61 +86,6 @@ const Experience = () => {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-  };
-
-  const filterSkillSuggestions = () => {
-    if (!skillInput.trim()) return [];
-
-    const input = skillInput.toLowerCase();
-    const existingSkills = formData.skills.map((skill) => skill.toLowerCase());
-
-    return predefinedSkills
-      .filter(
-        (skill) =>
-          skill.toLowerCase().includes(input) &&
-          !existingSkills.includes(skill.toLowerCase())
-      )
-      .slice(0, 8);
-  };
-
-  const handleSkillInputChange = (e) => {
-    const value = e.target.value;
-    setSkillInput(value);
-    setShowSkillSuggestions(value.length > 0);
-  };
-
-  const addSkill = (skillName) => {
-    if (
-      skillName.trim() &&
-      !formData.skills.some(
-        (skill) => skill.toLowerCase() === skillName.toLowerCase()
-      )
-    ) {
-      setFormData((prev) => ({
-        ...prev,
-        skills: [...prev.skills, skillName.trim()],
-      }));
-    }
-    setSkillInput("");
-    setShowSkillSuggestions(false);
-
-    skillInputRef.current?.focus();
-  };
-
-  const removeSkill = (skillToRemove) => {
-    setFormData((prev) => ({
-      ...prev,
-      skills: prev.skills.filter((skill) => skill !== skillToRemove),
-    }));
-  };
-
-  const handleSkillKeyPress = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (skillInput.trim()) {
-        addSkill(skillInput);
-      }
-    }
   };
 
   const handleSubmit = () => {
@@ -223,20 +121,6 @@ const Experience = () => {
       : `${experience.endMonth} ${experience.endYear}`;
     return `${startDate} - ${endDate}`;
   };
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        skillInputRef.current &&
-        !skillInputRef.current.contains(event.target)
-      ) {
-        setShowSkillSuggestions(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   return (
     <div>
@@ -293,21 +177,6 @@ const Experience = () => {
                   </div>
                   {experience.description && (
                     <p className="text-gray-700 mb-3">{experience.description}</p>
-                  )}
-                  {experience.skills.length > 0 && (
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 mb-2">Skills:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {experience.skills.map((skill, index) => (
-                          <span
-                            key={index}
-                            className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
                   )}
                 </div>
                 <div className="flex gap-2 ml-4">
@@ -512,89 +381,6 @@ const Experience = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Describe your role and responsibilities..."
                 />
-              </div>
-
-              {/* Skills Section */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Skills
-                </label>
-                <p className="text-sm text-gray-600 mb-3">
-                  We recommend adding your top 5 used in this role. They'll
-                  also appear in your Skills section.
-                </p>
-
-                {!showSkillSuggestions && (
-                  <button
-                    type="button"
-                    onClick={() => setShowSkillSuggestions(true)}
-                    className="flex items-center gap-1 px-4 py-2 border border-blue-500 text-blue-600 rounded-full hover:bg-blue-50 transition"
-                  >
-                    + Add skill
-                  </button>
-                )}
-
-                {/* Skill input (appears when 'Add skill' is clicked) */}
-                {showSkillSuggestions && (
-                  <div className="mt-3 relative" ref={skillInputRef}>
-                    <input
-                      type="text"
-                      value={skillInput}
-                      onChange={handleSkillInputChange}
-                      onKeyPress={handleSkillKeyPress}
-                      placeholder="Type to add skills..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      autoFocus
-                    />
-
-                    {/* Skill Suggestions */}
-                    <div className="absolute z-[999] w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-scroll overscroll-contain">
-                      {filterSkillSuggestions().map((skill, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          onClick={() => addSkill(skill)}
-                          className="w-full px-3 py-2 text-left hover:bg-gray-100"
-                        >
-                          {skill}
-                        </button>
-                      ))}
-
-                      {skillInput.trim() &&
-                        !predefinedSkills
-                          .map((s) => s.toLowerCase())
-                          .includes(skillInput.trim().toLowerCase()) && (
-                          <button
-                            type="button"
-                            onClick={() => addSkill(skillInput)}
-                            className="w-full px-3 py-2 text-left font-semibold text-blue-600 hover:bg-gray-100"
-                          >
-                            Add "{skillInput}"
-                          </button>
-                        )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Display added skills */}
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {formData.skills.map((skill, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-1 bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-sm font-medium"
-                    >
-                      {skill}
-                      <button
-                        type="button"
-                        onClick={() => removeSkill(skill)}
-                        className="ml-1 text-blue-600 hover:text-blue-900 font-bold"
-                        aria-label={`Remove skill ${skill}`}
-                      >
-                        &times;
-                      </button>
-                    </div>
-                  ))}
-                </div>
               </div>
             </div>
 
