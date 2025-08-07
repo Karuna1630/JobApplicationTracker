@@ -349,4 +349,4 @@ const [showEditModal, setShowEditModal] = useState(false);
   );
 };
 
-export default CompanyProfile;
+export default CompanyProfile;  

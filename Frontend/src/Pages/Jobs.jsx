@@ -36,6 +36,7 @@ const Jobs = ({ onClose, reloadTrigger, companyId }) => {
           `/api/Jobs/getjobsbycompanyid?companyId=${companyId}`
         );
         const jobsData = response.data;
+      
 
         if (isMounted) {
           if (Array.isArray(jobsData) && jobsData.length > 0) {
