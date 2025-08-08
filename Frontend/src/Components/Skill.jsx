@@ -1,69 +1,76 @@
 import React, { useState, useRef, useEffect } from "react";
 import { IoClose, IoAdd } from "react-icons/io5";
 import { Award } from "react-feather";
+import axiosInstance from "../Utils/axiosInstance";
+import { getUserIdFromToken } from "../Utils/jwtUtils";
+import { toast } from "react-toastify";
 
 const Skills = () => {
-  const [skills, setSkills] = useState([]);
+  const [userSkills, setUserSkills] = useState([]); // Skills selected by user
+  const [allSkills, setAllSkills] = useState([]); // All available skills from API
   const [showModal, setShowModal] = useState(false);
   const [skillInput, setSkillInput] = useState("");
   const [showSkillSuggestions, setShowSkillSuggestions] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   const skillInputRef = useRef(null);
 
-  const predefinedSkills = [
-    "Communication",
-    "Leadership",
-    "Project Management",
-    "JavaScript",
-    "React",
-    "Node.js",
-    "Python",
-    "Data Analysis",
-    "Marketing",
-    "Sales",
-    "Customer Service",
-    "Team Management",
-    "Strategic Planning",
-    "Problem Solving",
-    "Creative Writing",
-    "Social Media Marketing",
-    "E-Commerce",
-    "Community Outreach",
-    "Public Speaking",
-    "Negotiation",
-    "Time Management",
-    "Microsoft Office",
-    "Adobe Creative Suite",
-    "SQL",
-    "HTML/CSS",
-    "Agile Methodology",
-    "Business Development",
-    "Content Creation",
-    "Digital Marketing",
-    "Financial Analysis",
-    "Quality Assurance",
-    "UX/UI Design",
-    "Machine Learning",
-    "Cloud Computing",
-    "DevOps",
-    "TypeScript",
-    "Angular",
-    "Vue.js",
-    "Docker",
-    "Kubernetes",
-    "AWS",
-    "Azure",
-    "Google Cloud",
-    "MongoDB",
-    "PostgreSQL",
-    "MySQL",
-    "Git",
-    "REST APIs",
-    "GraphQL",
-    "Microservices",
-    "Scrum",
-    "Kanban",
-  ];
+  // Fetch all available skills from API
+  const fetchAllSkills = async () => {
+    try {
+      const response = await axiosInstance.get(`/api/skills/getallskills`);
+      if (response.data && Array.isArray(response.data)) {
+        // Map backend response to expected format
+        const mappedSkills = response.data.map(skill => ({
+          id: skill.skillId,
+          skillName: skill.skill
+        }));
+        setAllSkills(mappedSkills);
+      }
+    } catch (error) {
+      console.error('Error fetching all skills:', error);
+      toast.error('Failed to load available skills');
+    }
+  };
+
+  // Fetch user's selected skills
+  const fetchUserSkills = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const userId = getUserIdFromToken(token);
+      
+      if (!userId) {
+        console.error('No user ID found');
+        return;
+      }
+
+      // Use the new API endpoint to get skills by userId
+      const response = await axiosInstance.get(`/api/skills/getskillsbyuserid?userId=${userId}`);
+      if (response.data && Array.isArray(response.data)) {
+        // Map backend response to expected format
+        const mappedSkills = response.data.map(skill => ({
+          id: skill.skillId,
+          skillName: skill.skill
+        }));
+        setUserSkills(mappedSkills);
+      }
+    } catch (error) {
+      console.error('Error fetching user skills:', error);
+      // Don't show error toast for user skills as user might not have any skills yet
+      setUserSkills([]);
+    }
+  };
+
+  // Initial data fetch
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      await Promise.all([fetchAllSkills(), fetchUserSkills()]);
+      setLoading(false);
+    };
+    loadData();
+  }, []);
 
   useEffect(() => {
     if (showModal) {
@@ -87,16 +94,23 @@ const Skills = () => {
   };
 
   const filterSkillSuggestions = () => {
-    if (!skillInput.trim()) return predefinedSkills.slice(0, 10);
+    if (!Array.isArray(allSkills) || allSkills.length === 0) {
+      return [];
+    }
+
+    if (!skillInput.trim()) return allSkills.slice(0, 10);
 
     const input = skillInput.toLowerCase();
-    const existingSkills = skills.map((skill) => skill.toLowerCase());
+    const userSkillIds = userSkills.map(skill => skill.id);
 
-    return predefinedSkills
+    return allSkills
       .filter(
         (skill) =>
-          skill.toLowerCase().includes(input) &&
-          !existingSkills.includes(skill.toLowerCase())
+          skill && 
+          skill.skillName && 
+          typeof skill.skillName === 'string' &&
+          skill.skillName.toLowerCase().includes(input) &&
+          !userSkillIds.includes(skill.id)
       )
       .slice(0, 8);
   };
@@ -106,34 +120,80 @@ const Skills = () => {
     setSkillInput(value);
   };
 
-  const addSkill = (skillName) => {
-    if (
-      skillName.trim() &&
-      !skills.some(
-        (skill) => skill.toLowerCase() === skillName.toLowerCase()
-      )
-    ) {
-      setSkills((prev) => [...prev, skillName.trim()]);
+  const addSkill = (skillToAdd) => {
+    if (!skillToAdd || !skillToAdd.id || !skillToAdd.skillName) {
+      console.error('Invalid skill object:', skillToAdd);
+      return;
     }
+
+    const isAlreadyAdded = userSkills.some(skill => skill.id === skillToAdd.id);
+    
+    if (!isAlreadyAdded) {
+      setUserSkills(prev => [...prev, skillToAdd]);
+    }
+    
     setSkillInput("");
     skillInputRef.current?.focus();
   };
 
   const removeSkill = (skillToRemove) => {
-    setSkills((prev) => prev.filter((skill) => skill !== skillToRemove));
+    if (!skillToRemove || !skillToRemove.id) {
+      console.error('Invalid skill object to remove:', skillToRemove);
+      return;
+    }
+    
+    setUserSkills(prev => prev.filter(skill => skill.id !== skillToRemove.id));
   };
 
   const handleSkillKeyPress = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (skillInput.trim()) {
-        addSkill(skillInput);
+      const suggestions = filterSkillSuggestions();
+      if (suggestions.length > 0) {
+        addSkill(suggestions[0]);
       }
     }
   };
 
-  const handleSaveSkills = () => {
-    closeModal();
+  const handleSaveSkills = async () => {
+    setSubmitting(true);
+    try {
+      const token = localStorage.getItem("token");
+      const userId = getUserIdFromToken(token);
+      
+      if (!userId) {
+        toast.error('User not authenticated');
+        return;
+      }
+
+      // Create array of skill IDs [1,2,3] format
+      const skillIds = userSkills
+        .filter(skill => skill && skill.id)
+        .map(skill => skill.id);
+      
+      // Convert skill IDs array to JSON string for backend storage as [1,2,3]
+      const skillsJsonString = JSON.stringify(skillIds);
+      
+      // Use existing submituser endpoint to update skills
+      const response = await axiosInstance.post(`/submituser`, {
+        userId: userId,
+        skills: skillsJsonString
+      });
+
+      if (response.data && response.data.isSuccess) {
+        toast.success('Skills updated successfully!');
+        closeModal();
+        // Refresh user skills to get latest data from server
+        await fetchUserSkills();
+      } else {
+        throw new Error(response.data?.message || 'Failed to update skills');
+      }
+    } catch (error) {
+      console.error('Error saving skills:', error);
+      toast.error('Failed to save skills. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   useEffect(() => {
@@ -149,6 +209,14 @@ const Skills = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-8">
+        <div className="text-gray-500">Loading skills...</div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -170,7 +238,7 @@ const Skills = () => {
 
       {/* Skills Display */}
       <div>
-        {skills.length === 0 ? (
+        {userSkills.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <Award size={48} className="mx-auto mb-4 text-gray-300" />
             <p className="text-lg mb-2">No skills added yet</p>
@@ -178,21 +246,28 @@ const Skills = () => {
           </div>
         ) : (
           <div className="flex flex-wrap gap-3">
-            {skills.map((skill, index) => (
-              <div
-                key={index}
-                className="group flex items-center gap-2 bg-blue-100 text-blue-800 rounded-full px-4 py-2 text-sm font-medium border border-blue-200 hover:bg-blue-200 transition-colors"
-              >
-                <span>{skill}</span>
-                <button
-                  onClick={() => removeSkill(skill)}
-                  className="text-blue-600 hover:text-blue-900 opacity-0 group-hover:opacity-100 transition-opacity"
-                  aria-label={`Remove skill ${skill}`}
+            {userSkills.map((skill) => {
+              if (!skill || !skill.id || !skill.skillName) {
+                console.warn('Invalid skill object:', skill);
+                return null;
+              }
+              
+              return (
+                <div
+                  key={`skill-${skill.id}`}
+                  className="group flex items-center gap-2 bg-blue-100 text-blue-800 rounded-full px-4 py-2 text-sm font-medium border border-blue-200 hover:bg-blue-200 transition-colors"
                 >
-                  <IoClose size={16} />
-                </button>
-              </div>
-            ))}
+                  <span>{skill.skillName}</span>
+                  <button
+                    onClick={() => removeSkill(skill)}
+                    className="text-blue-600 hover:text-blue-900 opacity-0 group-hover:opacity-100 transition-opacity"
+                    aria-label={`Remove skill ${skill.skillName}`}
+                  >
+                    <IoClose size={16} />
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -238,56 +313,61 @@ const Skills = () => {
                   {/* Skill Suggestions */}
                   {showSkillSuggestions && (
                     <div className="absolute z-10 w-full mt-2 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                      {filterSkillSuggestions().map((skill, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          onClick={() => addSkill(skill)}
-                          className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
-                        >
-                          {skill}
-                        </button>
-                      ))}
-
-                      {skillInput.trim() &&
-                        !predefinedSkills
-                          .map((s) => s.toLowerCase())
-                          .includes(skillInput.trim().toLowerCase()) && (
+                      {filterSkillSuggestions().map((skill) => {
+                        if (!skill || !skill.id || !skill.skillName) {
+                          return null;
+                        }
+                        
+                        return (
                           <button
+                            key={`suggestion-${skill.id}`}
                             type="button"
-                            onClick={() => addSkill(skillInput)}
-                            className="w-full px-4 py-3 text-left font-semibold text-blue-600 hover:bg-blue-50 border-b border-gray-100 transition-colors"
+                            onClick={() => addSkill(skill)}
+                            className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
                           >
-                            Add "{skillInput}"
+                            {skill.skillName}
                           </button>
-                        )}
+                        );
+                      })}
+                      
+                      {filterSkillSuggestions().length === 0 && skillInput.trim() && (
+                        <div className="px-4 py-3 text-gray-500 text-center">
+                          No skills found matching "{skillInput}"
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
 
                 {/* Display Added Skills */}
-                {skills.length > 0 && (
+                {userSkills.length > 0 && (
                   <div>
                     <h4 className="text-sm font-medium text-gray-700 mb-3">
-                      Your Skills ({skills.length})
+                      Your Skills ({userSkills.length})
                     </h4>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {skills.map((skill, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-2 bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-sm font-medium"
-                        >
-                          <span>{skill}</span>
-                          <button
-                            type="button"
-                            onClick={() => removeSkill(skill)}
-                            className="text-blue-600 hover:text-blue-900 ml-1"
-                            aria-label={`Remove skill ${skill}`}
+                      {userSkills.map((skill) => {
+                        if (!skill || !skill.id || !skill.skillName) {
+                          return null;
+                        }
+                        
+                        return (
+                          <div
+                            key={`modal-skill-${skill.id}`}
+                            className="flex items-center gap-2 bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-sm font-medium"
                           >
-                            <IoClose size={14} />
-                          </button>
-                        </div>
-                      ))}
+                            <span>{skill.skillName}</span>
+                            <button
+                              type="button"
+                              onClick={() => removeSkill(skill)}
+                              className="text-blue-600 hover:text-blue-900 ml-1"
+                              aria-label={`Remove skill ${skill.skillName}`}
+                            >
+                              <IoClose size={14} />
+                            </button>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -304,9 +384,10 @@ const Skills = () => {
               </button>
               <button
                 onClick={handleSaveSkills}
-                className="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                disabled={submitting}
+                className="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Save Skills
+                {submitting ? 'Saving...' : 'Save Skills'}
               </button>
             </div>
           </div>
