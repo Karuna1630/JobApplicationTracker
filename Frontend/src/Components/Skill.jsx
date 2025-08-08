@@ -118,6 +118,10 @@ const Skills = () => {
   const handleSkillInputChange = (e) => {
     const value = e.target.value;
     setSkillInput(value);
+    // Show suggestions when user starts typing
+    if (value.trim()) {
+      setShowSkillSuggestions(true);
+    }
   };
 
   const addSkill = (skillToAdd) => {
@@ -133,6 +137,7 @@ const Skills = () => {
     }
     
     setSkillInput("");
+    setShowSkillSuggestions(true); // Keep suggestions open for more additions
     skillInputRef.current?.focus();
   };
 
@@ -143,6 +148,8 @@ const Skills = () => {
     }
     
     setUserSkills(prev => prev.filter(skill => skill.id !== skillToRemove.id));
+    // Reset suggestions after removing a skill
+    setShowSkillSuggestions(true);
   };
 
   const handleSkillKeyPress = (e) => {
@@ -194,6 +201,10 @@ const Skills = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleInputFocus = () => {
+    setShowSkillSuggestions(true);
   };
 
   useEffect(() => {
@@ -298,12 +309,46 @@ const Skills = () => {
                   Start typing to search for skills or select from suggestions below
                 </p>
 
+                {/* Display Selected Skills - Show above search input */}
+                {userSkills.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">
+                      Selected Skills ({userSkills.length})
+                    </h4>
+                    <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200 min-h-[50px]">
+                      {userSkills.map((skill) => {
+                        if (!skill || !skill.id || !skill.skillName) {
+                          return null;
+                        }
+                        
+                        return (
+                          <div
+                            key={`modal-skill-${skill.id}`}
+                            className="flex items-center gap-2 bg-blue-100 text-blue-800 rounded-full px-3 py-2 text-sm font-medium border border-blue-200 hover:bg-blue-200 transition-colors"
+                          >
+                            <span>{skill.skillName}</span>
+                            <button
+                              type="button"
+                              onClick={() => removeSkill(skill)}
+                              className="text-blue-600 hover:text-blue-900 hover:bg-blue-300 rounded-full p-1 transition-colors"
+                              aria-label={`Remove skill ${skill.skillName}`}
+                            >
+                              <IoClose size={14} />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 {/* Skill Input */}
                 <div className="relative mb-6" ref={skillInputRef}>
                   <input
                     type="text"
                     value={skillInput}
                     onChange={handleSkillInputChange}
+                    onFocus={handleInputFocus}
                     onKeyPress={handleSkillKeyPress}
                     placeholder="Type to search for skills..."
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
@@ -338,39 +383,6 @@ const Skills = () => {
                     </div>
                   )}
                 </div>
-
-                {/* Display Added Skills */}
-                {userSkills.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-3">
-                      Your Skills ({userSkills.length})
-                    </h4>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {userSkills.map((skill) => {
-                        if (!skill || !skill.id || !skill.skillName) {
-                          return null;
-                        }
-                        
-                        return (
-                          <div
-                            key={`modal-skill-${skill.id}`}
-                            className="flex items-center gap-2 bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-sm font-medium"
-                          >
-                            <span>{skill.skillName}</span>
-                            <button
-                              type="button"
-                              onClick={() => removeSkill(skill)}
-                              className="text-blue-600 hover:text-blue-900 ml-1"
-                              aria-label={`Remove skill ${skill.skillName}`}
-                            >
-                              <IoClose size={14} />
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
 
