@@ -47,11 +47,14 @@ const UserProfile = () => {
           phone: profileData.phoneNumber || "Not Provided",
           location: profileData.location || "Not Specified",
           bio: profileData.bio || "No bio available",
-          profileImageUrl: profileData.profilePicture || "",         
+          profileImageUrl: profileData.profilePicture || "",
           linkedinProfile: profileData.linkedinProfile || "",
           dateOfBirth: profileData.dateOfBirth || "",
         });
-        localStorage.setItem("profileImageUrl", profileData.profilePicture || "");
+        localStorage.setItem(
+          "profileImageUrl",
+          profileData.profilePicture || ""
+        );
       } else {
         setErrorMsg("User profile not found.");
       }
@@ -109,23 +112,33 @@ const UserProfile = () => {
       // Since EditProfile component already handles the API call and shows success message,
       // we just need to refresh the profile data from the server
       await fetchProfile();
-      
+
       // Close the edit modal
       setShowEdit(false);
-      
+
       // The EditProfile component already shows the success toast
     } catch (error) {
       console.error("Profile refresh error:", error);
-      toast.error("Profile updated but failed to refresh display. Please reload the page.");
+      toast.error(
+        "Profile updated but failed to refresh display. Please reload the page."
+      );
     }
   };
 
   if (isLoading) {
-    return <div className="flex justify-center items-center min-h-screen text-lg">Loading profile...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen text-lg">
+        Loading profile...
+      </div>
+    );
   }
 
   if (errorMsg) {
-    return <div className="flex justify-center items-center min-h-screen text-red-600 text-lg">{errorMsg}</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen text-red-600 text-lg">
+        {errorMsg}
+      </div>
+    );
   }
 
   return (
@@ -134,10 +147,13 @@ const UserProfile = () => {
       <div className="min-h-screen bg-gradient-to-br from-blue-100 to-white flex justify-center p-6">
         <div className="w-full max-w-5xl bg-white rounded-2xl shadow-lg overflow-hidden relative">
           {/* Header */}
-          <div className="h-56 bg-cover bg-center relative" style={{ backgroundImage: `url(${BackgroundImage})` }}>
+          <div
+            className=" h-56 bg-cover bg-center relative"
+            style={{ backgroundImage: `url(${BackgroundImage})` }}
+          >
             <div className="absolute top-4 right-4">
-              <button 
-                onClick={() => setShowEdit(true)} 
+              <button
+                onClick={() => setShowEdit(true)}
                 className="bg-white p-2 rounded-full shadow hover:bg-gray-50 transition-colors"
                 title="Edit Profile"
               >
@@ -146,54 +162,58 @@ const UserProfile = () => {
             </div>
           </div>
 
-          {/* Profile Section: Left-aligned image, name, and bio below */}
-          <div className="px-8 pt-6 pb-4">
-            <div className="flex flex-col items-start gap-4">
-              {/* Profile Image */}
-              <div className="relative">
-                <img
-                  src={userInfo.profileImageUrl || "https://via.placeholder.com/150"}
-                  alt="Profile"
-                  className="w-36 h-36 rounded-full border-4 border-white shadow-md object-cover"
+          {/* Profile Image Section */}
+          <div className="relative px-10 flex flex-col items-start -top-16 gap-2">
+            {/* Profile Image */}
+            <div className="relative">
+              <img
+                src={
+                  userInfo.profileImageUrl || "https://via.placeholder.com/150"
+                }
+                alt="Profile"
+                className="w-36 h-36 rounded-full border-4 border-white shadow-md object-cover"
+              />
+              <label className="absolute bottom-0 right-0 bg-blue-500 p-1.5 rounded-full cursor-pointer hover:bg-blue-600 transition-colors">
+                <FiCamera className="text-white w-4 h-4" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfileImageChange}
+                  className="hidden"
                 />
-                <label className="absolute bottom-0 right-0 bg-blue-500 p-2 rounded-full cursor-pointer hover:bg-blue-600 transition-colors">
-                  <FiCamera className="text-white w-4 h-4" />
-                  <input type="file" accept="image/*" onChange={handleProfileImageChange} className="hidden" />
-                </label>
-              </div>
-
-              {/* Name and Headline */}
-              <div>
-                <h2 className="text-2xl font-semibold text-gray-800">
-                  {userInfo.firstName} {userInfo.lastName}
-                </h2>
-
-              </div>
-
-              {/* Bio */}
-              <p className="text-base text-gray-600 max-w-3xl leading-relaxed">{userInfo.bio}</p>
-
-              {/* Social Links */}
-              {(userInfo.linkedinProfile || userInfo.portfolioUrl || userInfo.resumeUrl) && (
-                <div className="flex gap-4 mt-2">
-                  {userInfo.linkedinProfile && (
-                    <a 
-                      href={userInfo.linkedinProfile} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 underline"
-                    >
-                      LinkedIn
-                    </a>
-                  )}
-                </div>
-              )}
+              </label>
             </div>
+
+            {/* Name */}
+            <h2 className="mt-3 text-xl font-semibold text-gray-800 text-center">
+              {userInfo.firstName} {userInfo.lastName}
+            </h2>
+
+            {/* Bio */}
+            <p className="text-sm text-gray-500 max-w-xl leading-snug text-center">
+              {userInfo.bio}
+            </p>
+
+            {/* Social Links */}
+            {userInfo.linkedinProfile && (
+              <div className="mt-1">
+                <a
+                  href={userInfo.linkedinProfile}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 underline text-sm"
+                >
+                  LinkedIn
+                </a>
+              </div>
+            )}
           </div>
 
           {/* Contact Info */}
-          <div className="border-t border-gray-300 px-8 py-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Contact Information</h3>
+          <div className="border-t border-gray-300 px-8 py-6 ">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+              Contact Information
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 text-gray-600">
               <div className="flex flex-col">
                 <span className="font-medium text-gray-800">Email</span>
@@ -209,8 +229,12 @@ const UserProfile = () => {
               </div>
               {userInfo.dateOfBirth && (
                 <div className="flex flex-col">
-                  <span className="font-medium text-gray-800">Date of Birth</span>
-                  <span>{new Date(userInfo.dateOfBirth).toLocaleDateString()}</span>
+                  <span className="font-medium text-gray-800">
+                    Date of Birth
+                  </span>
+                  <span>
+                    {new Date(userInfo.dateOfBirth).toLocaleDateString()}
+                  </span>
                 </div>
               )}
             </div>
@@ -224,7 +248,9 @@ const UserProfile = () => {
 
           {/* Experience */}
           <div className="border-t border-gray-300 px-8 py-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Experience</h3>
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+              Experience
+            </h3>
             <Experience />
           </div>
 
@@ -235,8 +261,6 @@ const UserProfile = () => {
         </div>
       </div>
 
-      <Footer />
-
       {showEdit && (
         <EditProfile
           userData={{
@@ -246,7 +270,7 @@ const UserProfile = () => {
             phoneNumber: userInfo.phone,
             location: userInfo.location,
             bio: userInfo.bio,
-            linkedinProfile: userInfo.linkedinProfile,        
+            linkedinProfile: userInfo.linkedinProfile,
             dateOfBirth: userInfo.dateOfBirth,
             profilePicture: userInfo.profileImageUrl,
           }}
@@ -254,6 +278,7 @@ const UserProfile = () => {
           onClose={() => setShowEdit(false)}
         />
       )}
+      <Footer />
     </>
   );
 };
