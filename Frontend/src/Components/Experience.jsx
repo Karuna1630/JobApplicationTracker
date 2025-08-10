@@ -127,7 +127,7 @@ const Experience = () => {
       {/* Experience Section Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <p className="text-gray-600 text-sm">
+          <p className="text-gray-600 text-lg">
             Showcase your accomplishments and get up to 2X as many profile views
             and connections
           </p>

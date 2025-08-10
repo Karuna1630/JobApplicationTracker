@@ -108,13 +108,13 @@ const Navbar = () => {
             <Link to="/applications" className="hover:text-blue-600 transition">
               My Applications
             </Link>
-            {/* <Link to="/userProfile" className="hover:text-blue-600 transition">Profile</Link> */}
+            <Link to="/companies" className="hover:text-blue-600 transition">Companies</Link>
           </>
         )}
 
         {isLoggedIn && role === 2 && (
           <>
-            <Link to="/companyProfile" className="hover:text-blue-600 transition">
+            <Link to="/companyprofile" className="hover:text-blue-600 transition">
               Dashboard
             </Link>
             <Link to="/postjob" className="hover:text-blue-600 transition">

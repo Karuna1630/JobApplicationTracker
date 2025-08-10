@@ -211,7 +211,7 @@ const UserProfile = () => {
 
           {/* Contact Info */}
           <div className="border-t border-gray-300 px-8 py-6 ">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
               Contact Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 text-gray-600">

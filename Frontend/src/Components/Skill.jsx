@@ -234,7 +234,7 @@ const Skills = () => {
       {/* Skills Section Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <p className="text-gray-600 text-sm">
+          <p className="text-gray-600 text-lg">
             Add skills to showcase your expertise and attract relevant opportunities
           </p>
         </div>
