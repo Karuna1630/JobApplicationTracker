@@ -1,4 +1,7 @@
 import React from "react";
+import Navbar from "../Components/Navbar";
+import SidebarMenu from "../Components/SidebarMenu";
+import Footer from "../Components/Footer";
 import {
   LineChart,
   Line,
@@ -71,67 +74,69 @@ const CustomLineChart = ({ title, data, xKey, yKey }) => (
   </div>
 );
 
-// Main insights section
-const CompanyInsight = ({ onClose }) => {
-
+const CompanyInsight = () => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-      <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-6xl relative">
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-red-500 text-lg"
-        >
-          ✕
-        </button>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          <CustomLineChart
-            title={
-              <span className="flex items-center justify-center gap-2">
-                <FaUserTie className="text-gray-600" />
-                Join Year Distribution
-              </span>
-            }
-            data={joinYearData}
-            xKey="year"
-            yKey="count"
-          />
-          <CustomLineChart
-            title={
-              <span className="flex items-center justify-center gap-2">
-                <FaRing className="text-gray-600" />
-                Marital Status Breakdown
-              </span>
-            }
-            data={maritalData}
-            xKey="status"
-            yKey="count"
-          />
-          <CustomLineChart
-            title={
-              <span className="flex items-center justify-center gap-2">
-                <FaVenusMars className="text-gray-600" />
-                Gender Distribution
-              </span>
-            }
-            data={genderData}
-            xKey="gender"
-            yKey="count"
-          />
-          <CustomLineChart
-            title={
-              <span className="flex items-center justify-center gap-2">
-                <FaMapMarkedAlt className="text-gray-600" />
-                Province Wise Distribution
-              </span>
-            }
-            data={provinceData}
-            xKey="province"
-            yKey="count"
-          />
+    <>
+      <Navbar />
+      <div className="min-h-screen flex flex-row bg-gradient-to-br from-blue-100 to-white py-10">
+        <div className="p-6 w-fit">
+          <SidebarMenu />
+        </div>
+
+        <div className="m-2 ml-8 w-4/5 max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8">
+          <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
+            Company Insights
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <CustomLineChart
+              title={
+                <span className="flex items-center justify-center gap-2">
+                  <FaUserTie className="text-gray-600" />
+                  Join Year Distribution
+                </span>
+              }
+              data={joinYearData}
+              xKey="year"
+              yKey="count"
+            />
+            <CustomLineChart
+              title={
+                <span className="flex items-center justify-center gap-2">
+                  <FaRing className="text-gray-600" />
+                  Marital Status Breakdown
+                </span>
+              }
+              data={maritalData}
+              xKey="status"
+              yKey="count"
+            />
+            <CustomLineChart
+              title={
+                <span className="flex items-center justify-center gap-2">
+                  <FaVenusMars className="text-gray-600" />
+                  Gender Distribution
+                </span>
+              }
+              data={genderData}
+              xKey="gender"
+              yKey="count"
+            />
+            <CustomLineChart
+              title={
+                <span className="flex items-center justify-center gap-2">
+                  <FaMapMarkedAlt className="text-gray-600" />
+                  Province Wise Distribution
+                </span>
+              }
+              data={provinceData}
+              xKey="province"
+              yKey="count"
+            />
+          </div>
         </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 };
 

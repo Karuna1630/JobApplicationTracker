@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../Utils/axiosInstance";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
-import SidebarMenu from "../Components/SidebarMenu"; 
+import SidebarMenu from "../Components/SidebarMenu";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import EditCompanyModal from "../Components/EditCompanyModal";
@@ -31,10 +31,6 @@ const InfoCard = ({ icon, label, value, color = "gray" }) => (
 );
 
 const CompanyProfile = () => {
-  const [showApplications, setShowApplications] = useState(false);
-const [showJobs, setShowJobs] = useState(false);
-const [showPostJob, setShowPostJob] = useState(false);
-const [showCompanyInsight, setShowCompanyInsight] = useState(false);
   const [reloadJobs, setReloadJobs] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [companyId, setCompanyId] = useState(null);
@@ -80,8 +76,11 @@ const [showCompanyInsight, setShowCompanyInsight] = useState(false);
 
           });
 
-          const compId = profileData.companyProfile.companyId;
-          setCompanyId(compId);
+        const compId = profileData.companyProfile.companyId;
+        setCompanyId(compId);
+        localStorage.setItem('currentCompanyId', compId); // Add this line
+
+
 
           // Fetch all jobs for the company to get the total count and display data
           const jobsResponse = await axiosInstance.get(`/api/Jobs/getjobsbycompanyid?companyId=${compId}`);
@@ -148,13 +147,12 @@ const [showCompanyInsight, setShowCompanyInsight] = useState(false);
   return (
     <>
       <Navbar />
-     <div className="min-h-screen flex flex-row bg-gradient-to-br from-blue-100 to-white py-12">
-  <div className="bg-blue-900 text-white w-full md:w-1/5 lg:w-1/6 px-4 py-6">
-    <SidebarMenu />
+      <div className="min-h-screen flex flex-row bg-gradient-to-br from-blue-100 to-white py-10 ">
+        <div className="p-6 w-fit">
+          <SidebarMenu />
+        </div>
 
-</div>
-
-          <div className=" w-4/5 max-w-6xl mx-auto gap-8 px-4 sm:px-8 pl-16">
+        <div className="  m-2 ml-8 w-4/5 max-w-6xl mx-auto gap-4">
           <div className="bg-white shadow-xl rounded-2xl overflow-hidden mb-8">
             <div className="h-56 flex items-end justify-between px-6 py-4 relative bg-gradient-to-r from-indigo-300 to-pink-200">
               <div className="opacity-10 rounded-t-2xl"></div>
@@ -166,8 +164,8 @@ const [showCompanyInsight, setShowCompanyInsight] = useState(false);
                 Edit Profile
               </button>
             </div>
-            
-            
+
+
             <div className="p-8">
               <h2 className="text-3xl font-bold text-gray-800">{companyInfo.companyName}</h2>
               <p className="text-gray-600 mt-2">{companyInfo.description}</p>
@@ -234,6 +232,7 @@ const [showCompanyInsight, setShowCompanyInsight] = useState(false);
               <InfoCard icon={<FaUserPlus />} label="New Signups (30d)" value="14" color="orange" />
             </div>
           </div>
+          
 
 
           {showEditModal && (
@@ -244,12 +243,8 @@ const [showCompanyInsight, setShowCompanyInsight] = useState(false);
               onUpdateSuccess={handleUpdateSuccess}
             />
           )}
-
         </div>
-        
       </div>
-      
-           
       <Footer />
     </>
   );

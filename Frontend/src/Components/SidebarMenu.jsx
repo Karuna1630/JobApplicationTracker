@@ -5,83 +5,61 @@ import {
   FaPlusCircle,
   FaChartBar,
 } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const SidebarMenu = ({
   showApplications = false,
-  setShowApplications = () => {},
   showJobs = false,
-  setShowJobs = () => {},
   showPostJob = false,
-  setShowPostJob = () => {},
   showCompanyInsight = false,
-  setShowCompanyInsight = () => {},
-}) => {
+            }) => {
   const menuItems = [
     {
       label: "Applications",
       icon: <FaClipboardList />,
       key: "showApplications",
       active: showApplications,
-      onClick: () => {
-        setShowApplications(true);
-        setShowJobs(false);
-        setShowPostJob(false);
-        setShowCompanyInsight(false);
-      },
+      path: "/applicationreceived",
     },
     {
       label: "Jobs",
       icon: <FaBriefcase />,
       key: "showJobs",
       active: showJobs,
-      onClick: () => {
-        setShowApplications(false);
-        setShowJobs(true);
-        setShowPostJob(false);
-        setShowCompanyInsight(false);
-      },
+      path: "/jobs",
     },
     {
       label: "Post Job",
       icon: <FaPlusCircle />,
       key: "showPostJob",
       active: showPostJob,
-      onClick: () => {
-        setShowApplications(false);
-        setShowJobs(false);
-        setShowPostJob(true);
-        setShowCompanyInsight(false);
-      },
+      path: "/postjob",
     },
     {
       label: "Insights",
       icon: <FaChartBar />,
       key: "showCompanyInsight",
       active: showCompanyInsight,
-      onClick: () => {
-        setShowApplications(false);
-        setShowJobs(false);
-        setShowPostJob(false);
-        setShowCompanyInsight(true);
-      },
+      path: "/companyInsight",
     },
   ];
 
   return (
-    <div className="  bg-blue-900  text-white w-full md:w-1/5 lg:w-1/6 px-4 py-6">
+    <div className="bg-white shadow-lg rounded-xl p-6 w-64">
       <ul className="space-y-4">
         {menuItems.map((item) => (
           <li
             key={item.key}
-            className={`flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer transition ${
-              item.active
+            className={`flex items-center gap-3 cursor-pointer px-4 py-2 rounded-lg transition-all duration-200
+              ${item.active
                 ? "bg-blue-600 text-white"
-                : "hover:bg-blue-700 hover:text-white text-gray-300"
-            }`}
-            onClick={item.onClick}
+                : "text-gray-600 hover:bg-blue-100 hover:text-blue-700"
+              }`}
           >
-            {item.icon}
-            <span className="text-sm font-medium">{item.label}</span>
+            <Link to={item.path} className="flex items-center gap-3 w-full">
+              <span className="text-lg">{item.icon}</span>
+              <span className="text-sm font-semibold">{item.label}</span>
+            </Link>
           </li>
         ))}
       </ul>
