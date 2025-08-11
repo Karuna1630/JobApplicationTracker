@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
+import { FaSuitcase } from "react-icons/fa";
 import axiosInstance from "../Utils/axiosInstance";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
 import SidebarMenu from "../Components/SidebarMenu";
+import PostJob from "./PostJob";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 
 const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
+  const [showPostJob, setShowPostJob] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
@@ -51,7 +54,7 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
           `/api/Jobs/getjobsbycompanyid?companyId=${companyId}`
         );
         const jobsData = response.data;
-      
+
 
         if (isMounted) {
           if (Array.isArray(jobsData) && jobsData.length > 0) {
@@ -89,6 +92,14 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
       isMounted = false;
     };
   }, [reloadTrigger, companyId]);
+
+  // Handle job posting success
+  const handleJobPosted = (newJob) => {
+    setJobPosts((prev) => [newJob, ...prev]);
+    setTotalJobsCount((prev) => prev + 1);
+    setReloadJobs(prev => !prev);
+  };
+
 
   // Filter jobs based on search term and status
   const filteredJobs = jobs.filter((job) => {
@@ -181,7 +192,7 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
       </div>
     );
 
-   return (
+  return (
     <>
       <Navbar />
       <div className="min-h-screen flex flex-row bg-gradient-to-br from-blue-100 to-white py-10">
@@ -193,12 +204,19 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
         {/* Main Content */}
         <div className="m-2 ml-8 w-4/5 max-w-6xl mx-auto gap-4">
           {/* Page Title */}
-          <div className="bg-white shadow-xl rounded-2xl p-8 mb-8">
+          <div className="relative bg-white shadow-xl rounded-2xl p-8 mb-8">
             <h1 className="text-3xl font-bold text-gray-800 mb-2">Job Management</h1>
             <p className="text-gray-600">
               Showing {filteredJobs.length} of {jobs.length}{" "}
               {jobs.length === 1 ? "Job" : "Jobs"}
             </p>
+            <button
+              onClick={() => setShowPostJob(true)}
+              className="px-4 absolute top-9 right-10  bg-blue-600 text-white font-semibold py-2 rounded-xl hover:bg-blue-800 "
+            >
+              Add Job
+            </button>
+
           </div>
 
           {/* Search + Filter */}
@@ -232,26 +250,37 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
           {/* Jobs List */}
           <div className="bg-white shadow-xl rounded-2xl p-8 mb-8">
             {filteredJobs.length === 0 ? (
-              <div className="text-center py-8">
-                <svg
-                  className="w-16 h-16 mx-auto text-gray-300 mb-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6"
-                  />
-                </svg>
-                <p className="text-gray-500">
-                  {jobs.length === 0
-                    ? "No jobs found"
-                    : "No jobs match your search criteria"}
-                </p>
-              </div>
+              jobs.length === 0 ? (
+                // Case 1: No jobs at all
+                <div className="text-center py-8">
+                  <FaSuitcase className="text-4xl text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500">No job posts available.</p>
+                  <button
+                    onClick={() => setShowPostJob(true)}
+                    className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Post Your First Job
+                  </button>
+                </div>
+              ) : (
+                // Case 2: Jobs exist but none match search/filter
+                <div className="text-center py-8">
+                  <svg
+                    className="w-16 h-16 mx-auto text-gray-300 mb-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6"
+                    />
+                  </svg>
+                  <p className="text-gray-500">No jobs match your search criteria.</p>
+                </div>
+              )
             ) : (
               <div className="space-y-6">
                 {filteredJobs.map((job, index) => {
@@ -270,11 +299,10 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
                         </h2>
                         <div className="flex items-center gap-2 ml-4">
                           <span
-                            className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              isActive
-                                ? "bg-green-100 text-green-700"
-                                : "bg-red-100 text-red-700"
-                            }`}
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${isActive
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-700"
+                              }`}
                           >
                             {isActive ? "Active" : "Inactive"}
                           </span>
@@ -313,8 +341,8 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
                             {job.salaryRangeMin && job.salaryRangeMax
                               ? `$${job.salaryRangeMin.toLocaleString()} - $${job.salaryRangeMax.toLocaleString()}`
                               : job.salary
-                              ? `$${job.salary.toLocaleString()}`
-                              : "Not specified"}
+                                ? `$${job.salary.toLocaleString()}`
+                                : "Not specified"}
                           </p>
                         </div>
                         <div>
@@ -323,10 +351,10 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
                             {job.experienceLevel === 1
                               ? "Entry Level"
                               : job.experienceLevel === 2
-                              ? "Mid Level"
-                              : job.experienceLevel === 3
-                              ? "Senior Level"
-                              : job.experience || "Not specified"}
+                                ? "Mid Level"
+                                : job.experienceLevel === 3
+                                  ? "Senior Level"
+                                  : job.experience || "Not specified"}
                           </span>
                         </div>
                         <div>
@@ -344,17 +372,17 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
                           <p className="text-gray-600 mt-1">
                             {job.applicationDeadline
                               ? new Date(job.applicationDeadline).toLocaleDateString("en-US", {
-                                  year: "numeric",
-                                  month: "long",
-                                  day: "numeric",
-                                })
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })
                               : job.deadline
-                              ? new Date(job.deadline).toLocaleDateString("en-US", {
+                                ? new Date(job.deadline).toLocaleDateString("en-US", {
                                   year: "numeric",
                                   month: "long",
                                   day: "numeric",
                                 })
-                              : "Not specified"}
+                                : "Not specified"}
                           </p>
                         </div>
                         <div>
@@ -362,14 +390,14 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
                           <p className="text-gray-600 mt-1">
                             {job.postedAt || job.createdAt || job.datePosted
                               ? new Date(
-                                  job.postedAt ||
-                                    job.createdAt ||
-                                    job.datePosted
-                                ).toLocaleDateString("en-US", {
-                                  year: "numeric",
-                                  month: "long",
-                                  day: "numeric",
-                                })
+                                job.postedAt ||
+                                job.createdAt ||
+                                job.datePosted
+                              ).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })
                               : "Not specified"}
                           </p>
                         </div>
@@ -394,6 +422,13 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
           </div>
         </div>
       </div>
+
+      {showPostJob && (
+        <PostJob
+          onClose={() => setShowPostJob(false)}
+          onJobPosted={handleJobPosted}
+        />
+      )}
       <Footer />
     </>
   );

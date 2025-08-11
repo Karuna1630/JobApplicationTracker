@@ -11,7 +11,6 @@ const SidebarMenu = ({
   showCompanyProfile = false,
   showApplications = false,
   showJobs = false,
-  showPostJob = false,
   showCompanyInsight = false,
             }) => {
   const menuItems = [
@@ -35,13 +34,6 @@ const SidebarMenu = ({
       key: "showJobs",
       active: showJobs,
       path: "/jobs",
-    },
-    {
-      label: "Post Job",
-      icon: <FaPlusCircle />,
-      key: "showPostJob",
-      active: showPostJob,
-      path: "/postjob",
     },
     {
       label: "Insights",

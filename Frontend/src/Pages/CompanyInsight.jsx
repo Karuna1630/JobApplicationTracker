@@ -83,7 +83,7 @@ const CompanyInsight = () => {
           <SidebarMenu />
         </div>
 
-        <div className="m-2 ml-8 w-4/5 max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8">
+        <div className="m-2 ml-8 w-4/5 max-w-6xl mx-auto gap-4 bg-white rounded-2xl shadow-xl p-8">
           <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
             Company Insights
           </h2>
