@@ -185,12 +185,12 @@ const UserProfile = () => {
             </div>
 
             {/* Name */}
-            <h2 className="mt-3 text-xl font-semibold text-gray-800 text-center">
+            <h2 className="mt-3 text-3xl font-bold text-gray-800 text-center">
               {userInfo.firstName} {userInfo.lastName}
             </h2>
 
             {/* Bio */}
-            <p className="text-sm text-gray-500 max-w-xl leading-snug text-center">
+            <p className="text-3xl text-gray-500 max-w-xl leading-snug text-center">
               {userInfo.bio}
             </p>
 
@@ -211,12 +211,12 @@ const UserProfile = () => {
 
           {/* Contact Info */}
           <div className="border-t border-gray-300 px-8 py-6 ">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">
               Contact Information
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 text-gray-600">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 text-gray-800">
               <div className="flex flex-col">
-                <span className="font-medium text-gray-800">Email</span>
+                <span className="font-medium text-gray-800 text-lg">Email</span>
                 <span>{userInfo.email}</span>
               </div>
               <div className="flex flex-col">
