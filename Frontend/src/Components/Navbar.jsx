@@ -30,14 +30,12 @@ const Navbar = () => {
   const lastName = localStorage.getItem("lastName") || "";
   const profileImageUrl = localStorage.getItem("profileImageUrl");
 
-
   let initials = "U";
   if (firstName && lastName) {
     initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   } else if (firstName) {
     initials = `${firstName.charAt(0)}`.toUpperCase();
   }
-
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -55,7 +53,7 @@ const Navbar = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     localStorage.removeItem("firstName");
-    localStorage.removeItem("lastName")
+    localStorage.removeItem("lastName");
     setIsLoggedIn(false);
     setRole(null);
     setDropdownOpen(false);
@@ -106,15 +104,26 @@ const Navbar = () => {
         {isLoggedIn && role === 4 && (
           <>
             <Link to="/applications" className="hover:text-blue-600 transition">
-              My Applications
+              Overview
             </Link>
-            <Link to="/companies" className="hover:text-blue-600 transition">Companies</Link>
+            <Link to="/companies" className="hover:text-blue-600 transition">
+              Companies
+            </Link>
+            <Link to="/userprofile" className="hover:text-blue-600 transition">
+              My Profile
+            </Link>
+            <Link to="/status" className="hover:text-blue-600 transition">
+              My Status
+            </Link>
           </>
         )}
 
         {isLoggedIn && role === 2 && (
           <>
-            <Link to="/companyprofile" className="hover:text-blue-600 transition">
+            <Link
+              to="/companyprofile"
+              className="hover:text-blue-600 transition"
+            >
               Dashboard
             </Link>
             <Link to="/postjob" className="hover:text-blue-600 transition">
@@ -123,7 +132,10 @@ const Navbar = () => {
             <Link to="/manage-jobs" className="hover:text-blue-600 transition">
               Manage Jobs
             </Link>
-            <Link to="/companyinsight" className="hover:text-blue-600 transition">
+            <Link
+              to="/companyinsight"
+              className="hover:text-blue-600 transition"
+            >
               Company Insights
             </Link>
           </>
@@ -167,25 +179,26 @@ const Navbar = () => {
               className="flex items-center gap-2 cursor-pointer select-none"
               onClick={() => setDropdownOpen((prev) => !prev)}
             >
- {profileImageUrl ? (
-  <img
-    src={profileImageUrl}
-    alt="Profile"
-    className="w-10 h-10 rounded-full object-cover border border-blue-500"
-    title={`${firstName} ${lastName}`}
-  />
-) : (
-  <div
-    className="bg-blue-600 text-white font-semibold w-10 h-10 rounded-full flex items-center justify-center"
-    title={`${firstName} ${lastName}`}
-  >
-    {initials}
-  </div>
-)}
+              {profileImageUrl ? (
+                <img
+                  src={profileImageUrl}
+                  alt="Profile"
+                  className="w-10 h-10 rounded-full object-cover border border-blue-500"
+                  title={`${firstName} ${lastName}`}
+                />
+              ) : (
+                <div
+                  className="bg-blue-600 text-white font-semibold w-10 h-10 rounded-full flex items-center justify-center"
+                  title={`${firstName} ${lastName}`}
+                >
+                  {initials}
+                </div>
+              )}
 
               <svg
-                className={`w-4 h-4 text-gray-500 transition-transform ${dropdownOpen ? "rotate-180" : ""
-                  }`}
+                className={`w-4 h-4 text-gray-500 transition-transform ${
+                  dropdownOpen ? "rotate-180" : ""
+                }`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -208,7 +221,15 @@ const Navbar = () => {
                 >
                   Profile
                 </Link>
-                <button
+              
+                <Link
+                  to="/settings"
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  onClick={() => setDropdownOpen(false)}
+                >
+                  Settings
+                </Link>
+                  <button
                   onClick={handleLogout}
                   className="w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100"
                 >
