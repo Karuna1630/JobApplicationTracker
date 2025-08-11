@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../Utils/axiosInstance";
+import { getUserIdFromToken } from "../Utils/jwtUtils";
+import SidebarMenu from "../Components/SidebarMenu";
+import Navbar from "../Components/Navbar";
+import Footer from "../Components/Footer";
 
 const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
   const [jobs, setJobs] = useState([]);
@@ -11,7 +15,7 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
   // Get companyId from props or localStorage
   const getCompanyId = () => {
     if (propCompanyId) return propCompanyId;
-    
+
     // Get from localStorage (set by CompanyProfile)
     const storedCompanyId = localStorage.getItem('currentCompanyId');
     return storedCompanyId;
@@ -128,7 +132,7 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
       console.error("Delete job error:", error);
       alert(
         error.response?.data?.message ||
-          "Failed to delete job. Please try again."
+        "Failed to delete job. Please try again."
       );
     }
   };
@@ -176,206 +180,221 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
       </div>
     );
 
-  return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      {/* Page Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">
-          Job Management
-        </h1>
-        <p className="text-gray-600">
-          Showing {filteredJobs.length} of {jobs.length}{" "}
-          {jobs.length === 1 ? "Job" : "Jobs"}
-        </p>
-      </div>
+   return (
+    <>
+      <Navbar />
+      <div className="min-h-screen flex flex-row bg-gradient-to-br from-blue-100 to-white py-10">
+        {/* Sidebar */}
+        <div className="p-6 w-fit">
+          <SidebarMenu />
+        </div>
 
-      {/* Search and Filter Controls */}
-      {jobs.length > 0 && (
-        <div className="mb-6 p-6 bg-gray-50 rounded-lg border border-gray-200">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Search jobs by title, description, or location..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+        {/* Main Content */}
+        <div className="m-2 ml-8 w-4/5 max-w-6xl mx-auto gap-4">
+          {/* Page Title */}
+          <div className="bg-white shadow-xl rounded-2xl p-8 mb-8">
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">Job Management</h1>
+            <p className="text-gray-600">
+              Showing {filteredJobs.length} of {jobs.length}{" "}
+              {jobs.length === 1 ? "Job" : "Jobs"}
+            </p>
+          </div>
+
+          {/* Search + Filter */}
+          {jobs.length > 0 && (
+            <div className="bg-white shadow-xl rounded-2xl p-8 mb-8">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    placeholder="Search jobs..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div className="sm:w-48">
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="active">Active Only</option>
+                    <option value="inactive">Inactive Only</option>
+                  </select>
+                </div>
+              </div>
             </div>
-            <div className="sm:w-48">
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">All Status</option>
-                <option value="active">Active Only</option>
-                <option value="inactive">Inactive Only</option>
-              </select>
-            </div>
+          )}
+
+          {/* Jobs List */}
+          <div className="bg-white shadow-xl rounded-2xl p-8 mb-8">
+            {filteredJobs.length === 0 ? (
+              <div className="text-center py-8">
+                <svg
+                  className="w-16 h-16 mx-auto text-gray-300 mb-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6"
+                  />
+                </svg>
+                <p className="text-gray-500">
+                  {jobs.length === 0
+                    ? "No jobs found"
+                    : "No jobs match your search criteria"}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {filteredJobs.map((job, index) => {
+                  const jobId = job.jobId || job.id;
+                  const isActive = isJobActive(job);
+
+                  return (
+                    <div
+                      key={jobId || index}
+                      className="p-6 border rounded-xl hover:bg-gray-50 transition"
+                    >
+                      {/* Title & Status */}
+                      <div className="flex items-start justify-between mb-4">
+                        <h2 className="text-xl font-semibold text-gray-800 flex-1">
+                          {job.title || job.jobTitle || "Untitled Position"}
+                        </h2>
+                        <div className="flex items-center gap-2 ml-4">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              isActive
+                                ? "bg-green-100 text-green-700"
+                                : "bg-red-100 text-red-700"
+                            }`}
+                          >
+                            {isActive ? "Active" : "Inactive"}
+                          </span>
+                          <button
+                            onClick={() => handleDeleteJob(jobId)}
+                            className="px-3 py-1 text-xs bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      <div className="mb-4">
+                        <h3 className="font-semibold text-gray-700 mb-2">Description:</h3>
+                        <p className="text-gray-600 leading-relaxed">
+                          {job.description ||
+                            job.jobDescription ||
+                            "No description available"}
+                        </p>
+                      </div>
+
+                      {/* Job Details */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm mb-4">
+                        <div>
+                          <span className="font-semibold text-gray-700">Location:</span>
+                          <p className="text-gray-600 mt-1">
+                            {job.location ||
+                              job.jobLocation ||
+                              "Not specified"}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="font-semibold text-gray-700">Salary:</span>
+                          <p className="text-gray-600 mt-1">
+                            {job.salaryRangeMin && job.salaryRangeMax
+                              ? `$${job.salaryRangeMin.toLocaleString()} - $${job.salaryRangeMax.toLocaleString()}`
+                              : job.salary
+                              ? `$${job.salary.toLocaleString()}`
+                              : "Not specified"}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="font-semibold text-gray-700">Experience:</span>
+                          <span className="block px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 mt-1 w-fit">
+                            {job.experienceLevel === 1
+                              ? "Entry Level"
+                              : job.experienceLevel === 2
+                              ? "Mid Level"
+                              : job.experienceLevel === 3
+                              ? "Senior Level"
+                              : job.experience || "Not specified"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="font-semibold text-gray-700">Job Type:</span>
+                          <p className="text-gray-600 mt-1">
+                            {job.jobType || job.type || "Not specified"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Dates */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm pt-4 border-t border-gray-200">
+                        <div>
+                          <span className="font-semibold text-gray-700">Application Deadline:</span>
+                          <p className="text-gray-600 mt-1">
+                            {job.applicationDeadline
+                              ? new Date(job.applicationDeadline).toLocaleDateString("en-US", {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                })
+                              : job.deadline
+                              ? new Date(job.deadline).toLocaleDateString("en-US", {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                })
+                              : "Not specified"}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="font-semibold text-gray-700">Posted Date:</span>
+                          <p className="text-gray-600 mt-1">
+                            {job.postedAt || job.createdAt || job.datePosted
+                              ? new Date(
+                                  job.postedAt ||
+                                    job.createdAt ||
+                                    job.datePosted
+                                ).toLocaleDateString("en-US", {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                })
+                              : "Not specified"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Requirements */}
+                      {(job.requirements || job.qualifications || job.skills) && (
+                        <div className="mt-4 pt-4 border-t border-gray-200">
+                          <h3 className="font-semibold text-gray-700 mb-2">Requirements:</h3>
+                          <p className="text-gray-600 text-sm">
+                            {job.requirements ||
+                              job.qualifications ||
+                              job.skills}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
-      )}
-
-      {/* Jobs Content */}
-      <div className="space-y-6">
-        {filteredJobs.length === 0 ? (
-          <div className="text-center p-8 bg-white rounded-lg shadow-sm border border-gray-200">
-            <svg
-              className="w-16 h-16 mx-auto text-gray-400 mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6"
-              />
-            </svg>
-            <p className="text-lg text-gray-500 mb-2">
-              {jobs.length === 0
-                ? "No jobs found"
-                : "No jobs match your search criteria"}
-            </p>
-            <p className="text-sm text-gray-400">
-              {jobs.length === 0
-                ? "This company hasn't posted any jobs yet"
-                : "Try adjusting your search terms or filters"}
-            </p>
-          </div>
-        ) : (
-          filteredJobs.map((job, index) => {
-            const jobId = job.jobId || job.id;
-            const isActive = isJobActive(job);
-
-            return (
-              <div
-                key={jobId || index}
-                className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <h2 className="text-xl font-semibold text-gray-800 flex-1">
-                    {job.title || job.jobTitle || "Untitled Position"}
-                  </h2>
-                  <div className="flex items-center gap-2 ml-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        isActive
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {isActive ? "Active" : "Inactive"}
-                    </span>
-
-                    {/* Action Buttons */}
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => handleDeleteJob(jobId)}
-                        className="px-3 py-1 text-xs bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors"
-                        title="Delete Job"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <h3 className="font-semibold text-gray-700 mb-2">Description:</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    {job.description || job.jobDescription || "No description available"}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm mb-4">
-                  <div>
-                    <span className="font-semibold text-gray-700">Location:</span>
-                    <p className="text-gray-600 mt-1">
-                      {job.location || job.jobLocation || "Not specified"}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-gray-700">Salary:</span>
-                    <p className="text-gray-600 mt-1">
-                      {job.salaryRangeMin && job.salaryRangeMax
-                        ? `$${job.salaryRangeMin.toLocaleString()} - $${job.salaryRangeMax.toLocaleString()}`
-                        : job.salary
-                        ? `$${job.salary.toLocaleString()}`
-                        : "Not specified"}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-gray-700">Experience:</span>
-                    <span className="block px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 mt-1 w-fit">
-                      {job.experienceLevel === 1
-                        ? "Entry Level"
-                        : job.experienceLevel === 2
-                        ? "Mid Level"
-                        : job.experienceLevel === 3
-                        ? "Senior Level"
-                        : job.experience || "Not specified"}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-gray-700">Job Type:</span>
-                    <p className="text-gray-600 mt-1">
-                      {job.jobType || job.type || "Not specified"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm pt-4 border-t border-gray-200">
-                  <div>
-                    <span className="font-semibold text-gray-700">Application Deadline:</span>
-                    <p className="text-gray-600 mt-1">
-                      {job.applicationDeadline
-                        ? new Date(job.applicationDeadline).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })
-                        : job.deadline
-                        ? new Date(job.deadline).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })
-                        : "Not specified"}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-gray-700">Posted Date:</span>
-                    <p className="text-gray-600 mt-1">
-                      {job.postedAt || job.createdAt || job.datePosted
-                        ? new Date(
-                            job.postedAt || job.createdAt || job.datePosted
-                          ).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })
-                        : "Not specified"}
-                    </p>
-                  </div>
-                </div>
-
-                {(job.requirements || job.qualifications || job.skills) && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <h3 className="font-semibold text-gray-700 mb-2">Requirements:</h3>
-                    <p className="text-gray-600 text-sm">
-                      {job.requirements || job.qualifications || job.skills}
-                    </p>
-                  </div>
-                )}
-              </div>
-            );
-          })
-        )}
       </div>
-    </div>
+      <Footer />
+    </>
   );
 };
 

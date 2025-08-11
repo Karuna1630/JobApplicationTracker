@@ -8,12 +8,20 @@ import {
 import { Link } from "react-router-dom";
 
 const SidebarMenu = ({
+  showCompanyProfile = false,
   showApplications = false,
   showJobs = false,
   showPostJob = false,
   showCompanyInsight = false,
             }) => {
   const menuItems = [
+    {
+      label: "Dashboard",
+      icon: <FaClipboardList />,
+      key: "showCompanyProfile",
+      active: showCompanyProfile,
+      path: "/companyprofile",
+    },
     {
       label: "Applications",
       icon: <FaClipboardList />,
