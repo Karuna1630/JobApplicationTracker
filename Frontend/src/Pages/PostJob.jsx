@@ -1,8 +1,6 @@
 import React, { useState } from "react";
-import axiosInstance from "../Utils/axiosInstance";
-import { getUserIdFromToken } from "../Utils/jwtUtils";
 
-const PostJob = ({ onClose, onJobPosted }) => {
+const PostJob = ({ onClose, onJobPosted, companyId }) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -22,7 +20,9 @@ const PostJob = ({ onClose, onJobPosted }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
     if (
       !formData.title ||
       !formData.description ||
@@ -52,10 +52,8 @@ const PostJob = ({ onClose, onJobPosted }) => {
         return;
       }
 
-      const profileRes = await axiosInstance.get(`/profile/${userId}`);
-      const companyId = profileRes.data.companyProfile?.companyId;
       if (!companyId) {
-        setErrorMsg("Company profile not found.");
+        setErrorMsg("Company ID is missing.");
         setIsSubmitting(false);
         return;
       }
@@ -92,15 +90,21 @@ const PostJob = ({ onClose, onJobPosted }) => {
   };
 
   return (
-    // Backdrop
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      {/* Modal Box */}
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-8 relative">
-        
+    // Backdrop: clicking outside modal closes it
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      onClick={onClose}
+    >
+      {/* Modal Box: clicking inside modal should not close it */}
+      <div
+        className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-8 relative"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+          aria-label="Close modal"
         >
           ✖
         </button>
@@ -109,99 +113,101 @@ const PostJob = ({ onClose, onJobPosted }) => {
 
         {errorMsg && <p className="text-red-500 mb-4">{errorMsg}</p>}
 
-        <input
-          name="title"
-          placeholder="Job Title *"
-          value={formData.title}
-          onChange={handleChange}
-          className="border p-2 w-full mb-4 rounded"
-        />
-
-        <textarea
-          name="description"
-          placeholder="Job Description *"
-          value={formData.description}
-          onChange={handleChange}
-          className="border p-2 w-full mb-4 rounded"
-          rows={4}
-        />
-
-        <textarea
-          name="requirements"
-          placeholder="Requirements *"
-          value={formData.requirements}
-          onChange={handleChange}
-          className="border p-2 w-full mb-4 rounded"
-          rows={3}
-        />
-
-        <input
-          name="location"
-          placeholder="Location *"
-          value={formData.location}
-          onChange={handleChange}
-          className="border p-2 w-full mb-4 rounded"
-        />
-
-        <div className="flex gap-4 mb-4">
+        <form onSubmit={handleSubmit}>
           <input
-            name="salaryRangeMin"
-            placeholder="Min Salary"
-            type="number"
-            value={formData.salaryRangeMin}
+            name="title"
+            placeholder="Job Title *"
+            value={formData.title}
             onChange={handleChange}
-            className="border p-2 flex-1 rounded"
+            className="border p-2 w-full mb-4 rounded"
           />
+
+          <textarea
+            name="description"
+            placeholder="Job Description *"
+            value={formData.description}
+            onChange={handleChange}
+            className="border p-2 w-full mb-4 rounded"
+            rows={4}
+          />
+
+          <textarea
+            name="requirements"
+            placeholder="Requirements *"
+            value={formData.requirements}
+            onChange={handleChange}
+            className="border p-2 w-full mb-4 rounded"
+            rows={3}
+          />
+
           <input
-            name="salaryRangeMax"
-            placeholder="Max Salary"
-            type="number"
-            value={formData.salaryRangeMax}
+            name="location"
+            placeholder="Location *"
+            value={formData.location}
             onChange={handleChange}
-            className="border p-2 flex-1 rounded"
+            className="border p-2 w-full mb-4 rounded"
           />
-        </div>
 
-        <select
-          name="jobTypeId"
-          value={formData.jobTypeId}
-          onChange={handleChange}
-          className="border p-2 w-full mb-4 rounded"
-        >
-          <option value="">Select Job Type *</option>
-          <option value="1">Full-Time</option>
-          <option value="2">Part-Time</option>
-          <option value="3">Contract</option>
-        </select>
+          <div className="flex gap-4 mb-4">
+            <input
+              name="salaryRangeMin"
+              placeholder="Min Salary"
+              type="number"
+              value={formData.salaryRangeMin}
+              onChange={handleChange}
+              className="border p-2 flex-1 rounded"
+            />
+            <input
+              name="salaryRangeMax"
+              placeholder="Max Salary"
+              type="number"
+              value={formData.salaryRangeMax}
+              onChange={handleChange}
+              className="border p-2 flex-1 rounded"
+            />
+          </div>
 
-        <select
-          name="experienceLevel"
-          value={formData.experienceLevel}
-          onChange={handleChange}
-          className="border p-2 w-full mb-4 rounded"
-        >
-          <option value="">Select Experience Level *</option>
-          <option value="1">Entry</option>
-          <option value="2">Mid</option>
-          <option value="3">Senior</option>
-        </select>
+          <select
+            name="jobTypeId"
+            value={formData.jobTypeId}
+            onChange={handleChange}
+            className="border p-2 w-full mb-4 rounded"
+          >
+            <option value="">Select Job Type *</option>
+            <option value="1">Full-Time</option>
+            <option value="2">Part-Time</option>
+            <option value="3">Contract</option>
+          </select>
 
-        <input
-          name="applicationDeadline"
-          type="date"
-          value={formData.applicationDeadline}
-          onChange={handleChange}
-          className="border p-2 w-full mb-6 rounded"
-          min={new Date().toISOString().split("T")[0]}
-        />
+          <select
+            name="experienceLevel"
+            value={formData.experienceLevel}
+            onChange={handleChange}
+            className="border p-2 w-full mb-4 rounded"
+          >
+            <option value="">Select Experience Level *</option>
+            <option value="1">Entry</option>
+            <option value="2">Mid</option>
+            <option value="3">Senior</option>
+          </select>
 
-        <button
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-800 disabled:bg-gray-400 w-full"
-        >
-          {isSubmitting ? "Posting..." : "Post Job"}
-        </button>
+          <input
+            name="applicationDeadline"
+            type="date"
+            value={formData.applicationDeadline}
+            onChange={handleChange}
+            className="border p-2 w-full mb-6 rounded"
+            min={new Date().toISOString().split("T")[0]}
+          />
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-800 disabled:bg-gray-400 w-full"
+          >
+            {isSubmitting ? "Posting..." : "Post Job"}
+          </button>
+        </form>
       </div>
     </div>
   );
