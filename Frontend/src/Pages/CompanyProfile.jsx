@@ -4,6 +4,7 @@ import { getUserIdFromToken } from "../Utils/jwtUtils";
 import SidebarMenu from "../Components/SidebarMenu";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
+import PostJob from "./PostJob";
 import EditCompanyModal from "../Components/EditCompanyModal";
 import { FaEdit } from "react-icons/fa";
 import {
@@ -34,6 +35,7 @@ const CompanyProfile = () => {
   const [reloadJobs, setReloadJobs] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [companyId, setCompanyId] = useState(null);
+  const [showPostJob, setShowPostJob] = useState(false);
   const [companyInfo, setCompanyInfo] = useState({
     companyName: "",
     email: "",
@@ -76,9 +78,9 @@ const CompanyProfile = () => {
 
           });
 
-        const compId = profileData.companyProfile.companyId;
-        setCompanyId(compId);
-        localStorage.setItem('currentCompanyId', compId); // Add this line
+          const compId = profileData.companyProfile.companyId;
+          setCompanyId(compId);
+          localStorage.setItem('currentCompanyId', compId); // Add this line
 
 
 
@@ -195,7 +197,15 @@ const CompanyProfile = () => {
           <div className="bg-white shadow-xl rounded-2xl p-8 mb-8">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-semibold text-gray-700">Recent Job Posts</h2>
-              {totalJobsCount > 2 && <button onClick={() => setShowJobs(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 text-sm font-medium"><FaEye /> View All </button>}
+              {totalJobsCount > 2 &&
+                <button
+                  onClick={() => setShowPostJob(true)}
+                  className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Post Your First Job
+                </button>
+
+              }
             </div>
             {displayedJobs.length > 0 ? (
               <div className="space-y-4">
@@ -232,8 +242,6 @@ const CompanyProfile = () => {
               <InfoCard icon={<FaUserPlus />} label="New Signups (30d)" value="14" color="orange" />
             </div>
           </div>
-          
-
 
           {showEditModal && (
             <EditCompanyModal
@@ -243,6 +251,18 @@ const CompanyProfile = () => {
               onUpdateSuccess={handleUpdateSuccess}
             />
           )}
+          {showPostJob && (
+            <PostJob
+              onClose={() => setShowPostJob(false)}
+              onJobPosted={(newJob) => {
+                handleJobPosted(newJob);
+                setShowPostJob(false);
+              }}
+              companyId={companyId}
+            />
+          )}
+
+
         </div>
       </div>
       <Footer />
