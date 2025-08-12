@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import axiosInstance from "../Utils/axiosInstance";
+import { getUserIdFromToken } from "../Utils/jwtUtils";
 
 const PostJob = ({ onClose, onJobPosted, companyId }) => {
   const [formData, setFormData] = useState({
@@ -23,6 +25,7 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate required fields
     if (
       !formData.title ||
       !formData.description ||
@@ -31,6 +34,11 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
       !formData.applicationDeadline
     ) {
       setErrorMsg("Please fill all required fields, including application deadline.");
+      return;
+    }
+
+    if (!companyId) {
+      setErrorMsg("Company ID is missing.");
       return;
     }
 
@@ -52,15 +60,10 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
         return;
       }
 
-      if (!companyId) {
-        setErrorMsg("Company ID is missing.");
-        setIsSubmitting(false);
-        return;
-      }
-
+      // Prepare the payload for API
       const payload = {
         ...formData,
-        companyId,
+        companyId, // use the prop directly
         postedByUserId: userId,
         jobTypeId: parseInt(formData.jobTypeId, 10),
         experienceLevel: parseInt(formData.experienceLevel, 10),
@@ -72,6 +75,7 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
         views: 0,
       };
 
+      // Make the POST request
       const res = await axiosInstance.post("/api/Jobs/submitjobs", payload);
 
       if (res.status === 200 || res.status === 201) {
@@ -82,7 +86,7 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
         setErrorMsg("Failed to post job. Please try again.");
       }
     } catch (err) {
-      console.error("Post job error:", err);
+      console.error("Post job error:", err.response || err.message || err);
       setErrorMsg("Failed to post job. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -90,21 +94,18 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
   };
 
   return (
-    // Backdrop: clicking outside modal closes it
-    <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-      onClick={onClose}
-    >
-      {/* Modal Box: clicking inside modal should not close it */}
-      <div
+    // Backdrop
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      {/* Modal Box */}
+      <form
+        onSubmit={handleSubmit}
         className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-8 relative"
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <button
+          type="button"
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-          aria-label="Close modal"
         >
           ✖
         </button>
@@ -113,102 +114,105 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
 
         {errorMsg && <p className="text-red-500 mb-4">{errorMsg}</p>}
 
-        <form onSubmit={handleSubmit}>
+        <input
+          name="title"
+          placeholder="Job Title *"
+          value={formData.title}
+          onChange={handleChange}
+          className="border p-2 w-full mb-4 rounded"
+          required
+        />
+
+        <textarea
+          name="description"
+          placeholder="Job Description *"
+          value={formData.description}
+          onChange={handleChange}
+          className="border p-2 w-full mb-4 rounded"
+          rows={4}
+          required
+        />
+
+        <textarea
+          name="requirements"
+          placeholder="Requirements *"
+          value={formData.requirements}
+          onChange={handleChange}
+          className="border p-2 w-full mb-4 rounded"
+          rows={3}
+        />
+
+        <input
+          name="location"
+          placeholder="Location *"
+          value={formData.location}
+          onChange={handleChange}
+          className="border p-2 w-full mb-4 rounded"
+        />
+
+        <div className="flex gap-4 mb-4">
           <input
-            name="title"
-            placeholder="Job Title *"
-            value={formData.title}
+            name="salaryRangeMin"
+            placeholder="Min Salary"
+            type="number"
+            value={formData.salaryRangeMin}
             onChange={handleChange}
-            className="border p-2 w-full mb-4 rounded"
+            className="border p-2 flex-1 rounded"
           />
-
-          <textarea
-            name="description"
-            placeholder="Job Description *"
-            value={formData.description}
-            onChange={handleChange}
-            className="border p-2 w-full mb-4 rounded"
-            rows={4}
-          />
-
-          <textarea
-            name="requirements"
-            placeholder="Requirements *"
-            value={formData.requirements}
-            onChange={handleChange}
-            className="border p-2 w-full mb-4 rounded"
-            rows={3}
-          />
-
           <input
-            name="location"
-            placeholder="Location *"
-            value={formData.location}
+            name="salaryRangeMax"
+            placeholder="Max Salary"
+            type="number"
+            value={formData.salaryRangeMax}
             onChange={handleChange}
-            className="border p-2 w-full mb-4 rounded"
+            className="border p-2 flex-1 rounded"
           />
+        </div>
 
-          <div className="flex gap-4 mb-4">
-            <input
-              name="salaryRangeMin"
-              placeholder="Min Salary"
-              type="number"
-              value={formData.salaryRangeMin}
-              onChange={handleChange}
-              className="border p-2 flex-1 rounded"
-            />
-            <input
-              name="salaryRangeMax"
-              placeholder="Max Salary"
-              type="number"
-              value={formData.salaryRangeMax}
-              onChange={handleChange}
-              className="border p-2 flex-1 rounded"
-            />
-          </div>
+        <select
+          name="jobTypeId"
+          value={formData.jobTypeId}
+          onChange={handleChange}
+          className="border p-2 w-full mb-4 rounded"
+          required
+        >
+          <option value="">Select Job Type *</option>
+          <option value="1">Full-Time</option>
+          <option value="2">Part-Time</option>
+          <option value="3">Contract</option>
+        </select>
 
-          <select
-            name="jobTypeId"
-            value={formData.jobTypeId}
-            onChange={handleChange}
-            className="border p-2 w-full mb-4 rounded"
-          >
-            <option value="">Select Job Type *</option>
-            <option value="1">Full-Time</option>
-            <option value="2">Part-Time</option>
-            <option value="3">Contract</option>
-          </select>
+        <select
+          name="experienceLevel"
+          value={formData.experienceLevel}
+          onChange={handleChange}
+          className="border p-2 w-full mb-4 rounded"
+          required
+        >
+          <option value="">Select Experience Level *</option>
+          <option value="1">Entry</option>
+          <option value="2">Mid</option>
+          <option value="3">Senior</option>
+        </select>
 
-          <select
-            name="experienceLevel"
-            value={formData.experienceLevel}
-            onChange={handleChange}
-            className="border p-2 w-full mb-4 rounded"
-          >
-            <option value="">Select Experience Level *</option>
-            <option value="1">Entry</option>
-            <option value="2">Mid</option>
-            <option value="3">Senior</option>
-          </select>
+        <input
+          name="applicationDeadline"
+          type="date"
+          value={formData.applicationDeadline}
+          onChange={handleChange}
+          className="border p-2 w-full mb-6 rounded"
+          min={new Date().toISOString().split("T")[0]}
+          required
+        />
 
-          <input
-            name="applicationDeadline"
-            type="date"
-            value={formData.applicationDeadline}
-            onChange={handleChange}
-            className="border p-2 w-full mb-6 rounded"
-            min={new Date().toISOString().split("T")[0]}
-          />
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-800 disabled:bg-gray-400 w-full"
-          >
-            {isSubmitting ? "Posting..." : "Post Job"}
-          </button>
-        </form>
-      </div>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-800 disabled:bg-gray-400 w-full"
+        >
+          {isSubmitting ? "Posting..." : "Post Job"}
+        </button>
+      </form>
     </div>
   );
 };
