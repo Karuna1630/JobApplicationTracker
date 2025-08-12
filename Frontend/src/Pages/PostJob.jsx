@@ -1,12 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import axiosInstance from "../Utils/axiosInstance";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
+import { IoClose } from "react-icons/io5";
 
 const PostJob = ({ onClose, onJobPosted, companyId }) => {
+  // Debug log to check companyId
+ console.log("companyId received:", companyId);
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    requirements: "",
+    skills: [],
     location: "",
     salaryRangeMin: "",
     salaryRangeMax: "",
@@ -15,17 +19,42 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
     applicationDeadline: "",
   });
 
+  const [skillInput, setSkillInput] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const skillInputRef = useRef(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const addSkill = () => {
+    if (skillInput.trim() && !formData.skills.includes(skillInput.trim())) {
+      setFormData({
+        ...formData,
+        skills: [...formData.skills, skillInput.trim()],
+      });
+      setSkillInput("");
+    }
+  };
+
+  const removeSkill = (skill) => {
+    setFormData({
+      ...formData,
+      skills: formData.skills.filter((s) => s !== skill),
+    });
+  };
+
+  const handleSkillKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      addSkill();
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate required fields
     if (
       !formData.title ||
       !formData.description ||
@@ -60,10 +89,9 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
         return;
       }
 
-      // Prepare the payload for API
       const payload = {
         ...formData,
-        companyId, // use the prop directly
+        companyId,
         postedByUserId: userId,
         jobTypeId: parseInt(formData.jobTypeId, 10),
         experienceLevel: parseInt(formData.experienceLevel, 10),
@@ -75,7 +103,6 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
         views: 0,
       };
 
-      // Make the POST request
       const res = await axiosInstance.post("/api/Jobs/submitjobs", payload);
 
       if (res.status === 200 || res.status === 201) {
@@ -94,14 +121,11 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
   };
 
   return (
-    // Backdrop
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      {/* Modal Box */}
       <form
         onSubmit={handleSubmit}
         className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-8 relative"
       >
-        {/* Close Button */}
         <button
           type="button"
           onClick={onClose}
@@ -133,14 +157,32 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
           required
         />
 
-        <textarea
-          name="requirements"
-          placeholder="Requirements *"
-          value={formData.requirements}
-          onChange={handleChange}
-          className="border p-2 w-full mb-4 rounded"
-          rows={3}
-        />
+        {/* Skills Input */}
+        <div className="mb-4">
+          <input
+            type="text"
+            value={skillInput}
+            onChange={(e) => setSkillInput(e.target.value)}
+            onKeyDown={handleSkillKeyDown}
+            placeholder="Skills *"
+            className="w-full border p-2 rounded mb-2"
+            ref={skillInputRef}
+          />
+
+          <div className="flex flex-wrap gap-2">
+            {formData.skills.map((skill, idx) => (
+              <div
+                key={idx}
+                className="flex items-center gap-1 bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-sm"
+              >
+                <span>{skill}</span>
+                <button type="button" onClick={() => removeSkill(skill)}>
+                  <IoClose size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
 
         <input
           name="location"
