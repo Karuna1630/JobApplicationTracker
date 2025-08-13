@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axiosInstance from "../Utils/axiosInstance";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
 
-const PostJob = ({ onClose, onJobPosted }) => {
+const PostJob = ({ onClose, onJobPosted, companyId }) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -22,7 +22,10 @@ const PostJob = ({ onClose, onJobPosted }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Validate required fields
     if (
       !formData.title ||
       !formData.description ||
@@ -31,6 +34,11 @@ const PostJob = ({ onClose, onJobPosted }) => {
       !formData.applicationDeadline
     ) {
       setErrorMsg("Please fill all required fields, including application deadline.");
+      return;
+    }
+
+    if (!companyId) {
+      setErrorMsg("Company ID is missing.");
       return;
     }
 
@@ -52,17 +60,10 @@ const PostJob = ({ onClose, onJobPosted }) => {
         return;
       }
 
-      const profileRes = await axiosInstance.get(`/profile/${userId}`);
-      const companyId = profileRes.data.companyProfile?.companyId;
-      if (!companyId) {
-        setErrorMsg("Company profile not found.");
-        setIsSubmitting(false);
-        return;
-      }
-
+      // Prepare the payload for API
       const payload = {
         ...formData,
-        companyId,
+        companyId, // use the prop directly
         postedByUserId: userId,
         jobTypeId: parseInt(formData.jobTypeId, 10),
         experienceLevel: parseInt(formData.experienceLevel, 10),
@@ -74,6 +75,7 @@ const PostJob = ({ onClose, onJobPosted }) => {
         views: 0,
       };
 
+      // Make the POST request
       const res = await axiosInstance.post("/api/Jobs/submitjobs", payload);
 
       if (res.status === 200 || res.status === 201) {
@@ -84,7 +86,7 @@ const PostJob = ({ onClose, onJobPosted }) => {
         setErrorMsg("Failed to post job. Please try again.");
       }
     } catch (err) {
-      console.error("Post job error:", err);
+      console.error("Post job error:", err.response || err.message || err);
       setErrorMsg("Failed to post job. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -95,10 +97,13 @@ const PostJob = ({ onClose, onJobPosted }) => {
     // Backdrop
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       {/* Modal Box */}
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-8 relative">
-        
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-8 relative"
+      >
         {/* Close Button */}
         <button
+          type="button"
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
         >
@@ -115,6 +120,7 @@ const PostJob = ({ onClose, onJobPosted }) => {
           value={formData.title}
           onChange={handleChange}
           className="border p-2 w-full mb-4 rounded"
+          required
         />
 
         <textarea
@@ -124,6 +130,7 @@ const PostJob = ({ onClose, onJobPosted }) => {
           onChange={handleChange}
           className="border p-2 w-full mb-4 rounded"
           rows={4}
+          required
         />
 
         <textarea
@@ -167,6 +174,7 @@ const PostJob = ({ onClose, onJobPosted }) => {
           value={formData.jobTypeId}
           onChange={handleChange}
           className="border p-2 w-full mb-4 rounded"
+          required
         >
           <option value="">Select Job Type *</option>
           <option value="1">Full-Time</option>
@@ -179,6 +187,7 @@ const PostJob = ({ onClose, onJobPosted }) => {
           value={formData.experienceLevel}
           onChange={handleChange}
           className="border p-2 w-full mb-4 rounded"
+          required
         >
           <option value="">Select Experience Level *</option>
           <option value="1">Entry</option>
@@ -193,16 +202,17 @@ const PostJob = ({ onClose, onJobPosted }) => {
           onChange={handleChange}
           className="border p-2 w-full mb-6 rounded"
           min={new Date().toISOString().split("T")[0]}
+          required
         />
 
         <button
-          onClick={handleSubmit}
+          type="submit"
           disabled={isSubmitting}
           className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-800 disabled:bg-gray-400 w-full"
         >
           {isSubmitting ? "Posting..." : "Post Job"}
         </button>
-      </div>
+      </form>
     </div>
   );
 };
