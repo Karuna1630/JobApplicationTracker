@@ -10,30 +10,18 @@ const Education = () => {
   const [editingEducation, setEditingEducation] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
   // Form state
   const [formData, setFormData] = useState({
     school: '',
     degree: '',
     fieldOfStudy: '',
-    startMonth: '',
-    startYear: '',
-    endMonth: '',
-    endYear: '',
+    startDate: '',         // ISO date string, e.g. '2023-08-13'
+    endDate: '',           // ISO date string
     grade: '',
     isCurrentlyStudying: false,
     description: '',
   });
-
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
-
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 61 }, (_, i) => currentYear + 10 - i);
-
- 
-
 
   const fetchEducation = async () => {
     try {
@@ -49,31 +37,28 @@ const Education = () => {
     }
   };
 
-useEffect(() => {
-  fetchEducation();
-}, []);
+  useEffect(() => {
+    fetchEducation();
+  }, []);
 
-useEffect(() => {
-  if (showAddForm) {
-    document.body.style.overflow = 'hidden';
-  } else {
-    document.body.style.overflow = 'auto';
-  }
-  return () => {
-    document.body.style.overflow = 'auto';
-  };
-}, [showAddForm]);
-
+  useEffect(() => {
+    if (showAddForm) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [showAddForm]);
 
   const resetForm = () => {
     setFormData({
       school: '',
       degree: '',
       fieldOfStudy: '',
-      startMonth: '',
-      startYear: '',
-      endMonth: '',
-      endYear: '',
+      startDate: '',
+      endDate: '',
       grade: '',
       isCurrentlyStudying: false,
       description: '',
@@ -88,13 +73,6 @@ useEffect(() => {
     }));
   };
 
-  const buildDate = (month, year) => {
-    if (!month || !year) return null;
-    const monthIndex = months.indexOf(month);
-    if (monthIndex === -1) return null;
-    return new Date(year, monthIndex, 1).toISOString();
-  };
-
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
@@ -106,14 +84,14 @@ useEffect(() => {
         school: formData.school,
         degree: formData.degree,
         fieldOfStudy: formData.fieldOfStudy,
-        startDate: buildDate(formData.startMonth, formData.startYear),
-        endDate: formData.isCurrentlyStudying ? null : buildDate(formData.endMonth, formData.endYear),
+        startDate: formData.startDate || null,
+        endDate: formData.isCurrentlyStudying ? null : (formData.endDate || null),
         isCurrentlyStudying: formData.isCurrentlyStudying,
         description: formData.description || '',
         gpa: formData.grade || null,
       };
 
-      // Only POST - no PUT for editing
+      // POST only - no editing API
       const educationResponse = await axiosInstance.post('/api/education', educationData);
 
       const educationId = educationResponse.data.educationId || educationResponse.data.id;
@@ -149,31 +127,12 @@ useEffect(() => {
       school: education.school || '',
       degree: education.degree || '',
       fieldOfStudy: education.fieldOfStudy || '',
-      startMonth: '',
-      startYear: '',
-      endMonth: '',
-      endYear: '',
+      startDate: education.startDate ? education.startDate.split('T')[0] : '',
+      endDate: education.endDate ? education.endDate.split('T')[0] : '',
       grade: education.gpa || '',
       isCurrentlyStudying: education.isCurrentlyStudying || false,
       description: education.description || '',
     });
-
-    if (education.startDate) {
-      const start = new Date(education.startDate);
-      setFormData(prev => ({
-        ...prev,
-        startMonth: months[start.getMonth()],
-        startYear: start.getFullYear().toString(),
-      }));
-    }
-    if (education.endDate) {
-      const end = new Date(education.endDate);
-      setFormData(prev => ({
-        ...prev,
-        endMonth: months[end.getMonth()],
-        endYear: end.getFullYear().toString(),
-      }));
-    }
 
     setEditingEducation(education);
     setShowAddForm(true);
@@ -182,7 +141,7 @@ useEffect(() => {
   const handleDelete = async (educationId) => {
     if (window.confirm('Are you sure you want to delete this education entry?')) {
       try {
-        await axiosInstance.delete(`/api/education/${educationId}`);
+        await axiosInstance.delete(`/api/Education/${educationId}`);
         await fetchEducation();
       } catch (error) {
         console.error('Failed to delete education:', error);
@@ -192,6 +151,11 @@ useEffect(() => {
   };
 
   const formatDateRange = (startDateStr, endDateStr, isCurrentlyStudying) => {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
     const format = (dateStr) => {
       if (!dateStr) return '';
       const d = new Date(dateStr);
@@ -213,6 +177,7 @@ useEffect(() => {
   };
 
   const getUniversityLogo = (schoolName) => {
+    if (!schoolName) return null;
     const firstLetter = schoolName.charAt(0).toUpperCase();
     return (
       <div className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center text-white font-bold text-lg">
@@ -250,8 +215,8 @@ useEffect(() => {
         {educationList.length === 0 ? (
           <p className="text-gray-600">No education entries yet. Click the + button to add one.</p>
         ) : (
-          educationList.map((education,index) => (
-            <div key={education.id|| index} className="flex items-start gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+          educationList.map((education, index) => (
+            <div key={education.id || index} className="flex items-start gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
               {getUniversityLogo(education.school)}
 
               <div className="flex-1">
@@ -299,7 +264,7 @@ useEffect(() => {
       {/* Add/Edit Form Modal */}
       {showAddForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-         <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-auto flex flex-col" style={{ minHeight: 0 }}>
+          <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-auto flex flex-col" style={{ minHeight: 0 }}>
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-semibold">
@@ -357,74 +322,38 @@ useEffect(() => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <select
-                      name="startMonth"
-                      value={formData.startMonth}
-                      onChange={handleInputChange}
-                      className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="">Month</option>
-                      {months.map((month) => (
-                        <option key={month} value={month}>{month}</option>
-                      ))}
-                    </select>
-                    <select
-                      name="startYear"
-                      value={formData.startYear}
-                      onChange={handleInputChange}
-                      className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="">Year</option>
-                      {years.map((year) => (
-                        <option key={year} value={year}>{year}</option>
-                      ))}
-                    </select>
-                  </div>
+                  <input
+                    type="date"
+                    name="startDate"
+                    value={formData.startDate}
+                    onChange={handleInputChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
                 </div>
 
-                <div>
-                  <div className="flex items-center mb-2">
-                    <input
-                      type="checkbox"
-                      name="isCurrentlyStudying"
-                      checked={formData.isCurrentlyStudying}
-                      onChange={handleInputChange}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label className="ml-2 block text-sm text-gray-700">
-                      I am currently studying here
-                    </label>
-                  </div>
+                <div className="flex items-center mb-2">
+                  <input
+                    type="checkbox"
+                    name="isCurrentlyStudying"
+                    checked={formData.isCurrentlyStudying}
+                    onChange={handleInputChange}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label className="ml-2 block text-sm text-gray-700">
+                    I am currently studying here
+                  </label>
                 </div>
 
                 {!formData.isCurrentlyStudying && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">End Date (or expected)</label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <select
-                        name="endMonth"
-                        value={formData.endMonth}
-                        onChange={handleInputChange}
-                        className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value="">Month</option>
-                        {months.map((month) => (
-                          <option key={month} value={month}>{month}</option>
-                        ))}
-                      </select>
-                      <select
-                        name="endYear"
-                        value={formData.endYear}
-                        onChange={handleInputChange}
-                        className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value="">Year</option>
-                        {years.map((year) => (
-                          <option key={year} value={year}>{year}</option>
-                        ))}
-                      </select>
-                    </div>
+                    <input
+                      type="date"
+                      name="endDate"
+                      value={formData.endDate}
+                      onChange={handleInputChange}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
                   </div>
                 )}
 
