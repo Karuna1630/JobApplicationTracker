@@ -126,11 +126,8 @@ const Navbar = () => {
             >
               Dashboard
             </Link>
-            <Link to="/postjob" className="hover:text-blue-600 transition">
-              Add Job
-            </Link>
-            <Link to="/manage-jobs" className="hover:text-blue-600 transition">
-              Manage Jobs
+             <Link to="/companies" className="hover:text-blue-600 transition">
+              Companies
             </Link>
             <Link
               to="/companyinsight"
