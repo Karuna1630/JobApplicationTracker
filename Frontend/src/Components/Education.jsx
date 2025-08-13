@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { FiPlus, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import axiosInstance from '../Utils/axiosInstance';
 import { getUserIdFromToken } from '../Utils/jwtUtils';
+import { toast } from "react-toastify";
 
 const Education = () => {
   const [educationList, setEducationList] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingEducation, setEditingEducation] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [submitting, setSubmitting] = useState(false);
   // Form state
   const [formData, setFormData] = useState({
     school: '',
@@ -19,28 +20,26 @@ const Education = () => {
     endMonth: '',
     endYear: '',
     grade: '',
-    isCurrentlyStudying: false
+    isCurrentlyStudying: false,
+    description: '',
   });
 
-  // Months array for dropdowns
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  // Generate years (current year + 10 to current year - 50)
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 61 }, (_, i) => currentYear + 10 - i);
 
-  useEffect(() => {
-    fetchEducation();
-  }, []);
+ 
+
 
   const fetchEducation = async () => {
     try {
       const token = localStorage.getItem('token');
       const userId = getUserIdFromToken(token);
-      const response = await axiosInstance.get(`/education/${userId}`);
+      const response = await axiosInstance.get(`api/Education/user/${userId}`);
       setEducationList(response.data || []);
     } catch (error) {
       console.error('Failed to fetch education:', error);
@@ -49,6 +48,22 @@ const Education = () => {
       setIsLoading(false);
     }
   };
+
+useEffect(() => {
+  fetchEducation();
+}, []);
+
+useEffect(() => {
+  if (showAddForm) {
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = 'auto';
+  }
+  return () => {
+    document.body.style.overflow = 'auto';
+  };
+}, [showAddForm]);
+
 
   const resetForm = () => {
     setFormData({
@@ -60,41 +75,72 @@ const Education = () => {
       endMonth: '',
       endYear: '',
       grade: '',
-      isCurrentlyStudying: false
+      isCurrentlyStudying: false,
+      description: '',
     });
   };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
+  const buildDate = (month, year) => {
+    if (!month || !year) return null;
+    const monthIndex = months.indexOf(month);
+    if (monthIndex === -1) return null;
+    return new Date(year, monthIndex, 1).toISOString();
+  };
+
   const handleSubmit = async () => {
+    setSubmitting(true);
     try {
       const token = localStorage.getItem('token');
       const userId = getUserIdFromToken(token);
 
       const educationData = {
-        ...formData,
-        userId
+        userId,
+        school: formData.school,
+        degree: formData.degree,
+        fieldOfStudy: formData.fieldOfStudy,
+        startDate: buildDate(formData.startMonth, formData.startYear),
+        endDate: formData.isCurrentlyStudying ? null : buildDate(formData.endMonth, formData.endYear),
+        isCurrentlyStudying: formData.isCurrentlyStudying,
+        description: formData.description || '',
+        gpa: formData.grade || null,
       };
 
-      if (editingEducation) {
-        await axiosInstance.put(`/education/${editingEducation.id}`, educationData);
-      } else {
-        await axiosInstance.post('/education', educationData);
-      }
+      // Only POST - no PUT for editing
+      const educationResponse = await axiosInstance.post('/api/education', educationData);
 
-      await fetchEducation();
-      setShowAddForm(false);
-      setEditingEducation(null);
-      resetForm();
+      const educationId = educationResponse.data.educationId || educationResponse.data.id;
+
+      const existingEducationIds = educationList.map(edu => edu.id);
+      const updatedEducationIds = [...existingEducationIds, educationId];
+      const educationJsonString = JSON.stringify(updatedEducationIds);
+
+      const response = await axiosInstance.post(`/submituser`, {
+        userId,
+        education: educationJsonString,
+      });
+
+      if (response.data && response.data.isSuccess) {
+        toast.success('Education added successfully!');
+        await fetchEducation();
+        setShowAddForm(false);
+        resetForm();
+        setEditingEducation(null);
+      } else {
+        throw new Error(response.data?.message || 'Failed to update user with education');
+      }
     } catch (error) {
       console.error('Failed to save education:', error);
-      alert('Failed to save education. Please try again.');
+      toast.error('Failed to save education. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -103,13 +149,32 @@ const Education = () => {
       school: education.school || '',
       degree: education.degree || '',
       fieldOfStudy: education.fieldOfStudy || '',
-      startMonth: education.startMonth || '',
-      startYear: education.startYear || '',
-      endMonth: education.endMonth || '',
-      endYear: education.endYear || '',
-      grade: education.grade || '',
-      isCurrentlyStudying: education.isCurrentlyStudying || false
+      startMonth: '',
+      startYear: '',
+      endMonth: '',
+      endYear: '',
+      grade: education.gpa || '',
+      isCurrentlyStudying: education.isCurrentlyStudying || false,
+      description: education.description || '',
     });
+
+    if (education.startDate) {
+      const start = new Date(education.startDate);
+      setFormData(prev => ({
+        ...prev,
+        startMonth: months[start.getMonth()],
+        startYear: start.getFullYear().toString(),
+      }));
+    }
+    if (education.endDate) {
+      const end = new Date(education.endDate);
+      setFormData(prev => ({
+        ...prev,
+        endMonth: months[end.getMonth()],
+        endYear: end.getFullYear().toString(),
+      }));
+    }
+
     setEditingEducation(education);
     setShowAddForm(true);
   };
@@ -117,7 +182,7 @@ const Education = () => {
   const handleDelete = async (educationId) => {
     if (window.confirm('Are you sure you want to delete this education entry?')) {
       try {
-        await axiosInstance.delete(`/education/${educationId}`);
+        await axiosInstance.delete(`/api/education/${educationId}`);
         await fetchEducation();
       } catch (error) {
         console.error('Failed to delete education:', error);
@@ -126,11 +191,17 @@ const Education = () => {
     }
   };
 
-  const formatDateRange = (startMonth, startYear, endMonth, endYear, isCurrentlyStudying) => {
-    const start = startMonth && startYear ? `${startMonth} ${startYear}` : '';
-    const end = isCurrentlyStudying ? 'Present' : 
-                (endMonth && endYear ? `${endMonth} ${endYear}` : '');
-    
+  const formatDateRange = (startDateStr, endDateStr, isCurrentlyStudying) => {
+    const format = (dateStr) => {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      if (isNaN(d)) return '';
+      return `${months[d.getMonth()]} ${d.getFullYear()}`;
+    };
+
+    const start = format(startDateStr);
+    const end = isCurrentlyStudying ? 'Present' : format(endDateStr);
+
     if (start && end) {
       return `${start} - ${end}`;
     } else if (start) {
@@ -142,7 +213,6 @@ const Education = () => {
   };
 
   const getUniversityLogo = (schoolName) => {
-    // Simple logo generator based on school name
     const firstLetter = schoolName.charAt(0).toUpperCase();
     return (
       <div className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center text-white font-bold text-lg">
@@ -180,10 +250,10 @@ const Education = () => {
         {educationList.length === 0 ? (
           <p className="text-gray-600">No education entries yet. Click the + button to add one.</p>
         ) : (
-          educationList.map((education) => (
-            <div key={education.id} className="flex items-start gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+          educationList.map((education,index) => (
+            <div key={education.id|| index} className="flex items-start gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
               {getUniversityLogo(education.school)}
-              
+
               <div className="flex-1">
                 <h4 className="font-semibold text-gray-900">{education.school}</h4>
                 <p className="text-gray-700">
@@ -192,15 +262,16 @@ const Education = () => {
                 </p>
                 <p className="text-sm text-gray-600">
                   {formatDateRange(
-                    education.startMonth,
-                    education.startYear,
-                    education.endMonth,
-                    education.endYear,
+                    education.startDate,
+                    education.endDate,
                     education.isCurrentlyStudying
                   )}
                 </p>
-                {education.grade && (
-                  <p className="text-sm text-gray-600">Grade: {education.grade}</p>
+                {education.gpa && (
+                  <p className="text-sm text-gray-600">Grade: {education.gpa}</p>
+                )}
+                {education.description && (
+                  <p className="text-sm text-gray-600 mt-1">{education.description}</p>
                 )}
               </div>
 
@@ -228,11 +299,7 @@ const Education = () => {
       {/* Add/Edit Form Modal */}
       {showAddForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div
-    
-            className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
-            style={{ minHeight: 0 }}
-          >
+         <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-auto flex flex-col" style={{ minHeight: 0 }}>
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-semibold">
@@ -252,9 +319,7 @@ const Education = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    School *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">School *</label>
                   <input
                     type="text"
                     name="school"
@@ -267,9 +332,7 @@ const Education = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Degree
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Degree</label>
                   <input
                     type="text"
                     name="degree"
@@ -281,9 +344,7 @@ const Education = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Field of Study
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Field of Study</label>
                   <input
                     type="text"
                     name="fieldOfStudy"
@@ -295,9 +356,7 @@ const Education = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Start Date
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
                   <div className="grid grid-cols-2 gap-3">
                     <select
                       name="startMonth"
@@ -306,7 +365,7 @@ const Education = () => {
                       className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="">Month</option>
-                      {months.map(month => (
+                      {months.map((month) => (
                         <option key={month} value={month}>{month}</option>
                       ))}
                     </select>
@@ -317,7 +376,7 @@ const Education = () => {
                       className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="">Year</option>
-                      {years.map(year => (
+                      {years.map((year) => (
                         <option key={year} value={year}>{year}</option>
                       ))}
                     </select>
@@ -341,9 +400,7 @@ const Education = () => {
 
                 {!formData.isCurrentlyStudying && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      End Date (or expected)
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">End Date (or expected)</label>
                     <div className="grid grid-cols-2 gap-3">
                       <select
                         name="endMonth"
@@ -352,7 +409,7 @@ const Education = () => {
                         className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="">Month</option>
-                        {months.map(month => (
+                        {months.map((month) => (
                           <option key={month} value={month}>{month}</option>
                         ))}
                       </select>
@@ -363,7 +420,7 @@ const Education = () => {
                         className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="">Year</option>
-                        {years.map(year => (
+                        {years.map((year) => (
                           <option key={year} value={year}>{year}</option>
                         ))}
                       </select>
@@ -372,9 +429,7 @@ const Education = () => {
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Grade
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Grade</label>
                   <input
                     type="text"
                     name="grade"
@@ -382,6 +437,18 @@ const Education = () => {
                     onChange={handleInputChange}
                     placeholder="Ex: 3.8/4.0"
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    placeholder="Optional description"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={3}
                   />
                 </div>
 
@@ -401,8 +468,9 @@ const Education = () => {
                     type="button"
                     onClick={handleSubmit}
                     className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    disabled={submitting}
                   >
-                    {editingEducation ? 'Update' : 'Save'}
+                    Save
                   </button>
                 </div>
               </div>

@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import axiosInstance from "../Utils/axiosInstance";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 
 const Companies = () => {
+   const navigate = useNavigate();
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -141,7 +143,7 @@ const Companies = () => {
                         <span>View opportunities</span>
                       )}
                     </div>
-                    <button className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition duration-300">
+                    <button onClick={() => navigate('/jobs')} onclassName="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition duration-300">
                       View Jobs
                     </button>
                   </div>
