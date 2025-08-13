@@ -1,6 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AiFillCheckCircle } from "react-icons/ai";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import crlogo from "../assets/CR.avif";
 import Footer from "../Components/Footer";
 import Navbar from "../Components/Navbar";
@@ -12,6 +13,9 @@ import { toast } from "react-toastify";
 const CompanyR2 = () => {
   const navigate = useNavigate();
   const storedCompanyData = JSON.parse(localStorage.getItem("companyData"));
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     if (!storedCompanyData) {
@@ -171,30 +175,50 @@ const CompanyR2 = () => {
                   </p>
                 )}
 
-                <input
-                  type="password"
-                  name="password"
-                  value={values.password}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  placeholder="Password"
-                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
-                />
+                {/* Password with eye toggle */}
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={values.password}
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    placeholder="Password"
+                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md pr-10"
+                  />
+                  <span
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 cursor-pointer text-gray-500"
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </span>
+                </div>
                 {errors.password && touched.password && (
                   <p className="text-red-600 text-sm mt-1 ml-1 font-medium">
                     {errors.password}
                   </p>
                 )}
 
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={values.confirmPassword}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  placeholder="Confirm Password"
-                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
-                />
+                {/* Confirm Password with eye toggle */}
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    value={values.confirmPassword}
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    placeholder="Confirm Password"
+                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md pr-10"
+                  />
+                  <span
+                    onClick={() =>
+                      setShowConfirmPassword(!showConfirmPassword)
+                    }
+                    className="absolute right-3 top-3 cursor-pointer text-gray-500"
+                  >
+                    {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                  </span>
+                </div>
                 {errors.confirmPassword && touched.confirmPassword && (
                   <p className="text-red-600 text-sm mt-1 ml-1 font-medium">
                     {errors.confirmPassword}

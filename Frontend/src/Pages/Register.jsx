@@ -2,6 +2,7 @@ import { FaUser } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import { RiLockPasswordFill } from "react-icons/ri";
 import { FaPhone } from "react-icons/fa";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import registerimage from "../assets/registerimage.png";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
@@ -11,11 +12,16 @@ import { toast } from "react-toastify";
 import { FaLocationDot } from "react-icons/fa6";
 import axiosInstance from "../Utils/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const Register = () => {
   const navigate = useNavigate();
+
+  // State for toggling password visibility
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const initialValues = {
-    // userId: "0",
     firstName: "",
     lastName: "",
     email: "",
@@ -23,34 +29,12 @@ const Register = () => {
     password: "",
     confirmPassword: "",
     location: "",
-
-    // userType: "",
-    // createdAt: "",
-    // updatedAt: "",
-    // isActive: "",
-    // company: {
-    //   companiesId: "0",
-    //   companyName: "",
-    //   companyLogo: "",
-    //   industryId: "",
-    //   website: "",
-    //   location: "",
-    //   description: "",
-    //   createdAt: "",
-    //   updatedAt: "",
-    // },
   };
 
-  //fetching backend data uisng API
   const handleSubmit = async (values, actions) => {
-    console.log("values", values);
-    console.log(actions);
-
     try {
       const response = await axiosInstance.post("registeruser", values);
-      console.log("User Added:", response.data);
 
-      // Check if the response indicates success
       if (response.data.isSuccess) {
         actions.resetForm();
         navigate("/login");
@@ -58,23 +42,16 @@ const Register = () => {
           response.data.message || "User registration successfully!"
         );
       } else {
-        // Handle server-side validation errors
         toast.error(response.data.message || "Registration failed.");
       }
     } catch (error) {
-      console.log(error?.message);
-      console.error("Error while doing register:", error);
-
-      // Handle different types of errors
       if (error.response && error.response.data) {
-        // Server responded with error status and data
         const errorData = error.response.data;
         const errorMessage =
           errorData.message ||
           errorData.Message ||
           "Registration failed. Please try again.";
 
-        // Handle specific error cases if needed
         if (errorData.statusCode === 400) {
           if (errorMessage.includes("Email is already registered")) {
             toast.error(
@@ -91,12 +68,10 @@ const Register = () => {
           toast.error(errorMessage);
         }
       } else if (error.request) {
-        // Network error or no response
         toast.error(
           "Network error. Please check your connection and try again."
         );
       } else {
-        // Other errors
         toast.error("An unexpected error occurred. Please try again.");
       }
     }
@@ -129,133 +104,125 @@ const Register = () => {
               onSubmit={handleSubmit}
             >
               {({ errors, touched }) => (
-                <Form className="space-y-4  ">
-                  <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md ">
+                <Form className="space-y-4">
+                  {/* First Name */}
+                  <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                     <FaUser className="text-gray-500 mr-3" />
                     <Field
-                      className="w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400 rounded-md"
+                      className="w-full outline-none"
                       type="text"
                       name="firstName"
                       placeholder="First Name"
                     />
                   </div>
-                  <div className="error_container">
-                    {errors.firstName && touched.firstName && (
-                      <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                        {errors.firstName}
-                      </p>
-                    )}
-                  </div>
+                  {errors.firstName && touched.firstName && (
+                    <p className="text-red-600 text-sm">{errors.firstName}</p>
+                  )}
+
+                  {/* Last Name */}
                   <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                     <FaUser className="text-gray-500 mr-3" />
                     <Field
-                      className="w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400 rounded-md"
+                      className="w-full outline-none"
                       type="text"
                       name="lastName"
                       placeholder="Last Name"
                     />
                   </div>
-                  <div className="error_container">
-                    {errors.lastName && touched.lastName && (
-                      <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                        {errors.lastName}
-                      </p>
-                    )}
-                  </div>
+                  {errors.lastName && touched.lastName && (
+                    <p className="text-red-600 text-sm">{errors.lastName}</p>
+                  )}
+
+                  {/* Email */}
                   <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                     <MdEmail className="text-gray-500 mr-3 text-lg" />
                     <Field
-                      className="w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400 rounded-md"
+                      className="w-full outline-none"
                       type="email"
                       name="email"
                       placeholder="Email Address"
                     />
                   </div>
-                  <div className="error_container">
-                    {errors.email && touched.email && (
-                      <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                        {errors.email}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
+                  {errors.email && touched.email && (
+                    <p className="text-red-600 text-sm">{errors.email}</p>
+                  )}
+
+                  {/* Password */}
+                  <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md relative">
                     <RiLockPasswordFill className="text-gray-500 mr-3 text-lg" />
                     <Field
-                      type="password"
+                      className="w-full outline-none"
+                      type={showPassword ? "text" : "password"}
                       name="password"
                       placeholder="Password"
                     />
+                    <span
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 cursor-pointer text-gray-500"
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </span>
                   </div>
-                  <div className="error_container">
-                    {errors.password && touched.password && (
-                      <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                        {errors.password}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
+                  {errors.password && touched.password && (
+                    <p className="text-red-600 text-sm">{errors.password}</p>
+                  )}
+
+                  {/* Confirm Password */}
+                  <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md relative">
                     <RiLockPasswordFill className="text-gray-500 mr-3 text-lg" />
                     <Field
-                      className="w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400 rounded-md"
-                      type="password"
+                      className="w-full outline-none"
+                      type={showConfirmPassword ? "text" : "password"}
                       name="confirmPassword"
                       placeholder="Confirm Password"
                     />
+                    <span
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      className="absolute right-3 cursor-pointer text-gray-500"
+                    >
+                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                    </span>
                   </div>
-                  <div className="error_container">
-                    {errors.confirmPassword && touched.confirmPassword && (
-                      <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                        {errors.confirmPassword}
-                      </p>
-                    )}
-                  </div>
+                  {errors.confirmPassword && touched.confirmPassword && (
+                    <p className="text-red-600 text-sm">
+                      {errors.confirmPassword}
+                    </p>
+                  )}
+
+                  {/* Phone Number */}
                   <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                     <FaPhone className="text-gray-500 mr-3" />
                     <Field
-                      className="w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400 rounded-md"
+                      className="w-full outline-none"
                       type="text"
                       name="phoneNumber"
                       placeholder="Phone Number"
                     />
                   </div>
-                  <div className="error_container">
-                    {errors.phoneNumber && touched.phoneNumber && (
-                      <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                        {errors.phoneNumber}
-                      </p>
-                    )}
-                  </div>
+                  {errors.phoneNumber && touched.phoneNumber && (
+                    <p className="text-red-600 text-sm">{errors.phoneNumber}</p>
+                  )}
+
+                  {/* Location */}
                   <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                     <FaLocationDot className="text-gray-500 mr-3" />
                     <Field
-                      className="w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400 rounded-md"
+                      className="w-full outline-none"
                       type="text"
                       name="location"
                       placeholder="Location"
                     />
                   </div>
-                  <div className="error_container">
-                    {errors.location && touched.location && (
-                      <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                        {errors.location}
-                      </p>
-                    )}
-                  </div>
-                  {/* <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
-                    <IoPersonCircleSharp className="text-gray-500 mr-3" />
-                    <Field type="text" name="bio" placeholder="Bio" />
-                  </div>
-                  <div className="error_container">
-                    {errors.bio && touched.bio && (
-                      <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                        {errors.bio}
-                      </p>
-                    )}
-                  </div> */}
+                  {errors.location && touched.location && (
+                    <p className="text-red-600 text-sm">{errors.location}</p>
+                  )}
 
+                  {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full bg-blue-600 text-white py-2 rounded-md text-lg font-medium hover:bg-blue-800   transition"
+                    className="w-full bg-blue-600 text-white py-2 rounded-md text-lg font-medium hover:bg-blue-800 transition"
                   >
                     Create Account
                   </button>
