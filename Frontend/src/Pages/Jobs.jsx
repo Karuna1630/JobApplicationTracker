@@ -28,13 +28,11 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
 
   const companyId = getCompanyId();
 
-  // Helper function to get job type name from ID
   const getJobTypeName = (jobTypeId) => {
     const jobType = jobTypes.find(jt => jt.id === parseInt(jobTypeId));
     return jobType ? jobType.name : `Job Type ${jobTypeId}`;
   };
 
-  // Helper function to determine if job is active based on applicationDeadline
   const isJobActive = (job) => {
     if (!job.applicationDeadline) return false;
     const deadlineDate = new Date(job.applicationDeadline);
