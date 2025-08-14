@@ -151,7 +151,6 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
     return matchesSearch && matchesStatus;
   });
 
-  // DELETE Job API call
   const handleDeleteJob = async (jobId) => {
     if (
       !window.confirm(
