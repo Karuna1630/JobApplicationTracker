@@ -26,7 +26,7 @@ import Admin from './Pages/Admin.jsx'
 import ViewApplications from './Pages/ViewApplications'
 import CompanyInsight from './Pages/CompanyInsight.jsx'
 import Jobs from './Pages/Jobs'
-
+import JobTypeComponents from './Components/JobTypeComponents'
 
 
 function App() {
@@ -63,7 +63,7 @@ function App() {
           <Route path='/viewapplications' element={<ViewApplications/>}/>
           <Route path='/companyinsight' element={<CompanyInsight/>}/>
           <Route path='/curegister' element={<CURegister/>}/>
-
+          <Route path='/jobTypeComponents' element={<JobTypeComponents/>}/>
           <Route path='/jobs' element={<Jobs/>}/>
          
         
