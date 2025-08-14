@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { FaUser } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import { RiLockPasswordFill } from "react-icons/ri";
