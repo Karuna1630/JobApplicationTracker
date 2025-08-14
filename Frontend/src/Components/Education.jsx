@@ -91,38 +91,57 @@ const Education = () => {
         gpa: formData.grade || null,
       };
 
-      // POST only - no editing API
-      const educationResponse = await axiosInstance.post('/api/education', educationData);
-
-      const educationId = educationResponse.data.educationId || educationResponse.data.id;
-
-      const existingEducationIds = educationList.map(edu => edu.id);
-      const updatedEducationIds = [...existingEducationIds, educationId];
-      const educationJsonString = JSON.stringify(updatedEducationIds);
-
-      const response = await axiosInstance.post(`/submituser`, {
-        userId,
-        education: educationJsonString,
-      });
-
-      if (response.data && response.data.isSuccess) {
-        toast.success('Education added successfully!');
+      if (editingEducation) {
+        // For editing, include the education ID (backend expects EducationId)
+        educationData.educationId = editingEducation.educationId || editingEducation.id;
+        
+        console.log('Editing education with data:', educationData); // Debug log
+        
+        const educationResponse = await axiosInstance.post('/api/Education', educationData);
+        
+        toast.success('Education updated successfully!');
         await fetchEducation();
         setShowAddForm(false);
         resetForm();
         setEditingEducation(null);
       } else {
-        throw new Error(response.data?.message || 'Failed to update user with education');
+        // For adding new education
+        console.log('Adding new education with data:', educationData); // Debug log
+        
+        const educationResponse = await axiosInstance.post('/api/Education', educationData);
+        const educationId = educationResponse.data.educationId || educationResponse.data.id;
+
+        const existingEducationIds = educationList.map(edu => edu.educationId || edu.id);
+        const updatedEducationIds = [...existingEducationIds, educationId];
+        const educationJsonString = JSON.stringify(updatedEducationIds);
+
+        const response = await axiosInstance.post(`/submituser`, {
+          userId,
+          education: educationJsonString,
+        });
+
+        if (response.data && response.data.isSuccess) {
+          toast.success('Education added successfully!');
+          await fetchEducation();
+          setShowAddForm(false);
+          resetForm();
+          setEditingEducation(null);
+        } else {
+          throw new Error(response.data?.message || 'Failed to update user with education');
+        }
       }
     } catch (error) {
       console.error('Failed to save education:', error);
-      toast.error('Failed to save education. Please try again.');
+      console.error('Error details:', error.response?.data); // More detailed error logging
+      toast.error(`Failed to ${editingEducation ? 'update' : 'save'} education. Please try again.`);
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleEdit = (education) => {
+    console.log('Editing education:', education); // Debug log to see the structure
+    
     setFormData({
       school: education.school || '',
       degree: education.degree || '',
@@ -143,9 +162,10 @@ const Education = () => {
       try {
         await axiosInstance.delete(`/api/Education/${educationId}`);
         await fetchEducation();
+        toast.success('Education deleted successfully!');
       } catch (error) {
         console.error('Failed to delete education:', error);
-        alert('Failed to delete education. Please try again.');
+        toast.error('Failed to delete education. Please try again.');
       }
     }
   };
@@ -216,7 +236,7 @@ const Education = () => {
           <p className="text-gray-600">No education entries yet. Click the + button to add one.</p>
         ) : (
           educationList.map((education, index) => (
-            <div key={education.id || index} className="flex items-start gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            <div key={education.educationId || education.id || index} className="flex items-start gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
               {getUniversityLogo(education.school)}
 
               <div className="flex-1">
@@ -249,7 +269,7 @@ const Education = () => {
                   <FiEdit2 className="w-4 h-4 text-gray-600" />
                 </button>
                 <button
-                  onClick={() => handleDelete(education.id)}
+                  onClick={() => handleDelete(education.educationId || education.id)}
                   className="p-2 rounded-full hover:bg-red-100 transition-colors"
                   title="Delete education"
                 >
@@ -399,7 +419,7 @@ const Education = () => {
                     className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     disabled={submitting}
                   >
-                    Save
+                    {submitting ? 'Saving...' : (editingEducation ? 'Update' : 'Save')}
                   </button>
                 </div>
               </div>
