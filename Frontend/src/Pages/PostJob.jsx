@@ -1,22 +1,50 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axiosInstance from "../Utils/axiosInstance";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
+import { toast } from "react-toastify";
 
 const PostJob = ({ onClose, onJobPosted, companyId }) => {
   const [formData, setFormData] = useState({
-    title: "",
+    jobTypeId: "",
     description: "",
     requirements: "",
     location: "",
     salaryRangeMin: "",
     salaryRangeMax: "",
-    jobTypeId: "",
+    EmpolymentType: "", // Keep the original typo to match backend
     experienceLevel: "",
     applicationDeadline: "",
   });
 
+  const [jobTypes, setJobTypes] = useState([]);
+  const [loadingJobTypes, setLoadingJobTypes] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Fetch Job Types
+  const fetchJobTypes = async () => {
+    try {
+      const response = await axiosInstance.get('/getalljobtypes');
+      if (response.data && Array.isArray(response.data)) {
+        const mappedJobTypes = response.data.map(job => ({
+          id: job.jobTypeId,
+          name: job.name
+        }));
+        setJobTypes(mappedJobTypes);
+      } else {
+        toast.error("Failed to load job types");
+      }
+    } catch (error) {
+      console.error("Error fetching job types:", error);
+      toast.error("Failed to load job types");
+    } finally {
+      setLoadingJobTypes(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchJobTypes();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -25,19 +53,20 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate required fields
     if (
-      !formData.title ||
-      !formData.description ||
       !formData.jobTypeId ||
+      !formData.description ||
+      !formData.location ||
+      !formData.EmpolymentType ||
       !formData.experienceLevel ||
       !formData.applicationDeadline
     ) {
-      setErrorMsg("Please fill all required fields, including application deadline.");
+      setErrorMsg("Please fill all required fields.");
       return;
     }
 
-    if (!companyId) {
+    const effectiveCompanyId = companyId || localStorage.getItem("currentCompanyId");
+    if (!effectiveCompanyId) {
       setErrorMsg("Company ID is missing.");
       return;
     }
@@ -62,44 +91,54 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
 
       // Prepare the payload for API
       const payload = {
-        ...formData,
-        companyId, // use the prop directly
-        postedByUserId: userId,
-        jobTypeId: parseInt(formData.jobTypeId, 10),
-        experienceLevel: parseInt(formData.experienceLevel, 10),
-        salaryRangeMin: formData.salaryRangeMin ? parseFloat(formData.salaryRangeMin) : null,
-        salaryRangeMax: formData.salaryRangeMax ? parseFloat(formData.salaryRangeMax) : null,
-        applicationDeadline: new Date(formData.applicationDeadline).toISOString(),
-        postedAt: new Date().toISOString(),
-        status: "A",
-        views: 0,
+        JobId: 0,
+        PostedByUserId: userId,
+        CompanyId: parseInt(effectiveCompanyId),
+        JobType: formData.jobTypeId,
+        Description: formData.description,
+        Requirements: formData.requirements || "",
+        Location: formData.location,
+        EmpolymentType: formData.EmpolymentType,
+        SalaryRangeMin: formData.salaryRangeMin ? parseFloat(formData.salaryRangeMin) : 0,
+        SalaryRangeMax: formData.salaryRangeMax ? parseFloat(formData.salaryRangeMax) : 0,
+        ExperienceLevel: formData.experienceLevel,
+        Status: "A",
+        PostedAt: new Date().toISOString(),
+        ApplicationDeadline: new Date(formData.applicationDeadline).toISOString(),
       };
 
-      // Make the POST request
-      const res = await axiosInstance.post("/api/Jobs/submitjobs", payload);
+      console.log("Sending payload:", payload);
 
-      if (res.status === 200 || res.status === 201) {
-        const createdJob = res.data;
-        if (onJobPosted) onJobPosted(createdJob);
-        if (onClose) onClose();
+      // Make the POST request
+      const response = await axiosInstance.post("/api/Jobs/submitjobs", payload);
+
+      if (response.status === 200 || response.status === 201) {
+        toast.success("Job posted successfully!");
+        
+        if (onJobPosted && typeof onJobPosted === 'function') {
+          onJobPosted(response.data);
+        }
+        
+        onClose();
       } else {
         setErrorMsg("Failed to post job. Please try again.");
       }
+
     } catch (err) {
-      console.error("Post job error:", err.response || err.message || err);
-      setErrorMsg("Failed to post job. Please try again.");
+      console.error("Post job error:", err);
+      const errorMessage = err.response?.data?.message || "Failed to post job. Please try again.";
+      setErrorMsg(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    // Backdrop
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      {/* Modal Box */}
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-8 relative"
+        className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-8 relative max-h-[90vh] overflow-y-auto"
       >
         {/* Close Button */}
         <button
@@ -114,14 +153,25 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
 
         {errorMsg && <p className="text-red-500 mb-4">{errorMsg}</p>}
 
-        <input
-          name="title"
-          placeholder="Job Title *"
-          value={formData.title}
-          onChange={handleChange}
-          className="border p-2 w-full mb-4 rounded"
-          required
-        />
+        {/* Job Type Dropdown */}
+        {loadingJobTypes ? (
+          <p className="text-gray-500 mb-4">Loading job types...</p>
+        ) : (
+          <select
+            name="jobTypeId"
+            value={formData.jobTypeId}
+            onChange={handleChange}
+            className="border p-2 w-full mb-4 rounded"
+            required
+          >
+            <option value="">Select Job Type *</option>
+            {jobTypes.map((jobType) => (
+              <option key={jobType.id} value={jobType.id}>
+                {jobType.name}
+              </option>
+            ))}
+          </select>
+        )}
 
         <textarea
           name="description"
@@ -135,7 +185,7 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
 
         <textarea
           name="requirements"
-          placeholder="Requirements *"
+          placeholder="Requirements"
           value={formData.requirements}
           onChange={handleChange}
           className="border p-2 w-full mb-4 rounded"
@@ -148,6 +198,7 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
           value={formData.location}
           onChange={handleChange}
           className="border p-2 w-full mb-4 rounded"
+          required
         />
 
         <div className="flex gap-4 mb-4">
@@ -170,16 +221,16 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
         </div>
 
         <select
-          name="jobTypeId"
-          value={formData.jobTypeId}
+          name="EmpolymentType"
+          value={formData.EmpolymentType}
           onChange={handleChange}
           className="border p-2 w-full mb-4 rounded"
           required
         >
-          <option value="">Select Job Type *</option>
-          <option value="1">Full-Time</option>
-          <option value="2">Part-Time</option>
-          <option value="3">Contract</option>
+          <option value="">Select Employment Type *</option>
+          <option value="Full-Time">Full-Time</option>
+          <option value="Part-Time">Part-Time</option>
+          <option value="Remote">Remote</option>
         </select>
 
         <select
@@ -190,9 +241,9 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
           required
         >
           <option value="">Select Experience Level *</option>
-          <option value="1">Entry</option>
-          <option value="2">Mid</option>
-          <option value="3">Senior</option>
+          <option value="Entry">Entry</option>
+          <option value="Mid">Mid</option>
+          <option value="Senior">Senior</option>
         </select>
 
         <input

@@ -14,6 +14,7 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
   const [errorMsg, setErrorMsg] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [localReloadTrigger, setLocalReloadTrigger] = useState(0);
 
   // Get companyId from props or localStorage
   const getCompanyId = () => {
@@ -55,7 +56,6 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
         );
         const jobsData = response.data;
 
-
         if (isMounted) {
           if (Array.isArray(jobsData) && jobsData.length > 0) {
             setJobs(jobsData);
@@ -91,15 +91,16 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
     return () => {
       isMounted = false;
     };
-  }, [reloadTrigger, companyId]);
+  }, [reloadTrigger, companyId, localReloadTrigger]);
 
-  // Handle job posting success
+  // Handle job posting success - FIXED VERSION
   const handleJobPosted = (newJob) => {
-    setJobPosts((prev) => [newJob, ...prev]);
-    setTotalJobsCount((prev) => prev + 1);
-    setReloadJobs(prev => !prev);
+    // Add the new job to the existing jobs array
+    setJobs((prev) => [newJob, ...prev]);
+    
+    // Trigger a refetch to ensure data consistency
+    setLocalReloadTrigger(prev => prev + 1);
   };
-
 
   // Filter jobs based on search term and status
   const filteredJobs = jobs.filter((job) => {
@@ -216,7 +217,6 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
             >
               Add Job
             </button>
-
           </div>
 
           {/* Search + Filter */}
@@ -427,6 +427,7 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
         <PostJob
           onClose={() => setShowPostJob(false)}
           onJobPosted={handleJobPosted}
+          companyId={companyId}
         />
       )}
       <Footer />
