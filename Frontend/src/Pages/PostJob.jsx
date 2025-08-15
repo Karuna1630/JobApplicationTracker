@@ -11,7 +11,7 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
     location: "",
     salaryRangeMin: "",
     salaryRangeMax: "",
-    empolymentType: "",     
+    empolymentType: "",     // Keep original spelling to match backend
     experienceLevel: "",
     applicationDeadline: "",
   });
@@ -57,7 +57,7 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
       !formData.jobTypeId ||
       !formData.description ||
       !formData.location ||
-      !formData.empolymentType ||
+      !formData.empolymentType ||  // Keep original spelling
       !formData.experienceLevel ||
       !formData.applicationDeadline
     ) {
@@ -97,7 +97,7 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
         Description: formData.description,
         Requirements: formData.requirements || "",
         Location: formData.location,
-        EmpolymentType: formData.empolymentType,
+        EmpolymentType: formData.empolymentType,  // Match backend spelling exactly
         SalaryRangeMin: formData.salaryRangeMin ? parseFloat(formData.salaryRangeMin) : 0,
         SalaryRangeMax: formData.salaryRangeMax ? parseFloat(formData.salaryRangeMax) : 0,
         ExperienceLevel: formData.experienceLevel,
@@ -220,8 +220,8 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
         </div>
 
         <select
-          name="EmpolymentType"
-          value={formData.empolymentType}
+          name="empolymentType"  // Fixed: now matches formData property exactly
+          value={formData.empolymentType}  // Keep original spelling
           onChange={handleChange}
           className="border p-2 w-full mb-4 rounded"
           required
