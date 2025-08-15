@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FaSuitcase } from "react-icons/fa";
 import axiosInstance from "../Utils/axiosInstance";
-import { getUserIdFromToken } from "../Utils/jwtUtils";
 import SidebarMenu from "../Components/SidebarMenu";
 import PostJob from "./PostJob";
 import Navbar from "../Components/Navbar";

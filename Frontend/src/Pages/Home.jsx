@@ -12,6 +12,7 @@ const Home = () => {
   const [loadingCompanies, setLoadingCompanies] = useState(false);
   const [errorJobs, setErrorJobs] = useState(null);
   const [errorCompanies, setErrorCompanies] = useState(null);
+  const [imageErrors, setImageErrors] = useState(new Set()); // Track failed images
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -43,6 +44,21 @@ const Home = () => {
     fetchJobs();
     fetchCompanies();
   }, []);
+
+  // Handle image error with fallback prevention
+  const handleImageError = (companyId, e) => {
+    const imageKey = `company-${companyId}`;
+    if (imageErrors.has(imageKey)) {
+      // Already tried fallback, hide image completely
+      e.currentTarget.style.display = 'none';
+      return;
+    }
+    
+    // Mark this image as failed and set fallback
+    setImageErrors(prev => new Set(prev).add(imageKey));
+    // Use a more reliable placeholder or data URL
+    e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzlDQTNBRiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkNvbXBhbnkgTG9nbzwvdGV4dD48L3N2Zz4=';
+  };
 
   return (
     <>
@@ -86,18 +102,19 @@ const Home = () => {
                     className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition transform hover:scale-105 cursor-pointer"
                   >
                     <div className="w-full h-28 mb-4 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
-                      <img
-                        src={
-                          company.companyLogo && company.companyLogo.startsWith("http")
-                            ? company.companyLogo
-                            : "https://via.placeholder.com/300x120?text=Company+Logo"
-                        }
-                        alt={company.companyName}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.src = "https://via.placeholder.com/300x120?text=Company+Logo";
-                        }}
-                      />
+                      {company.companyLogo && company.companyLogo.startsWith("http") ? (
+                        <img
+                          src={company.companyLogo}
+                          alt={company.companyName}
+                          className="w-full h-full object-cover"
+                          onError={(e) => handleImageError(company.companyId, e)}
+                        />
+                      ) : (
+                        // Show a CSS-based placeholder instead of broken image
+                        <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
+                          {company.companyName?.charAt(0)?.toUpperCase() || 'C'}
+                        </div>
+                      )}
                     </div>
                     <h3 className="font-semibold text-lg text-blue-700 line-clamp-1">
                       {company.companyName}
