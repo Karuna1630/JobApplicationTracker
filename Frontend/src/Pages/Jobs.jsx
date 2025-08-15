@@ -10,10 +10,12 @@ import Footer from "../Components/Footer";
 const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
   const [showPostJob, setShowPostJob] = useState(false);
   const [jobs, setJobs] = useState([]);
+  const [jobTypes, setJobTypes] = useState([]); // Add this state for job types
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [localReloadTrigger, setLocalReloadTrigger] = useState(0);
 
   // Get companyId from props or localStorage
   const getCompanyId = () => {
@@ -26,7 +28,11 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
 
   const companyId = getCompanyId();
 
-  // Helper function to determine if job is active based on applicationDeadline
+  const getJobTypeName = (jobTypeId) => {
+    const jobType = jobTypes.find(jt => jt.id === parseInt(jobTypeId));
+    return jobType ? jobType.name : `Job Type ${jobTypeId}`;
+  };
+
   const isJobActive = (job) => {
     if (!job.applicationDeadline) return false;
     const deadlineDate = new Date(job.applicationDeadline);
@@ -37,11 +43,30 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
     return deadlineDate >= today;
   };
 
+  // Fetch Job Types
+  const fetchJobTypes = async () => {
+    try {
+      const response = await axiosInstance.get('/getalljobtypes');
+      if (response.data && Array.isArray(response.data)) {
+        const mappedJobTypes = response.data.map(job => ({
+          id: job.jobTypeId,
+          name: job.name
+        }));
+        setJobTypes(mappedJobTypes);
+      }
+    } catch (error) {
+      console.error("Error fetching job types:", error);
+    }
+  };
+
   useEffect(() => {
     let isMounted = true;
 
-    const fetchJobs = async () => {
+    const fetchData = async () => {
       try {
+        // Fetch job types first
+        await fetchJobTypes();
+
         if (!companyId) {
           if (isMounted) {
             setErrorMsg("No company ID found. Please ensure you're logged in properly.");
@@ -54,7 +79,6 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
           `/api/Jobs/getjobsbycompanyid?companyId=${companyId}`
         );
         const jobsData = response.data;
-
 
         if (isMounted) {
           if (Array.isArray(jobsData) && jobsData.length > 0) {
@@ -86,23 +110,26 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
       }
     };
 
-    fetchJobs();
+    fetchData();
 
     return () => {
       isMounted = false;
     };
-  }, [reloadTrigger, companyId]);
+  }, [reloadTrigger, companyId, localReloadTrigger]);
 
-  // Handle job posting success
+  // Handle job posting success - FIXED VERSION
   const handleJobPosted = (newJob) => {
-    setJobPosts((prev) => [newJob, ...prev]);
-    setTotalJobsCount((prev) => prev + 1);
-    setReloadJobs(prev => !prev);
+    // Add the new job to the existing jobs array
+    setJobs((prev) => [newJob, ...prev]);
+    
+    // Trigger a refetch to ensure data consistency
+    setLocalReloadTrigger(prev => prev + 1);
   };
-
 
   // Filter jobs based on search term and status
   const filteredJobs = jobs.filter((job) => {
+    const jobTypeName = getJobTypeName(job.jobType);
+    
     const matchesSearch =
       !searchTerm ||
       (job.title || job.jobTitle || "")
@@ -113,7 +140,8 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
         .includes(searchTerm.toLowerCase()) ||
       (job.location || job.jobLocation || "")
         .toLowerCase()
-        .includes(searchTerm.toLowerCase());
+        .includes(searchTerm.toLowerCase()) ||
+      jobTypeName.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus =
       filterStatus === "all" ||
@@ -123,7 +151,6 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
     return matchesSearch && matchesStatus;
   });
 
-  // DELETE Job API call
   const handleDeleteJob = async (jobId) => {
     if (
       !window.confirm(
@@ -216,7 +243,6 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
             >
               Add Job
             </button>
-
           </div>
 
           {/* Search + Filter */}
@@ -286,6 +312,7 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
                 {filteredJobs.map((job, index) => {
                   const jobId = job.jobId || job.id;
                   const isActive = isJobActive(job);
+                  const jobTypeName = getJobTypeName(job.jobType);
 
                   return (
                     <div
@@ -295,7 +322,7 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
                       {/* Title & Status */}
                       <div className="flex items-start justify-between mb-4">
                         <h2 className="text-xl font-semibold text-gray-800 flex-1">
-                          {job.title || job.jobTitle || "Untitled Position"}
+                          {jobTypeName}
                         </h2>
                         <div className="flex items-center gap-2 ml-4">
                           <span
@@ -326,7 +353,7 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
                       </div>
 
                       {/* Job Details */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm mb-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm mb-4">
                         <div>
                           <span className="font-semibold text-gray-700">Location:</span>
                           <p className="text-gray-600 mt-1">
@@ -339,7 +366,7 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
                           <span className="font-semibold text-gray-700">Salary:</span>
                           <p className="text-gray-600 mt-1">
                             {job.salaryRangeMin && job.salaryRangeMax
-                              ? `$${job.salaryRangeMin.toLocaleString()} - $${job.salaryRangeMax.toLocaleString()}`
+                              ?  `$${job.salaryRangeMin.toLocaleString()} - $${job.salaryRangeMax.toLocaleString()}`
                               : job.salary
                                 ? `$${job.salary.toLocaleString()}`
                                 : "Not specified"}
@@ -356,12 +383,6 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
                                   ? "Senior Level"
                                   : job.experience || "Not specified"}
                           </span>
-                        </div>
-                        <div>
-                          <span className="font-semibold text-gray-700">Job Type:</span>
-                          <p className="text-gray-600 mt-1">
-                            {job.jobType || job.type || "Not specified"}
-                          </p>
                         </div>
                       </div>
 
@@ -427,6 +448,7 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
         <PostJob
           onClose={() => setShowPostJob(false)}
           onJobPosted={handleJobPosted}
+          companyId={companyId}
         />
       )}
       <Footer />

@@ -44,6 +44,7 @@ const CompanyProfile = () => {
     description: "",
     firstName: "",
     lastName: "",
+    companyLogo: "",
   });
 
   const [jobPosts, setJobPosts] = useState([]);
@@ -75,7 +76,7 @@ const CompanyProfile = () => {
             phone: profileData.phoneNumber || "No phone number",
             firstName: profileData.firstName || "No first name",
             lastName: profileData.lastName || "No last name",
-
+            companyLogo: profileData.companyProfile.companyLogo || "",
           });
 
           const compId = profileData.companyProfile.companyId;
@@ -156,23 +157,36 @@ const CompanyProfile = () => {
 
         <div className="  m-2 ml-8 w-4/5 max-w-6xl mx-auto gap-4">
           <div className="bg-white shadow-xl rounded-2xl overflow-hidden mb-8">
-            <div className="h-56 flex items-end justify-between px-6 py-4 relative bg-gradient-to-r from-indigo-300 to-pink-200">
-              <div className="opacity-10 rounded-t-2xl"></div>
-              <button
-                onClick={() => setShowEditModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
-              >
-                <FaEdit />
-                Edit Profile
-              </button>
-            </div>
+  <div className="relative h-56 bg-gradient-to-r from-indigo-300 to-pink-200 flex items-center px-6 py-4">
+    <div className="absolute -bottom-16 left-8 w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-100">
+      <img
+        src={
+          companyInfo.companyLogo && companyInfo.companyLogo.startsWith("http")
+            ? companyInfo.companyLogo
+            : "https://via.placeholder.com/150?text=Company+Logo"
+        }
+        alt={companyInfo.companyName}
+        className="w-full h-full object-cover"
+        onError={(e) => {
+          e.currentTarget.src = "https://via.placeholder.com/150?text=Company+Logo";
+        }}
+      />
+    </div>
+    <button
+      onClick={() => setShowEditModal(true)}
+      className="absolute top-4 right-4 flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+    >
+      <FaEdit />
+      Edit Profile
+    </button>
+  </div>
 
+  <div className="pt-20 px-8 pb-8">
+    <h2 className="text-3xl font-bold text-gray-800">{companyInfo.companyName}</h2>
+    <p className="text-gray-600 mt-2">{companyInfo.description}</p>
+  </div>
+</div>
 
-            <div className="p-8">
-              <h2 className="text-3xl font-bold text-gray-800">{companyInfo.companyName}</h2>
-              <p className="text-gray-600 mt-2">{companyInfo.description}</p>
-            </div>
-          </div>
 
           <div className="bg-white shadow-xl rounded-2xl p-8 mb-8">
             <h3 className="text-xl font-semibold text-gray-700 mb-3">Company Information</h3>
