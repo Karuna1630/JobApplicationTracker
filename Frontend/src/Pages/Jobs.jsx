@@ -352,7 +352,7 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
                       </div>
 
                       {/* Job Details */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm mb-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm mb-4">
                         <div>
                           <span className="font-semibold text-gray-700">Location:</span>
                           <p className="text-gray-600 mt-1">
@@ -372,15 +372,15 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
                           </p>
                         </div>
                         <div>
-                          <span className="font-semibold text-gray-700">Experience:</span>
+                          <span className="font-semibold text-gray-700">Experience Level:</span>
                           <span className="block px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 mt-1 w-fit">
-                            {job.experienceLevel === 1
-                              ? "Entry Level"
-                              : job.experienceLevel === 2
-                                ? "Mid Level"
-                                : job.experienceLevel === 3
-                                  ? "Senior Level"
-                                  : job.experience || "Not specified"}
+                            {job.experienceLevel || job.experience || "Not specified"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="font-semibold text-gray-700">Employment Type:</span>
+                          <span className="block px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800 mt-1 w-fit">
+                            {job.empolymentType || job.employType || "Not specified"}
                           </span>
                         </div>
                       </div>

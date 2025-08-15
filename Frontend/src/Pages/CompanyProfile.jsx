@@ -38,7 +38,8 @@ const CompanyProfile = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [companyId, setCompanyId] = useState(null);
   const [showPostJob, setShowPostJob] = useState(false);
-  const [logoError, setLogoError] = useState(false); // Track logo errors
+  const [logoError, setLogoError] = useState(false);
+  const [jobTypes, setJobTypes] = useState([]); // Add job types state
   const [companyInfo, setCompanyInfo] = useState({
     companyName: "",
     email: "",
@@ -55,9 +56,34 @@ const CompanyProfile = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
 
+  // Add the same function from Jobs component
+  const getJobTypeName = (jobTypeId) => {
+    const jobType = jobTypes.find(jt => jt.id === parseInt(jobTypeId));
+    return jobType ? jobType.name : `Job Type ${jobTypeId}`;
+  };
+
+  // Add function to fetch job types
+  const fetchJobTypes = async () => {
+    try {
+      const response = await axiosInstance.get('/getalljobtypes');
+      if (response.data && Array.isArray(response.data)) {
+        const mappedJobTypes = response.data.map(job => ({
+          id: job.jobTypeId,
+          name: job.name
+        }));
+        setJobTypes(mappedJobTypes);
+      }
+    } catch (error) {
+      console.error("Error fetching job types:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchProfileAndJobs = async () => {
       try {
+        // Fetch job types first
+        await fetchJobTypes();
+
         const token = localStorage.getItem("token");
         const userId = getUserIdFromToken(token);
 
@@ -273,61 +299,65 @@ const CompanyProfile = () => {
                   onClick={() => setShowPostJob(true)}
                   className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
-                  Post Your First Job
+                  View All Jobs
                 </button>
               )}
             </div>
             {displayedJobs.length > 0 ? (
               <div className="space-y-4">
-                {displayedJobs.map((job) => (
-                  <div
-                    key={job.jobId || job.id}
-                    className="p-4 border rounded-xl hover:bg-gray-50"
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <h4 className="text-lg font-bold text-gray-800">
-                        {job.title || job.jobTitle || "Untitled Position"}
-                      </h4>
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          job.status === "A" ||
+                {displayedJobs.map((job) => {
+                  const jobTypeName = getJobTypeName(job.jobType); // Use the same logic as Jobs component
+                  
+                  return (
+                    <div
+                      key={job.jobId || job.id}
+                      className="p-4 border rounded-xl hover:bg-gray-50"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="text-lg font-bold text-gray-800">
+                          {jobTypeName} {/* Display job type name instead */}
+                        </h4>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            job.status === "A" ||
+                            job.status === "active" ||
+                            job.isActive
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-700"
+                          }`}
+                        >
+                          {job.status === "A" ||
                           job.status === "active" ||
                           job.isActive
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
-                      >
-                        {job.status === "A" ||
-                        job.status === "active" ||
-                        job.isActive
-                          ? "Active"
-                          : "Inactive"}
-                      </span>
-                    </div>
-                    <p className="text-gray-600 mb-2">
-                      {job.description ||
-                        job.jobDescription ||
-                        "No description available"}
-                    </p>
-                    <div className="flex gap-4 text-sm text-gray-500">
-                      <span>
-                        📍{" "}
-                        {job.location ||
-                          job.jobLocation ||
-                          "Location not specified"}
-                      </span>
-                      {job.salaryRangeMin && job.salaryRangeMax && (
-                        <span>
-                          💰 ${job.salaryRangeMin.toLocaleString()} - $
-                          {job.salaryRangeMax.toLocaleString()}
+                            ? "Active"
+                            : "Inactive"}
                         </span>
-                      )}
-                      {job.salary && (
-                        <span>💰 ${job.salary.toLocaleString()}</span>
-                      )}
+                      </div>
+                      <p className="text-gray-600 mb-2">
+                        {job.description ||
+                          job.jobDescription ||
+                          "No description available"}
+                      </p>
+                      <div className="flex gap-4 text-sm text-gray-500">
+                        <span>
+                          📍{" "}
+                          {job.location ||
+                            job.jobLocation ||
+                            "Location not specified"}
+                        </span>
+                        {job.salaryRangeMin && job.salaryRangeMax && (
+                          <span>
+                            💰 ${job.salaryRangeMin.toLocaleString()} - $
+                            {job.salaryRangeMax.toLocaleString()}
+                          </span>
+                        )}
+                        {job.salary && (
+                          <span>💰 ${job.salary.toLocaleString()}</span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="text-center py-8">

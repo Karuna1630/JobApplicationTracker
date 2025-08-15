@@ -11,7 +11,7 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
     location: "",
     salaryRangeMin: "",
     salaryRangeMax: "",
-    EmpolymentType: "", // Keep the original typo to match backend
+    empolymentType: "",     
     experienceLevel: "",
     applicationDeadline: "",
   });
@@ -57,7 +57,7 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
       !formData.jobTypeId ||
       !formData.description ||
       !formData.location ||
-      !formData.EmpolymentType ||
+      !formData.empolymentType ||
       !formData.experienceLevel ||
       !formData.applicationDeadline
     ) {
@@ -89,7 +89,6 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
         return;
       }
 
-      // Prepare the payload for API
       const payload = {
         JobId: 0,
         PostedByUserId: userId,
@@ -98,7 +97,7 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
         Description: formData.description,
         Requirements: formData.requirements || "",
         Location: formData.location,
-        EmpolymentType: formData.EmpolymentType,
+        EmpolymentType: formData.empolymentType,
         SalaryRangeMin: formData.salaryRangeMin ? parseFloat(formData.salaryRangeMin) : 0,
         SalaryRangeMax: formData.salaryRangeMax ? parseFloat(formData.salaryRangeMax) : 0,
         ExperienceLevel: formData.experienceLevel,
@@ -222,7 +221,7 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
 
         <select
           name="EmpolymentType"
-          value={formData.EmpolymentType}
+          value={formData.empolymentType}
           onChange={handleChange}
           className="border p-2 w-full mb-4 rounded"
           required
