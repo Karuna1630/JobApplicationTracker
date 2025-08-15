@@ -9,8 +9,7 @@ const SearchBar = ({ className = "" }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState({
     companies: [],
-    jobTypes: [],
-    skills: []
+    jobTypes: []
   });
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -82,32 +81,6 @@ const SearchBar = ({ className = "" }) => {
     return [];
   };
 
-  const searchSkills = async () => {
-    try {
-      const response = await fetch('https://localhost:7047/api/skills/getallskills');
-      console.log('Skills API response status:', response.status);
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Skills data received:', data);
-        
-        const filtered = data.filter(skill => {
-          const skillName = skill.skill || '';
-          
-          return skillName.toLowerCase().includes(searchQuery.toLowerCase());
-        });
-        
-        console.log('Filtered skills:', filtered);
-        return filtered;
-      } else {
-        console.error('Skills API failed with status:', response.status);
-      }
-    } catch (error) {
-      console.error('Error searching skills:', error);
-    }
-    return [];
-  };
-
   // Debounced search function
   useEffect(() => {
     const delayedSearch = setTimeout(async () => {
@@ -115,18 +88,16 @@ const SearchBar = ({ className = "" }) => {
         console.log('Starting search for:', searchQuery);
         setIsSearching(true);
         try {
-          const [companies, jobTypes, skills] = await Promise.all([
+          const [companies, jobTypes] = await Promise.all([
             searchCompanies(),
-            searchJobTypes(),
-            searchSkills()
+            searchJobTypes()
           ]);
           
-          console.log('Search results:', { companies, jobTypes, skills });
+          console.log('Search results:', { companies, jobTypes });
           
           setSearchResults({
             companies: companies.slice(0, 5), // Limit results
-            jobTypes: jobTypes.slice(0, 5),
-            skills: skills.slice(0, 5)
+            jobTypes: jobTypes.slice(0, 5)
           });
           setShowSearchResults(true);
         } catch (error) {
@@ -136,7 +107,7 @@ const SearchBar = ({ className = "" }) => {
         }
       } else {
         setShowSearchResults(false);
-        setSearchResults({ companies: [], jobTypes: [], skills: [] });
+        setSearchResults({ companies: [], jobTypes: [] });
       }
     }, 300); // 300ms delay
 
@@ -164,9 +135,6 @@ const SearchBar = ({ className = "" }) => {
       case 'jobType':
         navigate(`/jobs?type=${item.jobTypeId}`);
         break;
-      case 'skill':
-        navigate(`/jobs?skill=${item.skillId}`);
-        break;
       default:
         break;
     }
@@ -178,8 +146,7 @@ const SearchBar = ({ className = "" }) => {
   };
 
   const hasResults = searchResults.companies.length > 0 || 
-                   searchResults.jobTypes.length > 0 || 
-                   searchResults.skills.length > 0;
+                   searchResults.jobTypes.length > 0;
 
   return (
     <div className={`relative ${className}`} ref={searchRef}>
@@ -187,7 +154,7 @@ const SearchBar = ({ className = "" }) => {
         <div className="relative flex-1">
           <input
             type="text"
-            placeholder="Search companies, jobs, skills..."
+            placeholder="Search companies, jobs..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full h-10 md:h-12 px-4 pr-8 text-sm md:text-base rounded-l-full text-gray-700 border border-gray-300 focus:outline-none focus:border-blue-500"
@@ -244,9 +211,6 @@ const SearchBar = ({ className = "" }) => {
                         <div className="font-medium text-gray-900 truncate">
                           {company.companyName || 'Unknown Company'}
                         </div>
-                        <div className="text-sm text-gray-500 truncate">
-                          Company ID: {company.companyId}
-                        </div>
                       </div>
                     </button>
                   ))}
@@ -275,41 +239,6 @@ const SearchBar = ({ className = "" }) => {
                           <div className="font-medium text-gray-900 truncate">
                             {jobType.name || 'Unknown Job Type'}
                           </div>
-                          <div className="text-sm text-gray-500 truncate">
-                            Job Type ID: {jobType.jobTypeId}
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Skills */}
-              {searchResults.skills.length > 0 && (
-                <div className="mb-2">
-                  <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase border-b bg-gray-50">
-                    Skills ({searchResults.skills.length})
-                  </div>
-                  {searchResults.skills.map((skill, index) => (
-                    <button
-                      key={`skill-${skill.skillId || index}`}
-                      onClick={() => handleResultClick('skill', skill)}
-                      className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-purple-600 font-semibold text-sm">
-                            {(skill.skill || 'S').charAt(0)}
-                          </span>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="font-medium text-gray-900 truncate">
-                            {skill.skill || 'Unknown Skill'}
-                          </div>
-                          <div className="text-sm text-gray-500 truncate">
-                            Skill ID: {skill.skillId}
-                          </div>
                         </div>
                       </div>
                     </button>
@@ -333,7 +262,7 @@ const SearchBar = ({ className = "" }) => {
                 <IoSearch className="w-8 h-8 mx-auto" />
               </div>
               <div>No results found for "{searchQuery}"</div>
-              <div className="text-sm mt-1">Try searching for companies, job types, or skills</div>
+              <div className="text-sm mt-1">Try searching for companies or job types</div>
             </div>
           )}
         </div>
