@@ -30,8 +30,6 @@ import JobTypeComponents from './Components/JobTypeComponents'
 
 
 
-
-
 function App() {
   
 
