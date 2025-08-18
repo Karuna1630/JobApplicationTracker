@@ -294,19 +294,11 @@ const CompanyProfile = () => {
               <h2 className="text-2xl font-semibold text-gray-700">
                 Recent Job Posts
               </h2>
-              {totalJobsCount > 2 && (
-                <button
-                  onClick={() => setShowPostJob(true)}
-                  className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  View All Jobs
-                </button>
-              )}
             </div>
             {displayedJobs.length > 0 ? (
               <div className="space-y-4">
                 {displayedJobs.map((job) => {
-                  const jobTypeName = getJobTypeName(job.jobType); // Use the same logic as Jobs component
+                  const jobTypeName = getJobTypeName(job.jobType); 
                   
                   return (
                     <div

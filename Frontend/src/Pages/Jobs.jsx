@@ -353,7 +353,7 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
                   const jobId = job.jobId || job.id;
                   const isActive = isJobActive(job);
                   const jobTypeName = getJobTypeName(job.jobType);
-                  const skillNames = getSkillNames(job.skills); // ✅ Get skill names
+                  const skillNames = getSkillNames(job.skills); 
 
                   return (
                     <div
