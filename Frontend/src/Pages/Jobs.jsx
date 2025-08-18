@@ -3,14 +3,17 @@ import { FaSuitcase } from "react-icons/fa";
 import axiosInstance from "../Utils/axiosInstance";
 import SidebarMenu from "../Components/SidebarMenu";
 import PostJob from "./PostJob";
+import EditJobModal from "../Components/EditJobModal"; 
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 
 const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
   const [showPostJob, setShowPostJob] = useState(false);
+  const [showEditJob, setShowEditJob] = useState(false); 
+  const [selectedJobForEdit, setSelectedJobForEdit] = useState(null); 
   const [jobs, setJobs] = useState([]);
   const [jobTypes, setJobTypes] = useState([]);
-  const [allSkills, setAllSkills] = useState([]); // ✅ Add skills state
+  const [allSkills, setAllSkills] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,7 +36,7 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
     return jobType ? jobType.name : `Job Type ${jobTypeId}`;
   };
 
-  // ✅ New function to get skill names from skill IDs
+  // Function to get skill names from skill IDs
   const getSkillNames = (skillsString) => {
     if (!skillsString || !allSkills.length) return [];
     
@@ -81,7 +84,7 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
     }
   };
 
-  // ✅ Fetch all available skills
+  // Fetch all available skills
   const fetchAllSkills = async () => {
     try {
       const response = await axiosInstance.get(`/api/skills/getallskills`);
@@ -155,10 +158,31 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
     };
   }, [reloadTrigger, companyId, localReloadTrigger]);
 
-  // Handle job posting success - FIXED VERSION
+  // Handle job posting success
   const handleJobPosted = (newJob) => {
     // Add the new job to the existing jobs array
     setJobs((prev) => [newJob, ...prev]);
+    
+    // Trigger a refetch to ensure data consistency
+    setLocalReloadTrigger(prev => prev + 1);
+  };
+
+  // Add this function to handle edit button click
+  const handleEditJob = (job) => {
+    setSelectedJobForEdit(job);
+    setShowEditJob(true);
+  };
+
+  // Add this function to handle successful job update
+  const handleJobUpdated = (updatedJobData) => {
+    // Update the job in the jobs array
+    setJobs((prevJobs) => 
+      prevJobs.map((job) => 
+        (job.jobId || job.id) === (selectedJobForEdit.jobId || selectedJobForEdit.id)
+          ? { ...job, ...updatedJobData }
+          : job
+      )
+    );
     
     // Trigger a refetch to ensure data consistency
     setLocalReloadTrigger(prev => prev + 1);
@@ -181,7 +205,7 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
       jobTypeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      skillNames.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase())); // ✅ Added skills to search
+      skillNames.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchesStatus =
       filterStatus === "all" ||
@@ -201,15 +225,15 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
     }
 
     try {
-      // Call the new API endpoint
+      // Call the delete API endpoint
       await axiosInstance.delete(`/api/Jobs/delete/${jobId}`);
 
       // Remove the deleted job from state
       setJobs((prevJobs) => prevJobs.filter((job) => (job.jobId || job.id) !== jobId));
-      alert("Job deleted successfully!");
+      toast.success("Job deleted successfully!");
     } catch (error) {
       console.error("Delete job error:", error);
-      alert(
+      toast.error(
         error.response?.data?.message ||
         "Failed to delete job. Please try again."
       );
@@ -375,6 +399,12 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
                             {isActive ? "Active" : "Inactive"}
                           </span>
                           <button
+                            onClick={() => handleEditJob(job)}
+                            className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button
                             onClick={() => handleDeleteJob(jobId)}
                             className="px-3 py-1 text-xs bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors"
                           >
@@ -393,7 +423,7 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
                         </p>
                       </div>
 
-                      {/* ✅ Skills Section */}
+                      {/* Skills Section */}
                       {skillNames.length > 0 && (
                         <div className="mb-4">
                           <h3 className="font-semibold text-gray-700 mb-2">Required Skills:</h3>
@@ -501,6 +531,7 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
         </div>
       </div>
 
+      {/* Post Job Modal */}
       {showPostJob && (
         <PostJob
           onClose={() => setShowPostJob(false)}
@@ -508,6 +539,21 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
           companyId={companyId}
         />
       )}
+
+      {/* Edit Job Modal */}
+      {showEditJob && selectedJobForEdit && (
+        <EditJobModal
+          isOpen={showEditJob}
+          onClose={() => {
+            setShowEditJob(false);
+            setSelectedJobForEdit(null);
+          }}
+          jobInfo={selectedJobForEdit}
+          jobId={selectedJobForEdit.jobId || selectedJobForEdit.id}
+          onUpdateSuccess={handleJobUpdated}
+        />
+      )}
+
       <Footer />
     </>
   );
