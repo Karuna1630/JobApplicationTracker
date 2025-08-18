@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { IoSearch } from "react-icons/io5";
+import SearchBar from "../Components/SearchBar"; 
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -69,17 +69,8 @@ const Navbar = () => {
         </span>
       </Link>
 
-      {/* Search Bar */}
-      <div className="flex flex-1 max-w-xl mx-4">
-        <input
-          type="text"
-          placeholder="Search categories..."
-          className="w-full h-10 md:h-12 px-4 text-sm md:text-base rounded-l-full text-gray-700 border border-gray-300 focus:outline-none"
-        />
-        <button className="bg-blue-600 h-10 md:h-12 px-4 rounded-r-full hover:bg-blue-700">
-          <IoSearch className="text-white w-5 h-5" />
-        </button>
-      </div>
+      {/* Search Bar Component */}
+      <SearchBar className="flex flex-1 max-w-xl mx-4" />
 
       <nav className="flex gap-6 text-xl text-blue-800 font-medium">
         {/* 👇 Only show these when NOT logged in */}
