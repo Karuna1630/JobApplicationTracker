@@ -13,7 +13,11 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
   const [selectedJobForEdit, setSelectedJobForEdit] = useState(null); 
   const [jobs, setJobs] = useState([]);
   const [jobTypes, setJobTypes] = useState([]);
+
+  const [allSkills, setAllSkills] = useState([]); // ✅ Add skills state
+
   const [allSkills, setAllSkills] = useState([]);
+
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -36,7 +40,10 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
     return jobType ? jobType.name : `Job Type ${jobTypeId}`;
   };
 
+  // ✅ New function to get skill names from skill IDs
+
   // Function to get skill names from skill IDs
+
   const getSkillNames = (skillsString) => {
     if (!skillsString || !allSkills.length) return [];
     
@@ -84,7 +91,11 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
     }
   };
 
+
+  // ✅ Fetch all available skills
+
   // Fetch all available skills
+
   const fetchAllSkills = async () => {
     try {
       const response = await axiosInstance.get(`/api/skills/getallskills`);
@@ -205,7 +216,11 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
       jobTypeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+
+      skillNames.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase())); // ✅ Added skills to search
+
       skillNames.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
+
 
     const matchesStatus =
       filterStatus === "all" ||
@@ -377,7 +392,11 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
                   const jobId = job.jobId || job.id;
                   const isActive = isJobActive(job);
                   const jobTypeName = getJobTypeName(job.jobType);
+
+                  const skillNames = getSkillNames(job.skills); // ✅ Get skill names
+
                   const skillNames = getSkillNames(job.skills); 
+
 
                   return (
                     <div
@@ -423,7 +442,11 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
                         </p>
                       </div>
 
+
+                      {/* ✅ Skills Section */}
+
                       {/* Skills Section */}
+
                       {skillNames.length > 0 && (
                         <div className="mb-4">
                           <h3 className="font-semibold text-gray-700 mb-2">Required Skills:</h3>

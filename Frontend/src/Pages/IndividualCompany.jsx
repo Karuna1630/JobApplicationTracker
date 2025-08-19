@@ -1,81 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Users, Building, Globe, Calendar, DollarSign, Briefcase, Clock, Eye } from 'lucide-react';
 
-const IndividualCompany = ({ companyId = "1" }) => { // Default companyId for demo
+import { MapPin, Building, Globe, Calendar, DollarSign, Briefcase, Clock, Eye } from 'lucide-react';
+
+const IndividualCompany = ({ companyId = "1" }) => {
   const [activeTab, setActiveTab] = useState('about');
   const [companyData, setCompanyData] = useState(null);
   const [companyJobs, setCompanyJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [followersCount, setFollowersCount] = useState(0);
-  const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
     const fetchCompanyData = async () => {
       try {
         setLoading(true);
-        
-        // Fetch company details
+
+        // ✅ Fetch company details
         const companyResponse = await fetch(`/getcompanybyid?id=${companyId}`);
         if (companyResponse.ok) {
           const company = await companyResponse.json();
           setCompanyData(company);
         }
 
-        // Fetch company jobs
-        const jobsResponse = await fetch(`/jobs/getjobsbycompanyid?companyId=${companyId}`);
+        // ✅ Fetch jobs by company id
+        const jobsResponse = await fetch(`/api/Jobs/getjobsbyid?id=${companyId}`);
         if (jobsResponse.ok) {
           const jobs = await jobsResponse.json();
-          setCompanyJobs(Array.isArray(jobs) ? jobs : []);
+          setCompanyJobs(Array.isArray(jobs) ? jobs : [jobs]); // handle both array or single obj
         }
-        
       } catch (error) {
-        console.error('Error fetching company data:', error);
-        // For demo purposes, set mock data
-        setCompanyData({
-          companyId: 1,
-          companyName: "ASUS VIVOBook",
-          description: "An IT Company",
-          websiteUrl: "https://github.com/",
-          companyLogo: "https://localhost:7047/images/companylogo/02cb522b-eb96-4819-9c24-58bbc083e49.jpg",
-          location: "Itahari",
-          contactEmail: null
-        });
-        
-        setCompanyJobs([
-          {
-            jobId: 2,
-            companyId: 1,
-            postedByUserId: 2,
-            jobType: "Business Development Officer",
-            description: "this is thejob you want",
-            location: "itahari",
-            salaryRangeMin: 10000,
-            salaryRangeMax: 50000,
-            employmentType: "Part-Time",
-            experienceRequired: "Mid",
-            responsibilities: null,
-            requirements: "all",
-            benefits: null,
-            postedAt: "2025-08-15T09:48:46.296667",
-            applicationDeadline: "2025-08-27T00:00:00",
-            status: "A",
-            views: 0
-          }
-        ]);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    if (companyId) {
-      fetchCompanyData();
-    }
+    if (companyId) fetchCompanyData();
   }, [companyId]);
-
-  const handleFollow = () => {
-    setIsFollowing(!isFollowing);
-    setFollowersCount(prev => isFollowing ? prev - 1 : prev + 1);
-  };
 
   const formatSalary = (min, max) => {
     if (!min && !max) return 'Salary not disclosed';
@@ -84,387 +43,521 @@ const IndividualCompany = ({ companyId = "1" }) => { // Default companyId for de
     return 'Salary not disclosed';
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 1) return '1 day ago';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
-    return `${Math.ceil(diffDays / 30)} months ago`;
-  };
-
-  const getExperienceLevel = (experience) => {
-    if (!experience) return 'Not specified';
-    return experience;
-  };
-
-  const getEmploymentTypeLabel = (empType) => {
-    switch(empType) {
-      case 'Part-Time': return 'Part-Time';
-      case 'Full-Time': return 'Full-Time';
-      case 'Contract': return 'Contract';
-      case 'Internship': return 'Internship';
-      default: return 'Full-Time';
-    }
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading company details...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-600">Loading company details...</p>
+=======
+import { Building2, MapPin, Users, Globe, Calendar, Clock, DollarSign, BookOpen, Mail } from 'lucide-react';
+
+// Job Card Component
+const JobCard = ({ job }) => {
+  return (
+    <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 border border-gray-200">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex-1">
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">{job.title}</h3>
+          <div className="flex items-center text-gray-600 mb-2">
+            <MapPin className="w-4 h-4 mr-2" />
+            <span>{job.location}</span>
+          </div>
+          <div className="flex items-center text-gray-600 mb-2">
+            <Clock className="w-4 h-4 mr-2" />
+            <span>{job.type}</span>
+          </div>
         </div>
+        <div className="text-right">
+          <div className="text-sm text-gray-500 mb-1">Posted</div>
+          <div className="text-sm font-medium text-gray-700">{job.postedDate}</div>
+        </div>
+      </div>
+      
+      <div className="mb-4">
+        <p className="text-gray-700 text-sm line-clamp-3">{job.description}</p>
+      </div>
+      
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          <DollarSign className="w-4 h-4 mr-1 text-green-600" />
+          <span className="text-sm font-medium text-green-600">{job.salary}</span>
+        </div>
+        <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
+          Apply Now
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Jobs List Component
+const JobsList = ({ jobs, loading, error }) => {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <span className="ml-2 text-gray-600">Loading jobs...</span>
       </div>
     );
   }
 
-  if (!companyData) {
+  if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900">Company not found</h2>
-          <p className="mt-2 text-gray-600">The company you're looking for doesn't exist.</p>
-        </div>
+      <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+        <p className="text-red-700">{error}</p>
+      </div>
+    );
+  }
+
+  if (!jobs || jobs.length === 0) {
+    return (
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+        <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+        <p className="text-gray-600 text-lg">No jobs available at this time</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-700 to-blue-900 relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-blue-800 opacity-10">
-          <div className="absolute top-0 left-0 w-full h-full" 
-               style={{
-                 backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.1) 2px, rgba(255,255,255,0.1) 4px)',
-               }}>
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-1">
+      {jobs.map((job) => (
+        <JobCard key={job.id} job={job} />
+      ))}
+    </div>
+  );
+};
+
+// Company Header Component
+const CompanyHeader = ({ company }) => {
+  return (
+    <div className="relative bg-gradient-to-r from-blue-800 via-blue-700 to-blue-600 text-white">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-10 left-10 w-32 h-32 rounded-full border-2 border-white"></div>
+        <div className="absolute top-20 right-20 w-24 h-24 rounded-full border border-white"></div>
+        <div className="absolute bottom-10 left-1/4 w-16 h-16 rounded-full border border-white"></div>
+      </div>
+      
+      <div className="relative container mx-auto px-6 py-12">
+        <div className="flex items-center mb-6">
+          {/* Company Logo */}
+          <div className="bg-white p-3 rounded-lg mr-4">
+            {company.companyLogo ? (
+              <img 
+                src={company.companyLogo} 
+                alt={`${company.companyName} logo`}
+                className="w-8 h-8 object-contain"
+              />
+            ) : (
+              <Building2 className="w-8 h-8 text-blue-700" />
+            )}
+          </div>
+          
+          {/* Company Name */}
+          <div>
+            <h1 className="text-3xl font-bold">{company.companyName}</h1>
           </div>
         </div>
         
-        {/* Decorative Elements */}
-        <div className="absolute top-10 right-10 w-32 h-32 border-2 border-blue-300 rounded-full opacity-20"></div>
-        <div className="absolute bottom-10 right-32 w-20 h-20 border-2 border-blue-300 rounded-full opacity-30"></div>
-        <div className="absolute top-20 right-1/4 w-1 h-20 bg-blue-300 opacity-20 transform rotate-45"></div>
-
-        <div className="container mx-auto px-4 py-12 relative z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-6">
-              <div className="w-24 h-24 bg-white rounded-lg p-4 shadow-lg">
-                {companyData.companyLogo ? (
-                  <img 
-                    src={companyData.companyLogo} 
-                    alt={companyData.companyName}
-                    className="w-full h-full object-contain"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'flex';
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full bg-blue-100 rounded flex items-center justify-center">
-                    <span className="text-blue-600 font-bold text-2xl">
-                      {companyData.companyName?.charAt(0) || 'C'}
-                    </span>
-                  </div>
-                )}
-                <div className="w-full h-full bg-blue-100 rounded flex items-center justify-center" style={{display: 'none'}}>
-                  <span className="text-blue-600 font-bold text-2xl">
-                    {companyData.companyName?.charAt(0) || 'C'}
-                  </span>
-                </div>
-              </div>
-              <div>
-                <h1 className="text-4xl font-bold text-white mb-2">
-                  {companyData.companyName || 'Unknown Company'}
-                </h1>
-                <p className="text-blue-100 text-lg">
-                  {companyData.description || 'No description available'}
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <span className="text-blue-100 text-sm">{followersCount} Followers</span>
-              </div>
-              <button
-                onClick={handleFollow}
-                className={`px-6 py-2 rounded-full font-medium transition-colors ${
-                  isFollowing
-                    ? 'bg-white text-blue-700 hover:bg-gray-100'
-                    : 'bg-transparent text-white border-2 border-white hover:bg-white hover:text-blue-700'
-                }`}
-              >
-                {isFollowing ? 'Following' : 'Follow'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Navigation Tabs */}
-      <div className="bg-white border-b">
-        <div className="container mx-auto px-4">
-          <nav className="flex space-x-8">
-            <button
-              onClick={() => setActiveTab('about')}
-              className={`py-4 px-2 border-b-2 font-medium text-sm ${
-                activeTab === 'about'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              About
-            </button>
-            <button
-              onClick={() => setActiveTab('jobs')}
-              className={`py-4 px-2 border-b-2 font-medium text-sm ${
-                activeTab === 'jobs'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Jobs
-            </button>
-          </nav>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2">
-            {activeTab === 'about' && (
-              <div className="bg-white rounded-lg shadow-sm p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">About Us</h2>
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                      Driven by a vision for a Cleaner, Greener Nepal
-                    </h3>
-                    <p className="text-gray-700 leading-relaxed mb-4">
-                      We envision a world where electronic waste is no longer a threat to the environment but a valuable resource that contributes to a cleaner, greener, and more sustainable future.
-                    </p>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                      Our Mission
-                    </h3>
-                    <p className="text-gray-700 leading-relaxed">
-                      {companyData.description || "We're not just managing e-waste—we're redefining it. With a vision for a cleaner Nepal, we turn discarded electronics into valuable resources through safe, sustainable, and innovative practices. Our services—from secure recycling to data protection—make responsible e-waste disposal easy and impactful. As tech use grows, we aim to keep e-waste processing within Nepal to ensure it's handled responsibly and benefits our environment and communities."}
-                    </p>
-                  </div>
-                  
-                  {companyData.websiteUrl && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                        Website
-                      </h3>
-                      <a 
-                        href={companyData.websiteUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 flex items-center"
-                      >
-                        <Globe className="w-4 h-4 mr-2" />
-                        {companyData.websiteUrl}
-                      </a>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'jobs' && (
-              <div>
-                <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">Available Jobs</h2>
-                  <p className="text-gray-600 mt-1">
-                    Jobs posted by {companyData.companyName} ({companyJobs.length})
-                  </p>
-                </div>
-
-                {companyJobs.length === 0 ? (
-                  <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-                    <Briefcase className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No jobs available</h3>
-                    <p className="text-gray-500">This company hasn't posted any jobs yet.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {companyJobs.map((job) => (
-                      <div key={job.jobId} className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow border border-gray-100">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <div className="flex items-center mb-3">
-                              <div className="w-12 h-12 bg-blue-100 rounded-lg p-2 mr-4 flex-shrink-0">
-                                {companyData.companyLogo ? (
-                                  <img 
-                                    src={companyData.companyLogo} 
-                                    alt={companyData.companyName}
-                                    className="w-full h-full object-contain"
-                                    onError={(e) => {
-                                      e.target.style.display = 'none';
-                                      e.target.nextSibling.style.display = 'flex';
-                                    }}
-                                  />
-                                ) : null}
-                                <div className="w-full h-full bg-blue-200 rounded flex items-center justify-center">
-                                  <span className="text-blue-600 font-semibold text-sm">
-                                    {companyData.companyName?.charAt(0) || 'C'}
-                                  </span>
-                                </div>
-                              </div>
-                              <div>
-                                <h3 className="text-xl font-semibold text-gray-900 mb-1">
-                                  {job.jobType || 'Job Position'}
-                                </h3>
-                                <p className="text-gray-600">{companyData.companyName}</p>
-                              </div>
-                            </div>
-
-                            <div className="mb-4">
-                              <div className="flex flex-wrap gap-2 mb-3">
-                                <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm flex items-center">
-                                  <MapPin className="w-3 h-3 mr-1" />
-                                  Key Skills
-                                </span>
-                                <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
-                                  Organizational Development
-                                </span>
-                                <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
-                                  Client Handling
-                                </span>
-                                <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
-                                  Branding
-                                </span>
-                                <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
-                                  Reliability
-                                </span>
-                                <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
-                                  Research
-                                </span>
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                              <div className="flex items-center text-sm text-gray-600">
-                                <Briefcase className="w-4 h-4 mr-2" />
-                                <span>{job.experienceRequired ? `${job.experienceRequired} Level` : 'More than 5 years'}</span>
-                              </div>
-                              <div className="flex items-center text-sm text-gray-600">
-                                <Building className="w-4 h-4 mr-2" />
-                                <span>{getEmploymentTypeLabel(job.employmentType)}</span>
-                              </div>
-                              <div className="flex items-center text-sm text-gray-600">
-                                <DollarSign className="w-4 h-4 mr-2" />
-                                <span>{formatSalary(job.salaryRangeMin, job.salaryRangeMax)}</span>
-                              </div>
-                              <div className="flex items-center text-sm text-gray-600">
-                                <MapPin className="w-4 h-4 mr-2" />
-                                <span>{job.location || companyData.location || 'Chamati, Kathmandu'}</span>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                              <div className="flex items-center text-sm text-gray-500">
-                                <Clock className="w-4 h-4 mr-1" />
-                                <span>Apply Before: {job.applicationDeadline ? new Date(job.applicationDeadline).toLocaleDateString() : '2 weeks, 6 days from now'}</span>
-                              </div>
-                              <div className="flex items-center text-sm text-gray-500">
-                                <Eye className="w-4 h-4 mr-1" />
-                                <span>Views: {job.views || 40}</span>
-                              </div>
-                            </div>
-
-                            {job.description && (
-                              <div className="mt-4 pt-4 border-t border-gray-100">
-                                <p className="text-gray-700 text-sm line-clamp-2">{job.description}</p>
-                              </div>
-                            )}
-                          </div>
-                          
-                          <div className="ml-4">
-                            <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors">
-                              Apply Now
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">More Info</h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Industry</dt>
-                  <dd className="mt-1 text-sm text-gray-900">Other</dd>
-                </div>
-
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Company Size</dt>
-                  <dd className="mt-1 text-sm text-gray-900">10 - 50 employees</dd>
-                </div>
-
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Location</dt>
-                  <dd className="mt-1 text-sm text-gray-900 flex items-center">
-                    <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                    {companyData.location || 'imadol, balkumari'}
-                  </dd>
-                </div>
-
-                {companyData.websiteUrl && (
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Website</dt>
-                    <dd className="mt-1">
-                      <a 
-                        href={companyData.websiteUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
-                      >
-                        <Globe className="w-4 h-4 mr-2" />
-                        Visit Website
-                      </a>
-                    </dd>
-                  </div>
-                )}
-
-                <div className="pt-4 border-t">
-                  <div className="text-sm text-gray-500 mb-2">Active Jobs</div>
-                  <div className="text-2xl font-bold text-gray-900">{companyJobs.length}</div>
-                </div>
-
-                {companyData.contactEmail && (
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Contact</dt>
-                    <dd className="mt-1 text-sm text-gray-900">{companyData.contactEmail}</dd>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+        {/* Location */}
+        <div className="flex items-center text-sm">
+          <MapPin className="w-4 h-4 mr-2" />
+          <span>{company.location}</span>
         </div>
       </div>
     </div>
   );
 };
 
+// Company Tabs Component
+const CompanyTabs = ({ activeTab, setActiveTab }) => {
+  const tabs = [
+    { id: 'about', label: 'About' },
+    { id: 'jobs', label: 'Jobs' }
+  ];
+
+  return (
+    <div className="border-b border-gray-200 bg-white">
+      <div className="container mx-auto px-6">
+        <nav className="flex space-x-8">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === tab.id
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+      </div>
+    </div>
+  );
+};
+
+// About Company Component
+const AboutCompany = ({ company }) => {
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">About {company.companyName}</h2>
+      
+      {/* Company Description */}
+      <div className="prose max-w-none">
+        <p className="text-gray-700 leading-relaxed text-lg">
+          {company.description}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// Main Company Page Component
+const CompanyPage = ({ companyId }) => {
+  const [activeTab, setActiveTab] = useState('about');
+  const [company, setCompany] = useState(null);
+  const [jobs, setJobs] = useState([]);
+  const [loadingCompany, setLoadingCompany] = useState(true);
+  const [loadingJobs, setLoadingJobs] = useState(false);
+  const [errorCompany, setErrorCompany] = useState('');
+  const [errorJobs, setErrorJobs] = useState('');
+
+  // Sample company data based on your endpoint structure
+  const sampleCompany = {
+    companyId: 1,
+    companyName: "MRD",
+    description: "Health organization and jjshfj",
+    websiteUrl: null,
+    companyLogo: "https://localhost:7047/images/companylogo/dd6ab4c8-f139-4ea8-baba-f7b7c40f028a.jpg",
+    location: "Biratnagar",
+    contactEmail: "ak@gmail.com"
+  };
+
+  // Sample jobs data
+  const sampleJobs = [
+    {
+      id: 1,
+      title: "Senior Network Engineer",
+      location: "Biratnagar, Nepal",
+      type: "Full Time",
+      salary: "NPR 80,000 - 120,000",
+      postedDate: "2 days ago",
+      description: "We are looking for an experienced Network Engineer to join our team."
+    },
+    {
+      id: 2,
+      title: "Project Manager",
+      location: "Kathmandu, Nepal",
+      type: "Full Time",
+      salary: "NPR 100,000 - 150,000",
+      postedDate: "1 week ago",
+      description: "Seeking a dynamic Project Manager to oversee projects from conception to completion."
+    }
+  ];
+
+  // Fetch company details
+  const fetchCompany = async (id) => {
+    try {
+      setLoadingCompany(true);
+      setErrorCompany('');
+      
+      const response = await axiosInstance.get(`/getcompanybyid?id=${id}`);
+      setCompany(response.data);
+    } catch (err) {
+      console.error("Failed to fetch company", err);
+      setErrorCompany("Failed to load company information.");
+    } finally {
+      setLoadingCompany(false);
+    }
+  };
+
+  // Fetch jobs for this company
+  const fetchJobs = async (companyId) => {
+    try {
+      setLoadingJobs(true);
+      setErrorJobs('');
+      
+      const response = await axiosInstance.get(`/api/Jobs/getjobsbyid?id=${companyId}`);
+      setJobs(response.data || []);
+    } catch (err) {
+      console.error("Failed to fetch jobs", err);
+      setErrorJobs("Failed to load jobs.");
+    } finally {
+      setLoadingJobs(false);
+    }
+  };
+
+  // Load company data on component mount
+  useEffect(() => {
+    if (companyId) {
+      fetchCompany(companyId);
+    }
+  }, [companyId]);
+
+  // Load jobs when switching to jobs tab
+  useEffect(() => {
+    if (activeTab === 'jobs' && companyId && jobs.length === 0) {
+      fetchJobs(companyId);
+    }
+  }, [activeTab, companyId]);
+
+  // Loading state for company
+  if (loadingCompany) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading company information...</p>
+        </div>
+
+      </div>
+    );
+  }
+
+  // Error state for company
+  if (errorCompany) {
+    return (
+
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-600">Company not found</p>
+
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-600 text-6xl mb-4">⚠</div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Company Not Found</h2>
+          <p className="text-gray-600">{errorCompany}</p>
+        </div>
+
+      </div>
+    );
+  }
+
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-blue-700 to-blue-900 px-6 py-10">
+        <div className="flex items-center space-x-6">
+          <div className="w-24 h-24 bg-white rounded-lg p-2 shadow">
+            {companyData.companyLogo ? (
+              <img
+                src={companyData.companyLogo}
+                alt={companyData.companyName}
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full bg-blue-100 rounded">
+                <span className="text-blue-600 text-2xl font-bold">
+                  {companyData.companyName?.charAt(0) || "C"}
+                </span>
+              </div>
+            )}
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-white">{companyData.companyName}</h1>
+            <p className="text-blue-100">{companyData.description}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="bg-white border-b">
+        <div className="container mx-auto px-4 flex space-x-6">
+          <button
+            onClick={() => setActiveTab('about')}
+            className={`py-3 px-2 ${activeTab === 'about' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'}`}
+          >
+            About
+          </button>
+          <button
+            onClick={() => setActiveTab('jobs')}
+            className={`py-3 px-2 ${activeTab === 'jobs' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'}`}
+          >
+            Jobs
+          </button>
+
+  // No company data
+  if (!company) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Building2 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Company Not Found</h2>
+          <p className="text-gray-600">The requested company could not be found.</p>
+
+        </div>
+      </div>
+    );
+  }
+
+
+      {/* Content */}
+      <div className="container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Section */}
+        <div className="lg:col-span-2">
+          {activeTab === 'about' && (
+            <div className="bg-white p-6 rounded shadow">
+              <h2 className="text-2xl font-bold mb-4">About Us</h2>
+              <p className="text-gray-700 mb-4">
+                {companyData.description || "No description available"}
+              </p>
+
+              {companyData.websiteUrl && (
+                <p className="text-sm text-blue-600">
+                  <a href={companyData.websiteUrl} target="_blank" rel="noreferrer">
+                    <Globe className="inline w-4 h-4 mr-1" /> {companyData.websiteUrl}
+                  </a>
+                </p>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'jobs' && (
+            <div>
+              <h2 className="text-2xl font-bold mb-4">
+                Jobs at {companyData.companyName} ({companyJobs.length})
+              </h2>
+
+              {companyJobs.length === 0 ? (
+                <div className="bg-white p-6 rounded shadow text-center">
+                  <p>No jobs available</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {companyJobs.map((job) => (
+                    <div key={job.jobId} className="bg-white p-6 rounded shadow">
+                      <h3 className="text-xl font-semibold">{job.jobType}</h3>
+                      <p className="text-gray-600 mb-2">{job.location}</p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700 mb-3">
+                        <div><Briefcase className="inline w-4 h-4 mr-1" /> {job.experienceLevel || "Not specified"}</div>
+                        <div><Building className="inline w-4 h-4 mr-1" /> {job.empolymentType || "N/A"}</div>
+                        <div><DollarSign className="inline w-4 h-4 mr-1" /> {formatSalary(job.salaryRangeMin, job.salaryRangeMax)}</div>
+                        <div><Calendar className="inline w-4 h-4 mr-1" /> Apply before: {job.applicationDeadline ? new Date(job.applicationDeadline).toLocaleDateString() : "N/A"}</div>
+                      </div>
+
+                      {job.description && <p className="text-gray-700 mb-2">{job.description}</p>}
+
+                      {job.requirements && (
+                        <div className="mt-2">
+                          <h4 className="font-semibold">Requirements:</h4>
+                          <p className="text-gray-700 whitespace-pre-line">{job.requirements}</p>
+                        </div>
+                      )}
+
+                      <div className="flex justify-between items-center mt-4 text-sm text-gray-500">
+                        <span><Eye className="inline w-4 h-4 mr-1" /> Views: {job.views}</span>
+                        <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                          Apply Now
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Sidebar */}
+        <div className="bg-white p-6 rounded shadow">
+          <h3 className="text-lg font-semibold mb-4">More Info</h3>
+          <p><span className="font-medium">Location:</span> {companyData.location}</p>
+          {companyData.contactEmail && <p><span className="font-medium">Email:</span> {companyData.contactEmail}</p>}
+          {companyData.websiteUrl && (
+            <p>
+              <a href={companyData.websiteUrl} target="_blank" rel="noreferrer" className="text-blue-600">
+                Visit Website
+              </a>
+            </p>
+          )}
+          <p><span className="font-medium">Active Jobs:</span> {companyJobs.length}</p>
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <CompanyHeader company={company} />
+      <CompanyTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+      
+      <div className="container mx-auto px-6 py-8">
+        <div className="flex gap-8">
+          <main className="flex-1">
+            {activeTab === 'about' && <AboutCompany company={company} />}
+            {activeTab === 'jobs' && (
+              <div>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">Open Positions</h2>
+                  <p className="text-gray-600 mt-2">Join our team and be part of {company.companyName}</p>
+                </div>
+                <JobsList jobs={jobs} loading={loadingJobs} error={errorJobs} />
+              </div>
+            )}
+          </main>
+          
+          <aside className="w-80">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">More Info</h3>
+              
+              <div className="space-y-4">
+                {/* Location */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-1">Location</h4>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <MapPin className="w-4 h-4 mr-2" />
+                    <span>{company.location}</span>
+                  </div>
+                </div>
+                
+                {/* Website URL */}
+                {company.websiteUrl && (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-700 mb-1">Website</h4>
+                    <div className="flex items-center text-sm text-blue-600 hover:text-blue-800">
+                      <Globe className="w-4 h-4 mr-2" />
+                      <a 
+                        href={company.websiteUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="hover:underline"
+                      >
+                        Visit Website
+                      </a>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Contact Email */}
+                {company.contactEmail && (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-700 mb-1">Contact Email</h4>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Mail className="w-4 h-4 mr-2" />
+                      <a 
+                        href={`mailto:${company.contactEmail}`}
+                        className="hover:text-blue-600 hover:underline"
+                      >
+                        {company.contactEmail}
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <button className="w-full mt-6 bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
+                Follow Company
+              </button>
+            </div>
+          </aside>
+
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 export default IndividualCompany;
+
+export default CompanyPage;
+

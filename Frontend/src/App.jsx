@@ -27,7 +27,12 @@ import ViewApplications from './Pages/ViewApplications'
 import CompanyInsight from './Pages/CompanyInsight.jsx'
 import Jobs from './Pages/Jobs'
 import JobTypeComponents from './Components/JobTypeComponents'
+
+import Experience from './Components/Experience.jsx'
+
+
 import IndividualCompany from './Pages/IndividualCompany.jsx'
+import CompanyIndividual from './Components/CompanyIndividual.jsx'
 
 
 function App() {
@@ -37,6 +42,7 @@ function App() {
     <>
       <div>
         <BrowserRouter>
+
           <Routes>
             <Route path='/' element={<Home />} />
             <Route path='/login' element={<Login />} />
@@ -68,6 +74,54 @@ function App() {
             <Route path='/jobs' element={<Jobs />} />
             <Route path="/company/:companyId" element={<IndividualCompany />} />
           </Routes>
+        <Routes>
+          <Route path='/' element={<Home/>}/>
+          <Route path='/login' element={<Login/>}/>
+          <Route path='/signup' element={<SignUp/>}/>
+          <Route path='/registeru' element={<Register/>}/>
+          <Route path='/aboutus' element={<AboutUs/>}/>
+          <Route path='/registercomp' element={<RegisterComponent/>}/>
+          <Route path='/companies' element={<Companies/>}/>
+          <Route path='/uploadresume' element={<Uploadresume/>}/>
+          <Route path='/jobrecommendation' element={<JobRecommendation/>}/>
+          <Route path='/companyR1' element={<CompanyR1/>}/>
+          <Route path='/messagesinbox' element={<MessagesInbox/>}/>
+          <Route path='/userProfile' element= {<UserProfile/>}/>
+          <Route path='/companyR2' element={<CompanyR2/>}/>
+          <Route path='/companyR3' element={<CompanyR3/>}/>
+          <Route path='/applicationreceived' element={<ApplicationReceived/>}/>
+          <Route path='/contactus' element={<ContactUs/>}/>
+          <Route path='/editProfile' element={<EditProfile/>}/>
+          <Route path='/companyprofile' element={<CompanyProfile/>}/>
+          <Route path='/postjob' element={<PostJob/>}/>
+          <Route path="/registerstaff" element={<CURegister />} />
+          <Route path='/admin' element={<Admin/>}/>
+          <Route path='/skill' element={<Skill/>}/>
+          <Route path='/candidatescreening' element={<CandidateScreening/>}/>
+          <Route path='/viewapplications' element={<ViewApplications/>}/>
+          <Route path='/companyinsight' element={<CompanyInsight/>}/>
+          <Route path='/curegister' element={<CURegister/>}/>
+          <Route path='/jobTypeComponents' element={<JobTypeComponents/>}/>
+          <Route path='/jobs' element={<Jobs/>}/>
+
+
+          <Route path='/experience' element= {<Experience/>}/>
+         
+         
+
+
+           <Route path='/company/:companyId' element={<CompanyIndividual/>}/>
+
+       <Route path="/company/:companyId" element={<IndividualCompany/>} />
+
+        
+
+
+
+
+    
+        </Routes>
+
         </BrowserRouter>
       </div>
     </>
