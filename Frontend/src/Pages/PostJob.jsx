@@ -226,7 +226,7 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
         Status: "A",
         PostedAt: new Date().toISOString(),
         ApplicationDeadline: new Date(formData.applicationDeadline).toISOString(),
-        Skills: skillsJsonString // ✅ Added Skills to payload
+        Skills: skillsJsonString 
       };
 
       console.log("Sending payload:", payload);
