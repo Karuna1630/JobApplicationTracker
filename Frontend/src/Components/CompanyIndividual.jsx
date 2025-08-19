@@ -34,9 +34,9 @@ const CompanyIndividual = () => {
   return (
     <>
     <Navbar/>
-    <div className="max-w-6xl mx-auto bg-gray-50 min-h-screen pb-10">
+    <div className="max-w-6xl mx-auto bg-gray-50 min-h-screen mb-12">
       {/* Banner */}
-      <div className="relative bg-blue-700 h-48 flex items-center px-10">
+      <div className="relative bg-blue-700 h-48 flex items-center px-10 mt-5">
         {/* Logo */}
         <img
           src={company.companyLogo}
