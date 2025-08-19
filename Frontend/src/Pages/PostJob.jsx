@@ -21,17 +21,14 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
   const [loadingJobTypes, setLoadingJobTypes] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   // Skills-related state
   const [selectedSkills, setSelectedSkills] = useState([]);
   const [allSkills, setAllSkills] = useState([]);
   const [skillInput, setSkillInput] = useState("");
   const [showSkillSuggestions, setShowSkillSuggestions] = useState(false);
   const [loadingSkills, setLoadingSkills] = useState(true);
-
   const skillInputRef = useRef(null);
 
-  // Fetch Job Types
   const fetchJobTypes = async () => {
     try {
       const response = await axiosInstance.get('/getalljobtypes');
@@ -205,7 +202,7 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
         return;
       }
 
-      // Prepare skills data - convert selected skills to JSON string format [1,2,3]
+      // Prepare skills data - convert selected skills to JSON string format int
       const skillIds = selectedSkills
         .filter(skill => skill && skill.id)
         .map(skill => skill.id);
