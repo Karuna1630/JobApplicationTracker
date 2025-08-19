@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../Utils/axiosInstance";
+import Navbar from "./Navbar";
+import Footer from "./Footer";
 
 const CompanyIndividual = () => {
   const { companyId } = useParams();
@@ -30,27 +32,37 @@ const CompanyIndividual = () => {
   if (!company) return null;
 
   return (
+    <>
+    <Navbar/>
     <div className="max-w-6xl mx-auto bg-gray-50 min-h-screen pb-10">
       {/* Banner */}
-      <div className="relative">
-        <div className="h-40 md:h-56 bg-blue-700"></div>
-        <div className="absolute -bottom-12 left-10">
-          <img
-            src={company.companyLogo}
-            alt={company.companyName}
-            className="w-28 h-28 rounded-lg border-4 border-white shadow-lg"
-          />
+      <div className="relative bg-blue-700 h-48 flex items-center px-10">
+        {/* Logo */}
+        <img
+          src={company.companyLogo}
+          alt={company.companyName}
+          className="w-28 h-28 rounded-lg border-4 border-white shadow-lg bg-white"
+        />
+
+        {/* Company Info */}
+        <div className="ml-6 text-white">
+          <h1 className="text-2xl font-bold">{company.companyName}</h1>
+          <p className="text-gray-200">{company.location}</p>
         </div>
       </div>
 
-      {/* Company Name + Location */}
-      <div className="mt-16 px-10">
-        <h1 className="text-3xl font-bold">{company.companyName}</h1>
-        <p className="text-gray-500">{company.location}</p>
+      {/* Tabs (About, Jobs) */}
+      <div className="flex border-b px-10 bg-white">
+        <button className="py-3 px-6 text-blue-600 font-semibold border-b-2 border-blue-600">
+          About
+        </button>
+        <button className="py-3 px-6 text-gray-600 hover:text-blue-600">
+          Jobs
+        </button>
       </div>
 
       {/* Content Section */}
-      <div className="mt-8 px-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="mt-6 px-10 grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* About Us */}
         <div className="md:col-span-2 bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-3">About Us</h2>
@@ -91,6 +103,8 @@ const CompanyIndividual = () => {
         </div>
       </div>
     </div>
+    <Footer/>
+    </>
   );
 };
 

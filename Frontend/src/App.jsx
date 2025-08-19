@@ -27,11 +27,7 @@ import ViewApplications from './Pages/ViewApplications'
 import CompanyInsight from './Pages/CompanyInsight.jsx'
 import Jobs from './Pages/Jobs'
 import JobTypeComponents from './Components/JobTypeComponents'
-
 import Experience from './Components/Experience.jsx'
-
-
-import IndividualCompany from './Pages/IndividualCompany.jsx'
 import CompanyIndividual from './Components/CompanyIndividual.jsx'
 
 
@@ -71,16 +67,10 @@ function App() {
           <Route path='/curegister' element={<CURegister/>}/>
           <Route path='/jobTypeComponents' element={<JobTypeComponents/>}/>
           <Route path='/jobs' element={<Jobs/>}/>
-
-
           <Route path='/experience' element= {<Experience/>}/>
-         
-         
-
-
            <Route path='/company/:companyId' element={<CompanyIndividual/>}/>
 
-       <Route path="/company/:companyId" element={<IndividualCompany/>} />
+       
 
         
 
