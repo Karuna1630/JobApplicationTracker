@@ -15,9 +15,7 @@ export const decodeToken = (token) => {
 
 export const getUserIdFromToken = (token) => {
   const decoded = decodeToken(token);
-
   return decoded?.userId || decoded?.userid || decoded?.UserID || decoded?.UserId || null;
 
-  return decoded?.userId || null;
 
 };

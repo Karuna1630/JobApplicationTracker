@@ -6,7 +6,8 @@ import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import PostJob from "./PostJob";
 import EditCompanyModal from "../Components/EditCompanyModal";
-import { FaEdit } from "react-icons/fa";
+import { FaEdit, FaCamera, FaTrash } from "react-icons/fa";
+import { toast } from "react-toastify";
 import {
   FaSuitcase,
   FaUsers,
@@ -39,7 +40,8 @@ const CompanyProfile = () => {
   const [companyId, setCompanyId] = useState(null);
   const [showPostJob, setShowPostJob] = useState(false);
   const [logoError, setLogoError] = useState(false);
-  const [jobTypes, setJobTypes] = useState([]); // Add job types state
+  const [jobTypes, setJobTypes] = useState([]);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [companyInfo, setCompanyInfo] = useState({
     companyName: "",
     email: "",
@@ -76,6 +78,105 @@ const CompanyProfile = () => {
     } catch (error) {
       console.error("Error fetching job types:", error);
     }
+  };
+
+  // Logo upload function
+  const handleLogoUpload = async (file) => {
+    if (!companyId) {
+      toast.error("Company ID not found");
+      return;
+    }
+
+    setIsUploadingLogo(true);
+    
+    try {
+      // Validate file
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error("Please select a valid image file (JPEG, PNG, GIF, or WebP)");
+        return;
+      }
+
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        toast.error("File size must be less than 5MB");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('logoFile', file);
+
+      const response = await axiosInstance.post(
+        `/uploadcompanylogo/${companyId}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      if (response.data.isSuccess) {
+        const newLogoUrl = response.data.data?.LogoUrl || response.data.data?.logoUrl;
+        setCompanyInfo(prev => ({
+          ...prev,
+          companyLogo: newLogoUrl
+        }));
+        setLogoError(false);
+        toast.success("Logo uploaded successfully!");
+      } else {
+        toast.error(response.data.message || "Logo upload failed");
+      }
+    } catch (error) {
+      console.error("Error uploading logo:", error);
+      if (error.response) {
+        toast.error(error.response.data.message || "Failed to upload logo");
+      } else {
+        toast.error("Something went wrong while uploading logo");
+      }
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
+
+  // Logo delete function
+  const handleLogoDelete = async () => {
+    if (!companyId) {
+      toast.error("Company ID not found");
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.delete(`/deletecompanylogo/${companyId}`);
+      
+      if (response.data.isSuccess) {
+        setCompanyInfo(prev => ({
+          ...prev,
+          companyLogo: ""
+        }));
+        setLogoError(false);
+        toast.success("Logo deleted successfully!");
+      } else {
+        toast.error(response.data.message || "Failed to delete logo");
+      }
+    } catch (error) {
+      console.error("Error deleting logo:", error);
+      if (error.response) {
+        toast.error(error.response.data.message || "Failed to delete logo");
+      } else {
+        toast.error("Something went wrong while deleting logo");
+      }
+    }
+  };
+
+  // Handle file input change
+  const handleFileInputChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      handleLogoUpload(file);
+    }
+    // Reset file input
+    e.target.value = '';
   };
 
   useEffect(() => {
@@ -204,7 +305,7 @@ const CompanyProfile = () => {
         <div className="  m-2 ml-8 w-4/5 max-w-6xl mx-auto gap-4">
           <div className="bg-white shadow-xl rounded-2xl overflow-hidden mb-8">
             <div className="relative h-56 bg-gradient-to-r from-indigo-300 to-pink-200 flex items-center px-6 py-4">
-              <div className="absolute -bottom-16 left-8 w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-100">
+              <div className="absolute -bottom-16 left-8 w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-100 group">
                 {companyInfo.companyLogo && companyInfo.companyLogo.startsWith("http") && !logoError ? (
                   <img
                     src={companyInfo.companyLogo}
@@ -218,7 +319,42 @@ const CompanyProfile = () => {
                     {companyInfo.companyName?.charAt(0)?.toUpperCase() || 'C'}
                   </div>
                 )}
+                
+                {/* Logo upload/edit overlay */}
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div className="flex gap-2">
+                    {/* Upload/Change Logo Button */}
+                    <label className="cursor-pointer bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors">
+                      <FaCamera />
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleFileInputChange}
+                        disabled={isUploadingLogo}
+                      />
+                    </label>
+                    
+                    {/* Delete Logo Button - only show if logo exists */}
+                    {companyInfo.companyLogo && (
+                      <button
+                        onClick={handleLogoDelete}
+                        className="bg-red-600 text-white p-2 rounded-full hover:bg-red-700 transition-colors"
+                      >
+                        <FaTrash />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Loading overlay */}
+                {isUploadingLogo && (
+                  <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center">
+                    <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
               </div>
+              
               <button
                 onClick={() => setShowEditModal(true)}
                 className="absolute top-4 right-4 flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
@@ -374,7 +510,7 @@ const CompanyProfile = () => {
           </div>
 
           <div className="bg-white shadow-xl rounded-2xl p-8 mb-8">
-            <h2 className="text-2xl font-semibold text-gray-700 mb-6">
+            <h2 className="text-2xl font-semibond text-gray-700 mb-6">
               User Insights
             </h2>
             <div className="flex flex-wrap justify-center gap-6">
@@ -410,6 +546,7 @@ const CompanyProfile = () => {
               isOpen={showEditModal}
               onClose={() => setShowEditModal(false)}
               companyInfo={companyInfo}
+              companyId={companyId}
               onUpdateSuccess={handleUpdateSuccess}
             />
           )}
