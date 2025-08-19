@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { IoSearch, IoClose } from "react-icons/io5";
+import { IoSearch, IoClose, IoBusinessOutline, IoBriefcaseOutline } from "react-icons/io5";
+import axiosInstance from "../Utils/axiosInstance";
 
 const SearchBar = ({ className = "" }) => {
   const navigate = useNavigate();
@@ -27,58 +28,50 @@ const SearchBar = ({ className = "" }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Search API calls
+  // Search API calls using axiosInstance
   const searchCompanies = async () => {
     try {
-      const response = await fetch('https://localhost:7047/getallcompanies');
-      console.log('Companies API response status:', response.status);
+      const response = await axiosInstance.get('/getallcompanies');
+      console.log('Companies data received:', response.data);
       
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Companies data received:', data);
+      const data = response.data;
+      const filtered = data.filter(company => {
+        const name = company.companyName || '';
+        const location = company.location || '';
+        const description = company.description || '';
         
-        const filtered = data.filter(company => {
-          const name = company.companyName || '';
-          const id = company.companyId || '';
-          
-          return name.toLowerCase().includes(searchQuery.toLowerCase());
-        });
-        
-        console.log('Filtered companies:', filtered);
-        return filtered;
-      } else {
-        console.error('Companies API failed with status:', response.status);
-      }
+        const query = searchQuery.toLowerCase();
+        return name.toLowerCase().includes(query) ||
+               location.toLowerCase().includes(query) ||
+               description.toLowerCase().includes(query);
+      });
+      
+      console.log('Filtered companies:', filtered);
+      return filtered;
     } catch (error) {
       console.error('Error searching companies:', error);
+      return [];
     }
-    return [];
   };
 
   const searchJobTypes = async () => {
     try {
-      const response = await fetch('https://localhost:7047/getalljobstypes');
-      console.log('Job types API response status:', response.status);
+      const response = await axiosInstance.get('/getalljobstypes');
+      console.log('Job types data received:', response.data);
       
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Job types data received:', data);
-        
-        const filtered = data.filter(jobType => {
-          const name = jobType.name || '';
-          
-          return name.toLowerCase().includes(searchQuery.toLowerCase());
-        });
-        
-        console.log('Filtered job types:', filtered);
-        return filtered;
-      } else {
-        console.error('Job types API failed with status:', response.status);
-      }
+      const data = response.data;
+      const filtered = data.filter(jobType => {
+        const name = jobType.name || '';
+        const query = searchQuery.toLowerCase();
+        return name.toLowerCase().includes(query);
+      });
+      
+      console.log('Filtered job types:', filtered);
+      return filtered;
     } catch (error) {
       console.error('Error searching job types:', error);
+      return [];
     }
-    return [];
   };
 
   // Debounced search function
@@ -102,6 +95,9 @@ const SearchBar = ({ className = "" }) => {
           setShowSearchResults(true);
         } catch (error) {
           console.error('Search error:', error);
+          // Show error state or empty results
+          setSearchResults({ companies: [], jobTypes: [] });
+          setShowSearchResults(true);
         } finally {
           setIsSearching(false);
         }
@@ -120,6 +116,7 @@ const SearchBar = ({ className = "" }) => {
       // Navigate to a search results page with query
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
       setShowSearchResults(false);
+      setSearchQuery("");
     }
   };
 
@@ -130,9 +127,11 @@ const SearchBar = ({ className = "" }) => {
     // Navigate based on result type
     switch (type) {
       case 'company':
+        // Navigate to individual company page using companyId
         navigate(`/company/${item.companyId}`);
         break;
       case 'jobType':
+        // Navigate to jobs filtered by job type
         navigate(`/jobs?type=${item.jobTypeId}`);
         break;
       default:
@@ -157,13 +156,13 @@ const SearchBar = ({ className = "" }) => {
             placeholder="Search companies, jobs..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-10 md:h-12 px-4 pr-8 text-sm md:text-base rounded-l-full text-gray-700 border border-gray-300 focus:outline-none focus:border-blue-500"
+            className="w-full h-10 md:h-12 px-4 pr-10 text-sm md:text-base rounded-l-full text-gray-700 border border-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
           />
           {searchQuery && (
             <button
               type="button"
               onClick={clearSearch}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
             >
               <IoClose className="w-4 h-4" />
             </button>
@@ -171,74 +170,107 @@ const SearchBar = ({ className = "" }) => {
         </div>
         <button 
           type="submit"
-          className="bg-blue-600 h-10 md:h-12 px-4 rounded-r-full hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          className="bg-gradient-to-r from-blue-600 to-blue-700 h-10 md:h-12 px-6 rounded-r-full hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
           disabled={isSearching}
         >
-          <IoSearch className="text-white w-5 h-5" />
+          {isSearching ? (
+            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+          ) : (
+            <IoSearch className="text-white w-5 h-5" />
+          )}
         </button>
       </form>
 
-      {/* Search Results Dropdown */}
+      {/* Enhanced Search Results Dropdown */}
       {showSearchResults && (
-        <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 mt-1 max-h-96 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 mt-2 max-h-96 overflow-y-auto backdrop-blur-sm">
           {isSearching ? (
-            <div className="p-4 text-center text-gray-500">
-              <div className="flex items-center justify-center space-x-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
-                <span>Searching...</span>
+            <div className="p-6 text-center text-gray-500">
+              <div className="flex items-center justify-center space-x-3">
+                <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-600 border-t-transparent"></div>
+                <span className="text-lg">Searching...</span>
               </div>
             </div>
           ) : hasResults ? (
             <div className="py-2">
-              {/* Companies */}
+              {/* Companies Section */}
               {searchResults.companies.length > 0 && (
                 <div className="mb-2">
-                  <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase border-b bg-gray-50">
+                  <div className="px-4 py-3 text-xs font-bold text-gray-600 uppercase tracking-wide border-b bg-gradient-to-r from-blue-50 to-indigo-50 flex items-center">
+                    <IoBusinessOutline className="w-4 h-4 mr-2 text-blue-600" />
                     Companies ({searchResults.companies.length})
                   </div>
                   {searchResults.companies.map((company, index) => (
                     <button
                       key={`company-${company.companyId || index}`}
                       onClick={() => handleResultClick('company', company)}
-                      className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center space-x-3 transition-colors"
+                      className="w-full text-left px-4 py-4 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 flex items-center space-x-4 transition-all duration-200 border-b border-gray-50 last:border-b-0 group"
                     >
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-blue-600 font-semibold text-sm">
-                          {(company.companyName || 'C').charAt(0)}
-                        </span>
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:shadow-xl transition-shadow">
+                        {company.companyLogo ? (
+                          <img
+                            src={company.companyLogo}
+                            alt={company.companyName}
+                            className="w-8 h-8 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <span className="text-white font-bold text-lg">
+                            {(company.companyName || 'C').charAt(0)}
+                          </span>
+                        )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="font-medium text-gray-900 truncate">
+                        <div className="font-semibold text-gray-900 truncate text-lg group-hover:text-blue-700 transition-colors">
                           {company.companyName || 'Unknown Company'}
                         </div>
+                        {company.location && (
+                          <div className="text-sm text-gray-500 truncate">
+                            📍 {company.location}
+                          </div>
+                        )}
+                        {company.description && (
+                          <div className="text-xs text-gray-400 truncate mt-1">
+                            {company.description}
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                        →
                       </div>
                     </button>
                   ))}
                 </div>
               )}
 
-              {/* Job Types */}
+              {/* Job Types Section */}
               {searchResults.jobTypes.length > 0 && (
                 <div className="mb-2">
-                  <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase border-b bg-gray-50">
+                  <div className="px-4 py-3 text-xs font-bold text-gray-600 uppercase tracking-wide border-b bg-gradient-to-r from-green-50 to-emerald-50 flex items-center">
+                    <IoBriefcaseOutline className="w-4 h-4 mr-2 text-green-600" />
                     Job Types ({searchResults.jobTypes.length})
                   </div>
                   {searchResults.jobTypes.map((jobType, index) => (
                     <button
                       key={`jobtype-${jobType.jobTypeId || index}`}
                       onClick={() => handleResultClick('jobType', jobType)}
-                      className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors"
+                      className="w-full text-left px-4 py-4 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all duration-200 border-b border-gray-50 last:border-b-0 group"
                     >
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-green-600 font-semibold text-sm">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:shadow-xl transition-shadow">
+                          <span className="text-white font-bold text-lg">
                             {(jobType.name || 'J').charAt(0)}
                           </span>
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="font-medium text-gray-900 truncate">
+                          <div className="font-semibold text-gray-900 truncate text-lg group-hover:text-green-700 transition-colors">
                             {jobType.name || 'Unknown Job Type'}
                           </div>
+                          <div className="text-xs text-gray-400">
+                            Browse all {jobType.name} positions
+                          </div>
+                        </div>
+                        <div className="text-green-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                          →
                         </div>
                       </div>
                     </button>
@@ -247,22 +279,27 @@ const SearchBar = ({ className = "" }) => {
               )}
 
               {/* View All Results */}
-              <div className="border-t mt-2">
+              <div className="border-t mt-2 bg-gray-50">
                 <button
                   onClick={handleSearchSubmit}
-                  className="w-full px-4 py-3 text-blue-600 hover:bg-blue-50 font-medium text-center transition-colors"
+                  className="w-full px-4 py-4 text-blue-600 hover:bg-blue-100 font-semibold text-center transition-colors rounded-b-xl flex items-center justify-center space-x-2"
                 >
-                  View all results for "{searchQuery}"
+                  <IoSearch className="w-4 h-4" />
+                  <span>View all results for "{searchQuery}"</span>
                 </button>
               </div>
             </div>
           ) : (
-            <div className="p-4 text-center text-gray-500">
-              <div className="text-gray-400 mb-2">
-                <IoSearch className="w-8 h-8 mx-auto" />
+            <div className="p-8 text-center text-gray-500">
+              <div className="text-gray-300 mb-4">
+                <IoSearch className="w-12 h-12 mx-auto" />
               </div>
-              <div>No results found for "{searchQuery}"</div>
-              <div className="text-sm mt-1">Try searching for companies or job types</div>
+              <div className="text-lg font-medium text-gray-600 mb-2">
+                No results found for "{searchQuery}"
+              </div>
+              <div className="text-sm text-gray-400">
+                Try searching for companies or job types
+              </div>
             </div>
           )}
         </div>

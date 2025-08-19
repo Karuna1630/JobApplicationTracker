@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../Utils/axiosInstance";
-import { getUserIdFromToken } from "../Utils/jwtUtils";
+import { getUserIdFromToken, decodeToken } from "../Utils/jwtUtils";
 import { toast } from "react-toastify";
 
 const EditCompanyModal = ({ isOpen, onClose, companyInfo, companyId, onUpdateSuccess }) => {
