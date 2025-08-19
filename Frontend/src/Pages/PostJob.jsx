@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { IoClose, IoAdd } from "react-icons/io5";
 import axiosInstance from "../Utils/axiosInstance";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
 import { toast } from "react-toastify";
@@ -11,7 +12,7 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
     location: "",
     salaryRangeMin: "",
     salaryRangeMax: "",
-    empolymentType: "",     // Keep original spelling to match backend
+    empolymentType: "",     
     experienceLevel: "",
     applicationDeadline: "",
   });
@@ -20,6 +21,15 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
   const [loadingJobTypes, setLoadingJobTypes] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Skills-related state
+  const [selectedSkills, setSelectedSkills] = useState([]);
+  const [allSkills, setAllSkills] = useState([]);
+  const [skillInput, setSkillInput] = useState("");
+  const [showSkillSuggestions, setShowSkillSuggestions] = useState(false);
+  const [loadingSkills, setLoadingSkills] = useState(true);
+
+  const skillInputRef = useRef(null);
 
   // Fetch Job Types
   const fetchJobTypes = async () => {
@@ -42,13 +52,119 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
     }
   };
 
+  // Fetch all available skills
+  const fetchAllSkills = async () => {
+    try {
+      const response = await axiosInstance.get(`/api/skills/getallskills`);
+      if (response.data && Array.isArray(response.data)) {
+        const mappedSkills = response.data.map(skill => ({
+          id: skill.skillId,
+          skillName: skill.skill
+        }));
+        setAllSkills(mappedSkills);
+      }
+    } catch (error) {
+      console.error('Error fetching all skills:', error);
+      toast.error('Failed to load available skills');
+    } finally {
+      setLoadingSkills(false);
+    }
+  };
+
   useEffect(() => {
     fetchJobTypes();
+    fetchAllSkills();
   }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  // Skills functionality
+  const filterSkillSuggestions = () => {
+    if (!Array.isArray(allSkills) || allSkills.length === 0) {
+      return [];
+    }
+
+    if (!skillInput.trim()) return allSkills.slice(0, 10);
+
+    const input = skillInput.toLowerCase();
+    const selectedSkillIds = selectedSkills.map(skill => skill.id);
+
+    return allSkills
+      .filter(
+        (skill) =>
+          skill && 
+          skill.skillName && 
+          typeof skill.skillName === 'string' &&
+          skill.skillName.toLowerCase().includes(input) &&
+          !selectedSkillIds.includes(skill.id)
+      )
+      .slice(0, 8);
+  };
+
+  const handleSkillInputChange = (e) => {
+    const value = e.target.value;
+    setSkillInput(value);
+    if (value.trim()) {
+      setShowSkillSuggestions(true);
+    }
+  };
+
+  const addSkill = (skillToAdd) => {
+    if (!skillToAdd || !skillToAdd.id || !skillToAdd.skillName) {
+      console.error('Invalid skill object:', skillToAdd);
+      return;
+    }
+
+    const isAlreadyAdded = selectedSkills.some(skill => skill.id === skillToAdd.id);
+    
+    if (!isAlreadyAdded) {
+      setSelectedSkills(prev => [...prev, skillToAdd]);
+    }
+    
+    setSkillInput("");
+    setShowSkillSuggestions(true);
+    skillInputRef.current?.focus();
+  };
+
+  const removeSkill = (skillToRemove) => {
+    if (!skillToRemove || !skillToRemove.id) {
+      console.error('Invalid skill object to remove:', skillToRemove);
+      return;
+    }
+    
+    setSelectedSkills(prev => prev.filter(skill => skill.id !== skillToRemove.id));
+    setShowSkillSuggestions(true);
+  };
+
+  const handleSkillKeyPress = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const suggestions = filterSkillSuggestions();
+      if (suggestions.length > 0) {
+        addSkill(suggestions[0]);
+      }
+    }
+  };
+
+  const handleInputFocus = () => {
+    setShowSkillSuggestions(true);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        skillInputRef.current &&
+        !skillInputRef.current.contains(event.target)
+      ) {
+        setShowSkillSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,7 +173,7 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
       !formData.jobTypeId ||
       !formData.description ||
       !formData.location ||
-      !formData.empolymentType ||  // Keep original spelling
+      !formData.empolymentType ||
       !formData.experienceLevel ||
       !formData.applicationDeadline
     ) {
@@ -89,6 +205,12 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
         return;
       }
 
+      // Prepare skills data - convert selected skills to JSON string format [1,2,3]
+      const skillIds = selectedSkills
+        .filter(skill => skill && skill.id)
+        .map(skill => skill.id);
+      const skillsJsonString = skillIds.length > 0 ? JSON.stringify(skillIds) : null;
+
       const payload = {
         JobId: 0,
         PostedByUserId: userId,
@@ -97,18 +219,18 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
         Description: formData.description,
         Requirements: formData.requirements || "",
         Location: formData.location,
-        EmpolymentType: formData.empolymentType,  // Match backend spelling exactly
+        EmpolymentType: formData.empolymentType,
         SalaryRangeMin: formData.salaryRangeMin ? parseFloat(formData.salaryRangeMin) : 0,
         SalaryRangeMax: formData.salaryRangeMax ? parseFloat(formData.salaryRangeMax) : 0,
         ExperienceLevel: formData.experienceLevel,
         Status: "A",
         PostedAt: new Date().toISOString(),
         ApplicationDeadline: new Date(formData.applicationDeadline).toISOString(),
+        Skills: skillsJsonString // ✅ Added Skills to payload
       };
 
       console.log("Sending payload:", payload);
 
-      // Make the POST request
       const response = await axiosInstance.post("/api/Jobs/submitjobs", payload);
 
       if (response.status === 200 || response.status === 201) {
@@ -220,8 +342,8 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
         </div>
 
         <select
-          name="empolymentType"  // Fixed: now matches formData property exactly
-          value={formData.empolymentType}  // Keep original spelling
+          name="empolymentType"  
+          value={formData.empolymentType} 
           onChange={handleChange}
           className="border p-2 w-full mb-4 rounded"
           required
@@ -244,6 +366,89 @@ const PostJob = ({ onClose, onJobPosted, companyId }) => {
           <option value="Mid">Mid</option>
           <option value="Senior">Senior</option>
         </select>
+
+        {/* ✅ NEW: Skills Section */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Required Skills
+          </label>
+          
+          {/* Display Selected Skills */}
+          {selectedSkills.length > 0 && (
+            <div className="mb-3">
+              <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200 min-h-[50px]">
+                {selectedSkills.map((skill) => {
+                  if (!skill || !skill.id || !skill.skillName) {
+                    return null;
+                  }
+                  
+                  return (
+                    <div
+                      key={`selected-skill-${skill.id}`}
+                      className="flex items-center gap-2 bg-blue-100 text-blue-800 rounded-full px-3 py-2 text-sm font-medium border border-blue-200 hover:bg-blue-200 transition-colors"
+                    >
+                      <span>{skill.skillName}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeSkill(skill)}
+                        className="text-blue-600 hover:text-blue-900 hover:bg-blue-300 rounded-full p-1 transition-colors"
+                        aria-label={`Remove skill ${skill.skillName}`}
+                      >
+                        <IoClose size={14} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Skill Input with Suggestions */}
+          <div className="relative" ref={skillInputRef}>
+            <input
+              type="text"
+              value={skillInput}
+              onChange={handleSkillInputChange}
+              onFocus={handleInputFocus}
+              onKeyPress={handleSkillKeyPress}
+              placeholder="Type to search and add skills..."
+              className="border p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={loadingSkills}
+            />
+
+            {/* Skill Suggestions Dropdown */}
+            {showSkillSuggestions && !loadingSkills && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                {filterSkillSuggestions().map((skill) => {
+                  if (!skill || !skill.id || !skill.skillName) {
+                    return null;
+                  }
+                  
+                  return (
+                    <button
+                      key={`suggestion-${skill.id}`}
+                      type="button"
+                      onClick={() => addSkill(skill)}
+                      className="w-full px-4 py-2 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors text-sm"
+                    >
+                      {skill.skillName}
+                    </button>
+                  );
+                })}
+                
+                {filterSkillSuggestions().length === 0 && skillInput.trim() && (
+                  <div className="px-4 py-2 text-gray-500 text-center text-sm">
+                    No skills found matching "{skillInput}"
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          
+          {loadingSkills && (
+            <p className="text-gray-500 text-sm mt-1">Loading skills...</p>
+          )}
+        </div>
 
         <input
           name="applicationDeadline"
