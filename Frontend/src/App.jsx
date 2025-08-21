@@ -29,7 +29,7 @@ import Jobs from './Pages/Jobs'
 import JobTypeComponents from './Components/JobTypeComponents'
 import Experience from './Components/Experience.jsx'
 import CompanyIndividual from './Components/CompanyIndividual.jsx'
-
+import JobIndividual from './Components/JobIndividual.jsx'
 
 function App() {
   
@@ -68,8 +68,8 @@ function App() {
           <Route path='/jobTypeComponents' element={<JobTypeComponents/>}/>
           <Route path='/jobs' element={<Jobs/>}/>
           <Route path='/experience' element= {<Experience/>}/>
-           <Route path='/company/:companyId' element={<CompanyIndividual/>}/>
-       
+          <Route path='/company/:companyId' element={<CompanyIndividual/>}/>
+          <Route path='/job/:jobId' element={<JobIndividual/>}/>
        
 
         

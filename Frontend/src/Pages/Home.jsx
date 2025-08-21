@@ -134,44 +134,62 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Top Jobs */}
-        <section className="py-20 px-6 bg-gray-100">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-4xl font-bold text-gray-800 mb-10">Top Jobs</h2>
-            {loadingJobs ? (
-              <p className="text-gray-500">Loading jobs...</p>
-            ) : jobs.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {jobs.map((job) => (
-                  <div
-                    key={job.jobId}
-                    className="bg-white p-6 rounded-xl shadow hover:shadow-xl transition transform hover:-translate-y-2"
-                  >
-                    <h3 className="font-semibold text-xl mb-2 text-blue-700 line-clamp-1">
-                      {job.title}
-                    </h3>
-                    <p className="text-gray-600 mb-2 line-clamp-1">{job.companyName}</p>
-                    <p className="text-gray-700 mb-1 line-clamp-1">{job.location}</p>
-                    <p className="text-gray-500 text-sm">
-                      Posted on:{" "}
-                      {job.postedDate
-                        ? new Date(job.postedDate).toLocaleDateString()
-                        : "—"}
-                    </p>
-                    <button
-                      onClick={() => navigate(`/job/${job.jobId}`)}
-                      className="mt-4 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800"
-                    >
-                      View Details
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-500">No jobs found.</p>
-            )}
+      {/* Top Jobs */}
+<section className="py-20 px-6 bg-gray-100">
+  <div className="max-w-6xl mx-auto">
+    <h2 className="text-4xl font-bold text-gray-800 mb-10">Top Jobs</h2>
+    {loadingJobs ? (
+      <p className="text-gray-500">Loading jobs...</p>
+    ) : jobs.length > 0 ? (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {jobs.map((job) => (
+          <div
+            key={job.jobId}
+            className="bg-white p-6 rounded-xl shadow hover:shadow-xl transition transform hover:-translate-y-2"
+          >
+            <h3 className="font-semibold text-xl mb-2 text-blue-700 line-clamp-1">
+              {job.title}
+            </h3>
+
+            {/* ✅ Company Name */}
+            <p className="text-gray-600 mb-1 line-clamp-1">
+              {job.companyName || "Unknown Company"}
+            </p>
+
+            {/* ✅ Location */}
+            <p className="text-gray-700 mb-1 line-clamp-1">
+              {job.location || "Location not specified"}
+            </p>
+
+            {/* ✅ Job Type */}
+            <p className="text-gray-500 text-sm mb-1">
+              {job.jobType || "Job type not specified"}
+            </p>
+
+            {/* ✅ Posted Date */}
+            <p className="text-gray-500 text-sm">
+              Posted on:{" "}
+              {job.postedDate
+                ? new Date(job.postedDate).toLocaleDateString()
+                : "—"}
+            </p>
+
+            {/* ✅ Redirect to JobIndividual */}
+            <button
+              onClick={() => navigate(`/job/${job.jobId}`)}
+              className="mt-4 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800"
+            >
+              View Details
+            </button>
           </div>
-        </section>
+        ))}
+      </div>
+    ) : (
+      <p className="text-gray-500">No jobs found.</p>
+    )}
+  </div>
+</section>
+
 
         {/* CTA */}
         <section className="bg-blue-700 text-white py-20 px-4 text-center">
