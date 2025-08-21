@@ -20,6 +20,7 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [localReloadTrigger, setLocalReloadTrigger] = useState(0);
+  const [publishingJobs, setPublishingJobs] = useState(new Set()); // Track publishing state
 
   // Get companyId from props or localStorage
   const getCompanyId = () => {
@@ -65,6 +66,52 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
     deadlineDate.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
     return deadlineDate >= today;
+  };
+
+  // ✅ NEW: Handle publish/unpublish functionality
+  const handlePublishToggle = async (jobId, isCurrentlyPublished) => {
+    try {
+      // Add job to publishing state
+      setPublishingJobs(prev => new Set([...prev, jobId]));
+
+      const endpoint = isCurrentlyPublished 
+        ? `/api/Jobs/unpublish/${jobId}` 
+        : `/api/Jobs/publish/${jobId}`;
+
+      const response = await axiosInstance.put(endpoint);
+
+      if (response.data.isSuccess) {
+        // Update the job's published status in the local state
+        setJobs(prevJobs => 
+          prevJobs.map(job => 
+            (job.jobId || job.id) === jobId 
+              ? { ...job, isPublished: !isCurrentlyPublished }
+              : job
+          )
+        );
+
+        toast.success(
+          isCurrentlyPublished 
+            ? "Job unpublished successfully! It's no longer visible to users." 
+            : "Job published successfully! It's now visible to users."
+        );
+      } else {
+        toast.error(response.data.message || "Failed to update job status.");
+      }
+    } catch (error) {
+      console.error("Publish/Unpublish error:", error);
+      toast.error(
+        error.response?.data?.message || 
+        `Failed to ${isCurrentlyPublished ? 'unpublish' : 'publish'} job. Please try again.`
+      );
+    } finally {
+      // Remove job from publishing state
+      setPublishingJobs(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(jobId);
+        return newSet;
+      });
+    }
   };
 
   // Fetch Job Types
@@ -202,11 +249,7 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
       jobTypeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-
-      skillNames.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase())); // ✅ Added skills to search
-
       skillNames.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
-
 
     const matchesStatus =
       filterStatus === "all" ||
@@ -378,8 +421,9 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
                   const jobId = job.jobId || job.id;
                   const isActive = isJobActive(job);
                   const jobTypeName = getJobTypeName(job.jobType);
-                  const skillNames = getSkillNames(job.skills); 
-
+                  const skillNames = getSkillNames(job.skills);
+                  const isPublished = job.isPublished; // ✅ Get publish status
+                  const isPublishing = publishingJobs.has(jobId); // ✅ Check if currently publishing
 
                   return (
                     <div
@@ -392,14 +436,48 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
                           {jobTypeName}
                         </h2>
                         <div className="flex items-center gap-2 ml-4">
+                          {/* ✅ Publication Status Badge */}
                           <span
-                            className={`px-3 py-1 rounded-full text-xs font-medium ${isActive
-                              ? "bg-green-100 text-green-700"
-                              : "bg-red-100 text-red-700"
-                              }`}
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              isPublished
+                                ? "bg-blue-100 text-blue-700"
+                                : "bg-gray-100 text-gray-700"
+                            }`}
+                          >
+                            {isPublished ? "Published" : "Draft"}
+                          </span>
+                          
+                          {/* Active/Inactive Status */}
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              isActive
+                                ? "bg-green-100 text-green-700"
+                                : "bg-red-100 text-red-700"
+                            }`}
                           >
                             {isActive ? "Active" : "Inactive"}
                           </span>
+                          
+                          {/* ✅ Publish/Unpublish Button */}
+                          <button
+                            onClick={() => handlePublishToggle(jobId, isPublished)}
+                            disabled={isPublishing}
+                            className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                              isPublished
+                                ? "bg-orange-100 text-orange-700 hover:bg-orange-200"
+                                : "bg-green-100 text-green-700 hover:bg-green-200"
+                            } ${
+                              isPublishing ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
+                          >
+                            {isPublishing 
+                              ? "..." 
+                              : isPublished 
+                                ? "Unpublish" 
+                                : "Publish"
+                            }
+                          </button>
+                          
                           <button
                             onClick={() => handleEditJob(job)}
                             className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
@@ -414,6 +492,15 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
                           </button>
                         </div>
                       </div>
+
+                      {/* ✅ Publication Status Info */}
+                      {!isPublished && (
+                        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                          <p className="text-yellow-800 text-sm">
+                            <strong>📝 Draft:</strong> This job is not visible to users. Click "Publish" to make it public.
+                          </p>
+                        </div>
+                      )}
 
                       {/* Description */}
                       <div className="mb-4">
