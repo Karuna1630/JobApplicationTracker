@@ -6,6 +6,7 @@ import PostJob from "./PostJob";
 import EditJobModal from "../Components/EditJobModal"; 
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
+import { toast } from "react-toastify";
 
 const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
   const [showPostJob, setShowPostJob] = useState(false);

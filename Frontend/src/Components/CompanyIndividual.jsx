@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../Utils/axiosInstance";
+import { useNavigate } from 'react-router-dom';
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 
 const CompanyIndividual = () => {
+     const navigate = useNavigate();
   const { companyId } = useParams();
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -53,10 +55,10 @@ const CompanyIndividual = () => {
 
       {/* Tabs (About, Jobs) */}
       <div className="flex border-b px-10 bg-white">
-        <button className="py-3 px-6 text-blue-600 font-semibold border-b-2 border-blue-600">
+        <button   className="py-3 px-6 text-blue-600 font-semibold border-b-2 border-blue-600">
           About
         </button>
-        <button className="py-3 px-6 text-gray-600 hover:text-blue-600">
+        <button onClick={() => navigate('/company/:companyId:jobId')} className="py-3 px-6 text-gray-600 hover:text-blue-600">
           Jobs
         </button>
       </div>
