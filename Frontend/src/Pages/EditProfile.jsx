@@ -12,32 +12,24 @@ const EditProfile = ({ userData, onSave, onClose }) => {
     location: userData?.location || "",
     education: userData?.education || "",
     profilePicture: userData?.profilePicture || "",
-
     resumeUrl: userData?.resumeUrl || "",
     portfolioUrl: userData?.portfolioUrl || "",
     linkedinProfile: userData?.linkedinProfile || "",
     headline: userData?.headline || "",
-
-   
-
     bio: userData?.bio || "",
     dateOfBirth: userData?.dateOfBirth || "",
   });
 
   const [isLoading, setIsLoading] = useState(false);
-
-
   // Prevent background scroll when modal is open
   useEffect(() => {
     // Add style to prevent scrolling when component mounts
     document.body.style.overflow = 'hidden';
-
     // Cleanup function to restore scrolling when component unmounts
     return () => {
       document.body.style.overflow = 'unset';
     };
   }, []); // Empty dependency array since this modal is always "open" when rendered
-
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -47,17 +39,9 @@ const EditProfile = ({ userData, onSave, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-  
-
-   
-
-
-
     try {
       const token = localStorage.getItem("token");
       const userId = Number(getUserIdFromToken(token));
-
-
       // Send data directly without wrapping in usersDto
       const payload = {
         userId,
@@ -71,7 +55,6 @@ const EditProfile = ({ userData, onSave, onClose }) => {
         portfolioUrl: formData.portfolioUrl || null,
         linkedinProfile: formData.linkedinProfile || null,
         headline: formData.headline || null,
-     
         bio: formData.bio || null,
         dateOfBirth: formData.dateOfBirth || null,
         // Don't send passwordHash, companyId, userType unless they're being updated
@@ -115,13 +98,10 @@ const EditProfile = ({ userData, onSave, onClose }) => {
     }
   }
   
-  
-
   const handleClose = () => {
     // Restore scrolling when closing
     document.body.style.overflow = 'unset';
     onClose();
-
   };
 
   return (
@@ -284,6 +264,4 @@ const EditProfile = ({ userData, onSave, onClose }) => {
     </div>
   );
   }
-
-
 export default EditProfile;
