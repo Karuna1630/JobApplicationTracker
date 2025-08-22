@@ -5,7 +5,7 @@ import axiosInstance from "../Utils/axiosInstance";
 
 const SearchBar = ({ className = "" }) => {
   const navigate = useNavigate();
-  
+
   // Search functionality state
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState({
@@ -33,19 +33,19 @@ const SearchBar = ({ className = "" }) => {
     try {
       const response = await axiosInstance.get('/getallcompanies');
       console.log('Companies data received:', response.data);
-      
+
       const data = response.data;
       const filtered = data.filter(company => {
         const name = company.companyName || '';
         const location = company.location || '';
         const description = company.description || '';
-        
+
         const query = searchQuery.toLowerCase();
         return name.toLowerCase().includes(query) ||
-               location.toLowerCase().includes(query) ||
-               description.toLowerCase().includes(query);
+          location.toLowerCase().includes(query) ||
+          description.toLowerCase().includes(query);
       });
-      
+
       console.log('Filtered companies:', filtered);
       return filtered;
     } catch (error) {
@@ -58,14 +58,14 @@ const SearchBar = ({ className = "" }) => {
     try {
       const response = await axiosInstance.get('/getalljobstypes');
       console.log('Job types data received:', response.data);
-      
+
       const data = response.data;
       const filtered = data.filter(jobType => {
         const name = jobType.name || '';
         const query = searchQuery.toLowerCase();
         return name.toLowerCase().includes(query);
       });
-      
+
       console.log('Filtered job types:', filtered);
       return filtered;
     } catch (error) {
@@ -85,9 +85,9 @@ const SearchBar = ({ className = "" }) => {
             searchCompanies(),
             searchJobTypes()
           ]);
-          
+
           console.log('Search results:', { companies, jobTypes });
-          
+
           setSearchResults({
             companies: companies.slice(0, 5), // Limit results
             jobTypes: jobTypes.slice(0, 5)
@@ -123,7 +123,7 @@ const SearchBar = ({ className = "" }) => {
   const handleResultClick = (type, item) => {
     setShowSearchResults(false);
     setSearchQuery("");
-    
+
     // Navigate based on result type
     switch (type) {
       case 'company':
@@ -144,8 +144,8 @@ const SearchBar = ({ className = "" }) => {
     setShowSearchResults(false);
   };
 
-  const hasResults = searchResults.companies.length > 0 || 
-                   searchResults.jobTypes.length > 0;
+  const hasResults = searchResults.companies.length > 0 ||
+    searchResults.jobTypes.length > 0;
 
   return (
     <div className={`relative ${className}`} ref={searchRef}>
@@ -168,7 +168,7 @@ const SearchBar = ({ className = "" }) => {
             </button>
           )}
         </div>
-        <button 
+        <button
           type="submit"
           className="bg-gradient-to-r from-blue-600 to-blue-700 h-10 md:h-12 px-6 rounded-r-full hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
           disabled={isSearching}
