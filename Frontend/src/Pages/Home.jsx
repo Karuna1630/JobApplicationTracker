@@ -4,7 +4,7 @@ import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import axiosInstance from "../Utils/axiosInstance";
 
-// ✅ Company Card Component
+// Company Card Component
 const CompanyCard = ({ company, onClick }) => {
   const [logoError, setLogoError] = useState(false);
 
@@ -39,7 +39,7 @@ const CompanyCard = ({ company, onClick }) => {
           target="_blank"
           rel="noopener noreferrer"
           className="text-sm text-blue-600 hover:underline mt-2 inline-block"
-          onClick={(e) => e.stopPropagation()} // ✅ prevent navigating to company page
+          onClick={(e) => e.stopPropagation()}
         >
           Visit Website
         </a>
@@ -54,35 +54,92 @@ const Home = () => {
   const [companies, setCompanies] = useState([]);
   const [loadingJobs, setLoadingJobs] = useState(false);
   const [loadingCompanies, setLoadingCompanies] = useState(false);
+  const [jobTypes, setJobTypes] = useState([]);
 
+   const formatDate = (dateString) => {
+    if (!dateString) return "Not specified";
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  // Fetch job types
+  const fetchJobTypes = async () => {
+    try {
+      const response = await axiosInstance.get('/getalljobtypes');
+      if (response.data && Array.isArray(response.data)) {
+        const mappedJobTypes = response.data.map(job => ({
+          id: job.jobTypeId,
+          name: job.name
+        }));
+        setJobTypes(mappedJobTypes);
+      }
+    } catch (error) {
+      // Silently handle error
+    }
+  };
+
+  // Fetch jobs
+  const fetchJobs = async () => {
+    setLoadingJobs(true);
+    try {
+      const { data } = await axiosInstance.get("/api/Jobs");
+      setJobs(Array.isArray(data) ? data : []);
+    } catch (error) {
+      setJobs([]);
+    } finally {
+      setLoadingJobs(false);
+    }
+  };
+
+  // Fetch companies
+  const fetchCompanies = async () => {
+    setLoadingCompanies(true);
+    try {
+      const { data } = await axiosInstance.get("/getallcompanies");
+      setCompanies(Array.isArray(data) ? data : []);
+    } catch (error) {
+      setCompanies([]);
+    } finally {
+      setLoadingCompanies(false);
+    }
+  };
+
+  // Main useEffect
   useEffect(() => {
-    const fetchJobs = async () => {
-      setLoadingJobs(true);
-      try {
-        const { data } = await axiosInstance.get("/api/Jobs");
-        setJobs(data || []);
-      } catch {
-        console.error("Failed to fetch jobs");
-      } finally {
-        setLoadingJobs(false);
-      }
-    };
-
-    const fetchCompanies = async () => {
-      setLoadingCompanies(true);
-      try {
-        const { data } = await axiosInstance.get("/getallcompanies");
-        setCompanies(data || []);
-      } catch {
-        console.error("Failed to fetch companies");
-      } finally {
-        setLoadingCompanies(false);
-      }
-    };
-
     fetchJobs();
     fetchCompanies();
+    fetchJobTypes();
   }, []);
+
+  // Get job type name by ID
+  const getJobTypeName = (jobTypeId) => {
+    if (!jobTypeId || jobTypes.length === 0) return "Job Title";
+    const jobType = jobTypes.find(jt => jt.id === parseInt(jobTypeId));
+    return jobType ? jobType.name : `Job Type ${jobTypeId}`;
+  };
+
+  // Function to find company by ID
+  const findCompanyById = (companyId) => {
+    if (!companyId || companies.length === 0) return null;
+    return companies.find(company => company.companyId === companyId);
+  };
+
+  // Function to handle job navigation with company data
+  const handleJobClick = (job) => {
+    if (!job || !job.jobId) return;
+
+    const company = findCompanyById(job.companyId);
+    
+    navigate(`/job/${job.jobId}`, {
+      state: {
+        company: company,
+        job: job
+      }
+    });
+  };
 
   return (
     <>
@@ -99,13 +156,13 @@ const Home = () => {
           <div className="space-x-4">
             <button
               onClick={() => navigate("/registercomp")}
-              className="bg-white text-blue-700 font-semibold px-6 py-3 rounded-xl hover:bg-blue-100"
+              className="bg-white text-blue-700 font-semibold px-6 py-3 rounded-xl hover:bg-blue-100 transition-colors"
             >
               Get Started
             </button>
             <button
               onClick={() => navigate("/login")}
-              className="bg-blue-800 text-white px-6 py-3 rounded-xl hover:bg-blue-900"
+              className="bg-blue-800 text-white px-6 py-3 rounded-xl hover:bg-blue-900 transition-colors"
             >
               Login
             </button>
@@ -117,7 +174,15 @@ const Home = () => {
           <div className="max-w-6xl mx-auto">
             <h2 className="text-4xl font-bold text-gray-800 mb-10">Top Companies</h2>
             {loadingCompanies ? (
-              <p className="text-gray-500">Loading companies...</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                {[...Array(10)].map((_, index) => (
+                  <div key={index} className="bg-white p-6 rounded-xl shadow animate-pulse">
+                    <div className="w-full h-28 mb-4 rounded-lg bg-gray-200"></div>
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                  </div>
+                ))}
+              </div>
             ) : companies.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                 {companies.map((company) => (
@@ -129,67 +194,134 @@ const Home = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500">No companies found.</p>
+              <p className="text-gray-500 text-center">No companies found.</p>
             )}
           </div>
         </section>
 
-      {/* Top Jobs */}
-<section className="py-20 px-6 bg-gray-100">
-  <div className="max-w-6xl mx-auto">
-    <h2 className="text-4xl font-bold text-gray-800 mb-10">Top Jobs</h2>
-    {loadingJobs ? (
-      <p className="text-gray-500">Loading jobs...</p>
-    ) : jobs.length > 0 ? (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {jobs.map((job) => (
-          <div
-            key={job.jobId}
-            className="bg-white p-6 rounded-xl shadow hover:shadow-xl transition transform hover:-translate-y-2"
-          >
-            <h3 className="font-semibold text-xl mb-2 text-blue-700 line-clamp-1">
-              {job.title}
-            </h3>
+        {/* Top Jobs */}
+        <section className="py-20 px-6 bg-gray-100">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-4xl font-bold text-gray-800 mb-10">Top Jobs</h2>
+            {loadingJobs ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {[...Array(6)].map((_, index) => (
+                  <div key={index} className="bg-white p-6 rounded-xl shadow animate-pulse">
+                    <div className="h-6 bg-gray-200 rounded mb-3"></div>
+                    <div className="h-4 bg-gray-200 rounded mb-2 w-1/2"></div>
+                    <div className="h-4 bg-gray-200 rounded mb-2 w-1/3"></div>
+                    <div className="h-4 bg-gray-200 rounded mb-4 w-1/4"></div>
+                    <div className="h-10 bg-gray-200 rounded"></div>
+                  </div>
+                ))}
+              </div>
+            ) : jobs.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {jobs.map((job) => {
+                  if (!job || !job.jobId) return null;
 
-            {/* ✅ Company Name */}
-            <p className="text-gray-600 mb-1 line-clamp-1">
-              {job.companyName || "Unknown Company"}
-            </p>
+                  const company = findCompanyById(job.companyId);
+                  
+                  return (
+                    <div
+                      key={job.jobId}
+                      className="bg-white p-6 rounded-xl shadow hover:shadow-xl transition transform hover:-translate-y-2 cursor-pointer"
+                      onClick={() => handleJobClick(job)}
+                    >
+                      {/* Company Info */}
+                      {company && (
+                        <div className="flex items-center mb-4">
+                          {company.companyLogo && (
+                            <img
+                              src={company.companyLogo}
+                              alt={company.companyName}
+                              className="w-10 h-10 rounded-lg mr-3 object-cover border"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                              }}
+                            />
+                          )}
+                          <div>
+                            <p className="text-sm font-medium text-blue-600">
+                              {company.companyName}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {company.location}
+                            </p>
+                          </div>
+                        </div>
+                      )}
 
-            {/* ✅ Location */}
-            <p className="text-gray-700 mb-1 line-clamp-1">
-              {job.location || "Location not specified"}
-            </p>
+                      {/* Job Title */}
+                      <h3 className="font-semibold text-xl mb-3 text-gray-800 line-clamp-2">
+                        {getJobTypeName(job.jobType)}
+                      </h3>
 
-            {/* ✅ Job Type */}
-            <p className="text-gray-500 text-sm mb-1">
-              {job.jobType || "Job type not specified"}
-            </p>
+                      {/* Job Description Preview */}
+                      {job.description && (
+                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                          {job.description.length > 100 
+                            ? `${job.description.substring(0, 100)}...` 
+                            : job.description
+                          }
+                        </p>
+                      )}
 
-            {/* ✅ Posted Date */}
-            <p className="text-gray-500 text-sm">
-              Posted on:{" "}
-              {job.postedDate
-                ? new Date(job.postedDate).toLocaleDateString()
-                : "—"}
-            </p>
+                      {/* Job Details */}
+                      <div className="space-y-2 mb-4">
+                        {/* Location */}
+                        {job.location && (
+                          <div className="flex items-center text-sm text-gray-600">
+                            <span className="w-4 h-4 mr-2">📍</span>
+                            {job.location}
+                          </div>
+                        )}
 
-            {/* ✅ Redirect to JobIndividual */}
-            <button
-              onClick={() => navigate(`/job/${job.jobId}`)}
-              className="mt-4 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800"
-            >
-              View Details
-            </button>
+                        {/* Salary */}
+                        {(job.salaryRangeMin && job.salaryRangeMax) && (
+                          <div className="flex items-center text-sm text-gray-600">
+                            <span className="w-4 h-4 mr-2">💰</span>
+                            ${job.salaryRangeMin.toLocaleString()} - ${job.salaryRangeMax.toLocaleString()}
+                          </div>
+                        )}
+
+                        {/* Posted Date */}
+                        <div className="flex items-center text-sm text-gray-600">
+                          <span className="w-4 h-4 mr-2">📅</span>
+                          Posted: {formatDate(job.postedAt)}
+                        </div>
+
+                        {/* Application Deadline */}
+                        <div className="flex items-center text-sm text-red-600">
+                          <span className="w-4 h-4 mr-2">⏰</span>
+                          Deadline: {formatDate(job.applicationDeadline)}
+                        </div>
+                      </div>
+
+                      {/* View Details Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleJobClick(job);
+                        }}
+                        className="w-full bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition font-medium"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  );
+                }).filter(Boolean)}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                  <span className="text-gray-400 text-2xl">💼</span>
+                </div>
+                <p className="text-gray-500 text-lg">No jobs found.</p>
+              </div>
+            )}
           </div>
-        ))}
-      </div>
-    ) : (
-      <p className="text-gray-500">No jobs found.</p>
-    )}
-  </div>
-</section>
-
+        </section>
 
         {/* CTA */}
         <section className="bg-blue-700 text-white py-20 px-4 text-center">
@@ -198,7 +330,7 @@ const Home = () => {
           </h2>
           <button
             onClick={() => navigate("/registercomp")}
-            className="bg-white text-blue-700 font-semibold px-8 py-3 rounded-xl hover:bg-blue-100"
+            className="bg-white text-blue-700 font-semibold px-8 py-3 rounded-xl hover:bg-blue-100 transition-colors"
           >
             Sign Up Now
           </button>
