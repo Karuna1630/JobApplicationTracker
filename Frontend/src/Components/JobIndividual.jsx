@@ -319,9 +319,9 @@ const JobIndividual = () => {
                   Job Description
                 </h3>
                 <div className="prose max-w-none text-gray-700">
-                  {job.description || job.jobDescription ? (
+                  {job.description  ? (
                     <div className="whitespace-pre-wrap leading-relaxed">
-                      {job.description || job.jobDescription}
+                      {job.description}
                     </div>
                   ) : (
                     <p className="text-gray-500 italic">
@@ -352,7 +352,7 @@ const JobIndividual = () => {
               )}
 
               {/* Requirements */}
-              {(job.requirements || job.qualifications) && (
+              {(job.requirements) && (
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <h3 className="text-xl font-semibold mb-4 flex items-center">
                     <span className="w-2 h-6 bg-purple-600 rounded-full mr-3"></span>
@@ -360,7 +360,7 @@ const JobIndividual = () => {
                   </h3>
                   <div className="prose max-w-none text-gray-700">
                     <div className="whitespace-pre-wrap leading-relaxed">
-                      {job.requirements || job.qualifications}
+                      {job.requirements}
                     </div>
                   </div>
                 </div>
@@ -421,7 +421,7 @@ const JobIndividual = () => {
                       Experience Level
                     </h4>
                     <p className="text-gray-600">
-                      {job.experienceLevel || job.experience || "Not specified"}
+                      {job.experienceLevel ||  "Not specified"}
                     </p>
                   </div>
 
@@ -431,7 +431,7 @@ const JobIndividual = () => {
                       Employment Type
                     </h4>
                     <p className="text-gray-600">
-                      {job.empolymentType || job.employType || "Not specified"}
+                      {job.empolymentType ||  "Not specified"}
                     </p>
                   </div>
 
@@ -452,7 +452,7 @@ const JobIndividual = () => {
                     </h4>
                     <p className="text-gray-600">
                       {formatDate(
-                        job.postedAt || job.createdAt || job.datePosted
+                        job.postedAt
                       )}
                     </p>
                   </div>
