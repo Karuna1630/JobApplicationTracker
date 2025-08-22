@@ -357,13 +357,13 @@ const CompanyIndividual = () => {
                               <div>
                                 <span className="font-semibold text-gray-700">Application Deadline:</span>
                                 <p className="text-gray-600 mt-1">
-                                  {formatDate(job.applicationDeadline || job.deadline)}
+                                  {formatDate(job.applicationDeadline )}
                                 </p>
                               </div>
                               <div>
                                 <span className="font-semibold text-gray-700">Posted Date:</span>
                                 <p className="text-gray-600 mt-1">
-                                  {formatDate(job.postedAt || job.createdAt || job.datePosted)}
+                                  {formatDate(job.postedAt)}
                                 </p>
                               </div>
                             </div>
