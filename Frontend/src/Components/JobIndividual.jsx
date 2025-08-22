@@ -1,7 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { MapPin, Clock, Eye, Calendar, DollarSign, Briefcase, Users, Building, ExternalLink, ArrowLeft } from 'lucide-react';
-import axiosInstance from '../Utils/axiosInstance';
+import React, { useState, useEffect } from "react";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
+import {
+  MapPin,
+  Clock,
+  Eye,
+  Calendar,
+  DollarSign,
+  Briefcase,
+  Users,
+  Building,
+  ExternalLink,
+  ArrowLeft,
+} from "lucide-react";
+import axiosInstance from "../Utils/axiosInstance";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 
@@ -9,7 +20,7 @@ const JobIndividual = () => {
   const { jobId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   const [job, setJob] = useState(null);
   const [company, setCompany] = useState(null);
   const [jobTypes, setJobTypes] = useState([]);
@@ -24,26 +35,26 @@ const JobIndividual = () => {
 
   // Get job type name by ID
   const getJobTypeName = (jobTypeId) => {
-    const jobType = jobTypes.find(jt => jt.id === parseInt(jobTypeId));
+    const jobType = jobTypes.find((jt) => jt.id === parseInt(jobTypeId));
     return jobType ? jobType.name : `Job Type ${jobTypeId}`;
   };
 
   // Get skill names from skills string
   const getSkillNames = (skillsString) => {
     if (!skillsString || !allSkills.length) return [];
-    
+
     try {
       const skillIds = JSON.parse(skillsString);
       if (!Array.isArray(skillIds)) return [];
-      
+
       return skillIds
-        .map(skillId => {
-          const skill = allSkills.find(s => s.id === skillId);
+        .map((skillId) => {
+          const skill = allSkills.find((s) => s.id === skillId);
           return skill ? skill.skillName : null;
         })
         .filter(Boolean);
     } catch (error) {
-      console.error('Error parsing skills:', error);
+      console.error("Error parsing skills:", error);
       return [];
     }
   };
@@ -61,21 +72,21 @@ const JobIndividual = () => {
   // Format date
   const formatDate = (dateString) => {
     if (!dateString) return "Not specified";
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
   // Fetch Job Types
   const fetchJobTypes = async () => {
     try {
-      const response = await axiosInstance.get('/getalljobtypes');
+      const response = await axiosInstance.get("/getalljobtypes");
       if (response.data && Array.isArray(response.data)) {
-        const mappedJobTypes = response.data.map(job => ({
+        const mappedJobTypes = response.data.map((job) => ({
           id: job.jobTypeId,
-          name: job.name
+          name: job.name,
         }));
         setJobTypes(mappedJobTypes);
       }
@@ -89,30 +100,27 @@ const JobIndividual = () => {
     try {
       const response = await axiosInstance.get(`/api/skills/getallskills`);
       if (response.data && Array.isArray(response.data)) {
-        const mappedSkills = response.data.map(skill => ({
+        const mappedSkills = response.data.map((skill) => ({
           id: skill.skillId,
-          skillName: skill.skill
+          skillName: skill.skill,
         }));
         setAllSkills(mappedSkills);
       }
     } catch (error) {
-      console.error('Error fetching all skills:', error);
+      console.error("Error fetching all skills:", error);
     }
   };
 
-  // Fetch company data
+  // ✅ Simplified fetchCompany
   const fetchCompany = async (companyId) => {
     if (!companyId) return;
-    
+
+    setCompanyLoading(true);
     try {
-      setCompanyLoading(true);
-      const response = await axiosInstance.get(`/getcompanybyid?id=${companyId}`);
-      
-      if (response.data) {
-        setCompany(response.data);
-      } else {
-        setCompany(null);
-      }
+      const response = await axiosInstance.get(
+        `/getcompanybyid?id=${companyId}`
+      );
+      setCompany(response.data || null);
     } catch (err) {
       console.error("Failed to fetch company:", err);
       setCompany(null);
@@ -121,54 +129,34 @@ const JobIndividual = () => {
     }
   };
 
-  // Fetch job data
+  // ✅ Simplified fetchJob (no fallback to /api/Jobs)
   const fetchJob = async () => {
-    // Use passed job data if available and matches the current jobId
-    if (passedJob && passedJob.jobId.toString() === jobId) {
-      setJob(passedJob);
-      
-      if (passedCompany) {
-        setCompany(passedCompany);
-      } else if (passedJob.companyId) {
-        await fetchCompany(passedJob.companyId);
-      }
-      return;
-    }
-
-    // Fetch job from API
     try {
-      const response = await axiosInstance.get(`/api/Jobs/getjobsbyid?jobId=${jobId}`);
-      const jobData = response.data;
+      let jobData;
+
+      // Use passed job if available and matches jobId
+      if (passedJob && passedJob.jobId.toString() === jobId) {
+        jobData = passedJob;
+      } else {
+        const response = await axiosInstance.get(
+          `/api/Jobs/getjobsbyid?jobId=${jobId}`
+        );
+        jobData = response.data;
+      }
+
+      // Set job
       setJob(jobData);
-      
-      // Handle company data
+
+      // Handle company
       if (passedCompany) {
         setCompany(passedCompany);
-      } else if (jobData && jobData.companyId) {
+      } else if (jobData?.companyId) {
         await fetchCompany(jobData.companyId);
       }
-      
     } catch (error) {
-      // If primary endpoint fails, try fallback - fetch from jobs list
-      try {
-        const response = await axiosInstance.get("/api/Jobs");
-        const jobs = response.data || [];
-        const foundJob = jobs.find(job => job.jobId.toString() === jobId);
-        
-        if (foundJob) {
-          setJob(foundJob);
-          
-          if (passedCompany) {
-            setCompany(passedCompany);
-          } else if (foundJob.companyId) {
-            await fetchCompany(foundJob.companyId);
-          }
-        } else {
-          throw new Error(`Job with ID ${jobId} not found`);
-        }
-      } catch (fallbackErr) {
-        throw new Error(`Job with ID ${jobId} not found. Please check if the job exists or contact support.`);
-      }
+      console.error(`❌ Failed to fetch job with ID ${jobId}:`, error);
+      setJob(null);
+      setCompany(null);
     }
   };
 
@@ -176,17 +164,14 @@ const JobIndividual = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (!jobId) return;
-      
+
       try {
         setLoading(true);
         setError(null);
-        
+
         // Fetch job types and skills first
-        await Promise.all([
-          fetchJobTypes(),
-          fetchAllSkills()
-        ]);
-        
+        await Promise.all([fetchJobTypes(), fetchAllSkills()]);
+
         // Then fetch job data (which will handle company data)
         await fetchJob();
       } catch (err) {
@@ -200,59 +185,64 @@ const JobIndividual = () => {
     fetchData();
   }, [jobId]);
 
-  if (loading) return (
-    <>
-      <Navbar/>
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading job details...</p>
-          <p className="text-sm text-gray-400 mt-2">Job ID: {jobId}</p>
-        </div>
-      </div>
-    </>
-  );
-
-  if (error) return (
-    <>
-      <Navbar/>
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center max-w-md mx-auto p-6">
-          <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
-            <span className="text-red-600 text-2xl">⚠</span>
+  if (loading)
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading job details...</p>
+            <p className="text-sm text-gray-400 mt-2">Job ID: {jobId}</p>
           </div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Job Not Found</h2>
-          <p className="text-red-500 mb-4">{error}</p>
-          <button
-            onClick={() => navigate('/')}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
-          >
-            Browse All Jobs
-          </button>
         </div>
-      </div>
-    </>
-  );
+      </>
+    );
 
-  if (!job) return (
-    <>
-      <Navbar/>
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-            <Briefcase className="w-8 h-8 text-gray-400" />
+  if (error)
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center max-w-md mx-auto p-6">
+            <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+              <span className="text-red-600 text-2xl">⚠</span>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">
+              Job Not Found
+            </h2>
+            <p className="text-red-500 mb-4">{error}</p>
+            <button
+              onClick={() => navigate("/")}
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+            >
+              Browse All Jobs
+            </button>
           </div>
-          <p className="text-gray-600 text-lg">Job not found.</p>
-          <button
-            onClick={() => navigate('/')}
-            className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
-          >
-            Browse All Jobs
-          </button>
         </div>
-      </div>
-    </>
-  );
+      </>
+    );
+
+  if (!job)
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+              <Briefcase className="w-8 h-8 text-gray-400" />
+            </div>
+            <p className="text-gray-600 text-lg">Job not found.</p>
+            <button
+              onClick={() => navigate("/")}
+              className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+            >
+              Browse All Jobs
+            </button>
+          </div>
+        </div>
+      </>
+    );
 
   const isActive = isJobActive(job);
   const jobTypeName = getJobTypeName(job.jobType);
@@ -260,10 +250,9 @@ const JobIndividual = () => {
 
   return (
     <>
-      <Navbar/>
+      <Navbar />
       <div className="min-h-screen bg-gradient-to-br from-blue-100 to-white py-8">
         <div className="max-w-screen-2xl mx-auto px-4">
-          
           {/* Job Header Banner */}
           <div className="relative bg-gradient-to-r from-blue-700 to-blue-800 rounded-lg shadow-lg p-8 mb-6 text-white">
             <div className="flex items-start justify-between">
@@ -280,44 +269,22 @@ const JobIndividual = () => {
                     <Building className="w-8 h-8 text-gray-400" />
                   </div>
                 )}
-                
+
                 {/* Job Info */}
                 <div className="flex-1">
-                  <h1 className="text-3xl font-bold mb-2">{jobTypeName}</h1>
-                  
                   {/* Company Info */}
                   <div className="mb-4">
-                    {companyLoading ? (
-                      <div className="animate-pulse">
-                        <div className="h-6 bg-blue-500 rounded w-48 mb-2"></div>
-                        <div className="h-4 bg-blue-500 rounded w-32"></div>
-                      </div>
-                    ) : company ? (
-                      <div>
-                        <h2 className="text-xl font-semibold text-blue-100 mb-1">
-                          {company.companyName}
-                        </h2>
-                        <p className="text-blue-200 flex items-center">
-                          <MapPin className="w-4 h-4 mr-1" />
-                          {company.location }
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="text-blue-200">
-                        <p className="text-sm">Company information not available</p>
-                        {job.location && (
-                          <p className="flex items-center mt-1">
-                            <MapPin className="w-4 h-4 mr-1" />
-                            {job.location}
-                          </p>
-                        )}
-                      </div>
-                    )}
+                    <h2 className="text-xl font-semibold text-blue-100 mb-1">
+                      {company.companyName}
+                    </h2>
+                    <p className="text-blue-200 flex items-center">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      {company.location}
+                    </p>
                   </div>
-
                 </div>
               </div>
-              
+
               {/* Status and Views */}
               <div className="flex flex-col items-end gap-3">
                 <span
@@ -333,7 +300,9 @@ const JobIndividual = () => {
             </div>
 
             {/* Apply Button */}
-            <div className="mt-6">
+            <div className="flex flex-row justify-between items-center mt-6">
+              <h1 className="text-3xl font-bold mb-2">{jobTypeName}</h1>
+
               <button className="bg-white hover:bg-gray-100 text-blue-700 px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg">
                 Apply Now
               </button>
@@ -341,10 +310,8 @@ const JobIndividual = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
-              
               {/* Job Description */}
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h3 className="text-xl font-semibold mb-4 flex items-center">
@@ -357,7 +324,9 @@ const JobIndividual = () => {
                       {job.description || job.jobDescription}
                     </div>
                   ) : (
-                    <p className="text-gray-500 italic">No description available.</p>
+                    <p className="text-gray-500 italic">
+                      No description available.
+                    </p>
                   )}
                 </div>
               </div>
@@ -415,7 +384,6 @@ const JobIndividual = () => {
 
             {/* Sidebar */}
             <div className="space-y-6">
-              
               {/* Job Information */}
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h3 className="text-lg font-semibold mb-4 flex items-center">
@@ -423,13 +391,14 @@ const JobIndividual = () => {
                   Job Information
                 </h3>
                 <div className="space-y-4">
-                  
                   <div className="border-l-4 border-blue-200 pl-4">
                     <h4 className="font-medium text-gray-800 flex items-center mb-1">
                       <MapPin className="w-4 h-4 mr-2 text-blue-600" />
                       Location
                     </h4>
-                    <p className="text-gray-600">{job.location || "Not specified"}</p>
+                    <p className="text-gray-600">
+                      {job.location || "Not specified"}
+                    </p>
                   </div>
 
                   <div className="border-l-4 border-green-200 pl-4">
@@ -441,8 +410,8 @@ const JobIndividual = () => {
                       {job.salaryRangeMin && job.salaryRangeMax
                         ? `${job.salaryRangeMin.toLocaleString()} - ${job.salaryRangeMax.toLocaleString()}`
                         : job.salary
-                          ? `${job.salary.toLocaleString()}`
-                          : "Not specified"}
+                        ? `${job.salary.toLocaleString()}`
+                        : "Not specified"}
                     </p>
                   </div>
 
@@ -482,7 +451,9 @@ const JobIndividual = () => {
                       Posted Date
                     </h4>
                     <p className="text-gray-600">
-                      {formatDate(job.postedAt || job.createdAt || job.datePosted)}
+                      {formatDate(
+                        job.postedAt || job.createdAt || job.datePosted
+                      )}
                     </p>
                   </div>
                 </div>
@@ -494,7 +465,7 @@ const JobIndividual = () => {
                   <Building className="w-5 h-5 mr-2 text-blue-600" />
                   Company Information
                 </h3>
-                
+
                 {companyLoading ? (
                   <div className="animate-pulse space-y-4">
                     <div className="flex items-center space-x-3">
@@ -524,26 +495,33 @@ const JobIndividual = () => {
                         </div>
                       )}
                       <div>
-                        <h4 className="font-semibold text-gray-800">{company.companyName}</h4>
-                        <p className="text-gray-600 text-sm">{company.location}</p>
+                        <h4 className="font-semibold text-gray-800">
+                          {company.companyName}
+                        </h4>
+                        <p className="text-gray-600 text-sm">
+                          {company.location}
+                        </p>
                       </div>
                     </div>
 
                     {company.description && (
                       <div>
-                        <h4 className="font-medium text-gray-800 mb-2">About Company</h4>
+                        <h4 className="font-medium text-gray-800 mb-2">
+                          About Company
+                        </h4>
                         <p className="text-gray-600 text-sm leading-relaxed">
-                          {company.description.length > 150 
-                            ? `${company.description.substring(0, 150)}...` 
-                            : company.description
-                          }
+                          {company.description.length > 150
+                            ? `${company.description.substring(0, 150)}...`
+                            : company.description}
                         </p>
                       </div>
                     )}
 
                     {company.websiteUrl && (
                       <div>
-                        <h4 className="font-medium text-gray-800 mb-2">Website</h4>
+                        <h4 className="font-medium text-gray-800 mb-2">
+                          Website
+                        </h4>
                         <a
                           href={company.websiteUrl}
                           target="_blank"
@@ -551,15 +529,19 @@ const JobIndividual = () => {
                           className="text-blue-600 hover:underline text-sm flex items-center"
                         >
                           <ExternalLink className="w-3 h-3 mr-1" />
-                          {company.websiteUrl.replace(/^https?:\/\//, '')}
+                          {company.websiteUrl.replace(/^https?:\/\//, "")}
                         </a>
                       </div>
                     )}
 
                     {company.contactEmail && (
                       <div>
-                        <h4 className="font-medium text-gray-800 mb-2">Contact</h4>
-                        <p className="text-gray-600 text-sm">{company.contactEmail}</p>
+                        <h4 className="font-medium text-gray-800 mb-2">
+                          Contact
+                        </h4>
+                        <p className="text-gray-600 text-sm">
+                          {company.contactEmail}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -568,7 +550,9 @@ const JobIndividual = () => {
                     <div className="w-12 h-12 mx-auto mb-3 bg-gray-100 rounded-lg flex items-center justify-center">
                       <Building className="w-6 h-6 text-gray-400" />
                     </div>
-                    <p className="text-gray-500 text-sm">Company information not available</p>
+                    <p className="text-gray-500 text-sm">
+                      Company information not available
+                    </p>
                   </div>
                 )}
               </div>
@@ -581,10 +565,9 @@ const JobIndividual = () => {
               </div>
             </div>
           </div>
-
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </>
   );
 };
