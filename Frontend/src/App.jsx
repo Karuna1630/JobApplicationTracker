@@ -30,10 +30,9 @@ import JobTypeComponents from './Components/JobTypeComponents'
 import Experience from './Components/Experience.jsx'
 import CompanyIndividual from './Components/CompanyIndividual.jsx'
 import JobIndividual from './Components/JobIndividual.jsx'
+import JobApplicationForm from './Pages/JobApplicationForm.jsx'
 
 function App() {
-  
-
   return (
     <>
       <div>
@@ -70,14 +69,7 @@ function App() {
           <Route path='/experience' element= {<Experience/>}/>
           <Route path='/company/:companyId' element={<CompanyIndividual/>}/>
           <Route path='/job/:jobId' element={<JobIndividual/>}/>
-       
-
-        
-
-
-
-
-    
+          <Route path='/jobApplicationForm' element={<JobApplicationForm/>}/>
         </Routes>
         </BrowserRouter>
       </div>
