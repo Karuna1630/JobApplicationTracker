@@ -77,7 +77,7 @@ const Home = () => {
         setJobTypes(mappedJobTypes);
       }
     } catch (error) {
-      // Silently handle error
+       console.error("Failed to fetch jobs", error);
     }
   };
 
@@ -88,6 +88,7 @@ const Home = () => {
       const { data } = await axiosInstance.get("/api/Jobs");
       setJobs(Array.isArray(data) ? data : []);
     } catch (error) {
+       console.error("Failed to fetch jobs", error);
       setJobs([]);
     } finally {
       setLoadingJobs(false);
@@ -101,6 +102,7 @@ const Home = () => {
       const { data } = await axiosInstance.get("/getallcompanies");
       setCompanies(Array.isArray(data) ? data : []);
     } catch (error) {
+       console.error("Failed to fetch companies", error);
       setCompanies([]);
     } finally {
       setLoadingCompanies(false);
@@ -205,7 +207,7 @@ const Home = () => {
             <h2 className="text-4xl font-bold text-gray-800 mb-10">Top Jobs</h2>
             {loadingJobs ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {[...Array(6)].map((_, index) => (
+                {[...Array(15)].map((_, index) => (
                   <div key={index} className="bg-white p-6 rounded-xl shadow animate-pulse">
                     <div className="h-6 bg-gray-200 rounded mb-3"></div>
                     <div className="h-4 bg-gray-200 rounded mb-2 w-1/2"></div>
