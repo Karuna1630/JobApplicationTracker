@@ -213,7 +213,7 @@ const SearchBar = ({ className = "" }) => {
 
               {/* Companies Section */}
               {searchResults.companies.length > 0 && (
-                <div className="mb-2">
+                <div>
                   <div className="px-4 py-3 text-xs font-bold text-gray-600 uppercase tracking-wide border-b bg-gradient-to-r from-blue-50 to-indigo-50 flex items-center">
                     <IoBusinessOutline className="w-4 h-4 mr-2 text-blue-600" />
                     Companies ({searchResults.companies.length})
@@ -249,17 +249,6 @@ const SearchBar = ({ className = "" }) => {
                   ))}
                 </div>
               )}
-
-              {/* View All Results */}
-              <div className="border-t mt-2 bg-gray-50">
-                <button
-                  onClick={handleSearchSubmit}
-                  className="w-full px-4 py-4 text-blue-600 hover:bg-blue-100 font-semibold text-center transition-colors rounded-b-xl flex items-center justify-center space-x-2"
-                >
-                  <IoSearch className="w-4 h-4" />
-                  <span>View all results for "{searchQuery}"</span>
-                </button>
-              </div>
             </div>
           ) : (
             <div className="p-8 text-center text-gray-500">
