@@ -5,12 +5,16 @@ import {
   IoBriefcase,
 } from "react-icons/io5";
 import { Calendar, MapPin } from "react-feather";
+import axiosInstance from "../Utils/axiosInstance";
+import { getUserIdFromToken } from '../Utils/jwtUtils';
+import { toast } from "react-toastify";
 
 const Experience = () => {
   const [experiences, setExperiences] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editingExperience, setEditingExperience] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     jobTitle: "",
@@ -32,112 +36,115 @@ const Experience = () => {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 50 }, (_, i) => currentYear - i);
 
-  // Updated API Base URL to match your backend
-  const API_BASE_URL = 'https://localhost:7047';
-
-  // Fetch all experiences
+  // Fetch all experiences using the same pattern as Education
   const fetchExperiences = async () => {
     try {
-      setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/getallexperiences`);
-      if (response.ok) {
-        const data = await response.json();
-        setExperiences(data);
-      } else {
-        console.error('Failed to fetch experiences');
-        alert('Failed to load experiences');
-      }
+      const token = localStorage.getItem('token');
+      const userId = getUserIdFromToken(token);
+      const response = await axiosInstance.get(`api/Experience/user/${userId}`);
+      setExperiences(response.data || []);
     } catch (error) {
-      console.error('Error fetching experiences:', error);
-      alert('Error loading experiences');
+      console.error('Failed to fetch experiences:', error);
+      setExperiences([]);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  // Save or update experience - Updated to match your API structure
-  const saveExperience = async (experienceData) => {
+  // Save or update experience using the same logic as Education
+  const handleSubmit = async () => {
+    if (!formData.jobTitle.trim() || !formData.organization.trim()) {
+      toast.error("Please fill in the required fields (Job Title and Organization)");
+      return;
+    }
+
+    if (!formData.startMonth || !formData.startYear) {
+      toast.error("Please select start month and year");
+      return;
+    }
+
+    if (!formData.currentRole && (!formData.endMonth || !formData.endYear)) {
+      toast.error("Please select end month and year, or check 'currently working'");
+      return;
+    }
+
+    setSubmitting(true);
     try {
-      setLoading(true);
-      
-      // Prepare data for API - Updated to match your API structure exactly
-      const apiData = {
-        experienceId: editingExperience || 0, // Use 0 for new experiences
-        jobTitle: experienceData.jobTitle,
-        organization: experienceData.organization,
-        location: experienceData.location || "",
-        startMonth: experienceData.startMonth ? months.indexOf(experienceData.startMonth) + 1 : 0,
-        startYear: experienceData.startYear ? parseInt(experienceData.startYear) : 0,
-        endMonth: experienceData.currentRole ? 0 : (experienceData.endMonth ? months.indexOf(experienceData.endMonth) + 1 : 0),
-        endYear: experienceData.currentRole ? 0 : (experienceData.endYear ? parseInt(experienceData.endYear) : 0),
-        isCurrentlyWorking: experienceData.currentRole, // Boolean as expected by API
-        description: experienceData.description || "",
+      const token = localStorage.getItem('token');
+      const userId = getUserIdFromToken(token);
+
+      // Prepare data for API - matching your original structure
+      const experienceData = {
+        userId,
+        organization: formData.organization,
+        jobTitle: formData.jobTitle,
+        location: formData.location || null,
+        startMonth: formData.startMonth ? months.indexOf(formData.startMonth) + 1 : 1,
+        startYear: formData.startYear ? parseInt(formData.startYear) : new Date().getFullYear(),
+        endMonth: formData.currentRole ? null : (formData.endMonth ? months.indexOf(formData.endMonth) + 1 : null),
+        endYear: formData.currentRole ? null : (formData.endYear ? parseInt(formData.endYear) : null),
+        isCurrentlyWorking: formData.currentRole,
+        description: formData.description || null,
       };
 
-      console.log('Sending data to API:', apiData); // Debug log
-
-      const response = await fetch(`${API_BASE_URL}/submitexperience`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'accept': '*/*'
-        },
-        body: JSON.stringify(apiData),
-      });
-
-      console.log('Response status:', response.status); // Debug log
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('API response:', result); // Debug log
+      if (editingExperience) {
+        // For editing, include the experience ID
+        experienceData.experienceId = editingExperience.experienceId || editingExperience.id;
         
-        // Check if the response indicates success
-        if (result.isSuccess) {
-          // Refresh the experiences list
+        console.log('Editing experience with data:', experienceData);
+        
+        await axiosInstance.post('/api/Experience', experienceData);
+        
+        toast.success('Experience updated successfully!');
+        await fetchExperiences();
+        closeModal();
+        setEditingExperience(null);
+      } else {
+        // For adding new experience
+        console.log('Adding new experience with data:', experienceData);
+        
+        const experienceResponse = await axiosInstance.post('/api/Experience', experienceData);
+        const experienceId = experienceResponse.data.experienceId || experienceResponse.data.id;
+
+        // Update user table with experience IDs (same logic as Education)
+        const existingExperienceIds = experiences.map(exp => exp.experienceId || exp.id);
+        const updatedExperienceIds = [...existingExperienceIds, experienceId];
+        const experienceJsonString = JSON.stringify(updatedExperienceIds);
+
+        const response = await axiosInstance.post(`/submituser`, {
+          userId,
+          experiences: experienceJsonString, // Fixed: Changed to 'experiences' (plural)
+        });
+
+        if (response.data && response.data.isSuccess) {
+          toast.success('Experience added successfully!');
           await fetchExperiences();
           closeModal();
-          alert(result.message || (editingExperience ? 'Experience updated successfully!' : 'Experience added successfully!'));
+          setEditingExperience(null);
         } else {
-          alert(`Failed to save experience: ${result.message}`);
+          throw new Error(response.data?.message || 'Failed to update user with experience');
         }
-      } else {
-        const errorText = await response.text();
-        console.error('API Error Response:', errorText);
-        alert(`Failed to save experience: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
-      console.error('Network/Fetch Error:', error);
-      alert(`Network error: ${error.message}`);
+      console.error('Failed to save experience:', error);
+      console.error('Error details:', error.response?.data);
+      toast.error(`Failed to ${editingExperience ? 'update' : 'save'} experience. Please try again.`);
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
-  // Delete experience
-  const deleteExperienceFromDB = async (experienceId) => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/deleteexperience`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ experienceId }),
-      });
-
-      if (response.ok) {
-        setExperiences(prev => prev.filter(exp => exp.experienceId !== experienceId));
-        alert('Experience deleted successfully!');
-      } else {
-        const error = await response.text();
+  // Delete experience using axios
+  const handleDelete = async (experienceId) => {
+    if (window.confirm('Are you sure you want to delete this experience?')) {
+      try {
+        await axiosInstance.delete(`/api/Experience/${experienceId}`);
+        await fetchExperiences();
+        toast.success('Experience deleted successfully!');
+      } catch (error) {
         console.error('Failed to delete experience:', error);
-        alert('Failed to delete experience');
+        toast.error('Failed to delete experience. Please try again.');
       }
-    } catch (error) {
-      console.error('Error deleting experience:', error);
-      alert('Error deleting experience');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -172,6 +179,8 @@ const Experience = () => {
 
   const openModal = (experience = null) => {
     if (experience) {
+      console.log('Editing experience:', experience);
+      
       // Convert database data back to form format
       setFormData({
         jobTitle: experience.jobTitle || "",
@@ -184,7 +193,7 @@ const Experience = () => {
         currentRole: experience.isCurrentlyWorking === true,
         description: experience.description || "",
       });
-      setEditingExperience(experience.experienceId);
+      setEditingExperience(experience);
     } else {
       resetForm();
     }
@@ -204,42 +213,17 @@ const Experience = () => {
     }));
   };
 
-  const handleSubmit = () => {
-    if (!formData.jobTitle.trim() || !formData.organization.trim()) {
-      alert("Please fill in the required fields (Job Title and Organization)");
-      return;
-    }
-
-    if (!formData.startMonth || !formData.startYear) {
-      alert("Please select start month and year");
-      return;
-    }
-
-    if (!formData.currentRole && (!formData.endMonth || !formData.endYear)) {
-      alert("Please select end month and year, or check 'currently working'");
-      return;
-    }
-
-    saveExperience(formData);
-  };
-
-  const deleteExperience = (experienceId) => {
-    if (window.confirm('Are you sure you want to delete this experience?')) {
-      deleteExperienceFromDB(experienceId);
-    }
-  };
-
   const formatDateRange = (experience) => {
     const startMonth = experience.startMonth ? months[experience.startMonth - 1] : "";
-    const startDate = `${startMonth} ${experience.startYear}`;
+    const startText = `${startMonth} ${experience.startYear}`;
     
-    const endDate = experience.isCurrentlyWorking === true ? "Present" : 
-      experience.endMonth ? `${months[experience.endMonth - 1]} ${experience.endYear}` : "";
+    const endText = experience.isCurrentlyWorking ? "Present" : 
+      (experience.endMonth ? `${months[experience.endMonth - 1]} ${experience.endYear}` : "");
     
-    return `${startDate} - ${endDate}`;
+    return `${startText} - ${endText}`;
   };
 
-  if (loading && experiences.length === 0) {
+  if (isLoading) {
     return (
       <div className="text-center py-8">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -261,7 +245,7 @@ const Experience = () => {
         </div>
         <button
           onClick={() => openModal()}
-          disabled={loading}
+          disabled={submitting}
           className="flex items-center gap-2 px-4 py-2 border-2 border-blue-600 text-blue-600 rounded-full hover:bg-blue-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <IoAdd size={20} />
@@ -270,7 +254,7 @@ const Experience = () => {
       </div>
 
       {/* Loading indicator for actions */}
-      {loading && experiences.length > 0 && (
+      {submitting && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
           <div className="flex items-center">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
@@ -281,16 +265,16 @@ const Experience = () => {
 
       {/* Experience List */}
       <div className="space-y-4">
-        {experiences.length === 0 && !loading ? (
+        {experiences.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <IoBriefcase size={48} className="mx-auto mb-4 text-gray-300" />
             <p className="text-lg mb-2">No experience added yet</p>
             <p>Add your work experience to showcase your professional journey</p>
           </div>
         ) : (
-          experiences.map((experience) => (
+          experiences.map((experience, index) => (
             <div
-              key={experience.experienceId}
+              key={experience.experienceId || experience.id || index}
               className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow bg-white"
             >
               <div className="flex justify-between items-start">
@@ -322,14 +306,14 @@ const Experience = () => {
                 <div className="flex gap-2 ml-4">
                   <button
                     onClick={() => openModal(experience)}
-                    disabled={loading}
+                    disabled={submitting}
                     className="px-3 py-1 text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => deleteExperience(experience.experienceId)}
-                    disabled={loading}
+                    onClick={() => handleDelete(experience.experienceId || experience.id)}
+                    disabled={submitting}
                     className="px-3 py-1 text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Delete
@@ -354,7 +338,7 @@ const Experience = () => {
                 type="button"
                 onClick={closeModal}
                 className="text-gray-400 hover:text-gray-600 p-1"
-                disabled={loading}
+                disabled={submitting}
               >
                 <IoClose size={24} />
               </button>
@@ -375,7 +359,7 @@ const Experience = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Ex: Software Engineer"
                   required
-                  disabled={loading}
+                  disabled={submitting}
                 />
               </div>
 
@@ -392,7 +376,7 @@ const Experience = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Ex: Microsoft"
                   required
-                  disabled={loading}
+                  disabled={submitting}
                 />
               </div>
 
@@ -408,7 +392,7 @@ const Experience = () => {
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Ex: New York, NY"
-                  disabled={loading}
+                  disabled={submitting}
                 />
               </div>
 
@@ -420,7 +404,7 @@ const Experience = () => {
                   checked={formData.currentRole}
                   onChange={handleInputChange}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  disabled={loading}
+                  disabled={submitting}
                 />
                 <label className="ml-2 text-sm text-gray-700">
                   I am currently working in this role
@@ -439,7 +423,7 @@ const Experience = () => {
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
-                    disabled={loading}
+                    disabled={submitting}
                   >
                     <option value="">Select Month</option>
                     {months.map((month) => (
@@ -459,7 +443,7 @@ const Experience = () => {
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
-                    disabled={loading}
+                    disabled={submitting}
                   >
                     <option value="">Select Year</option>
                     {years.map((year) => (
@@ -484,7 +468,7 @@ const Experience = () => {
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required={!formData.currentRole}
-                      disabled={loading}
+                      disabled={submitting}
                     >
                       <option value="">Select Month</option>
                       {months.map((month) => (
@@ -504,7 +488,7 @@ const Experience = () => {
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required={!formData.currentRole}
-                      disabled={loading}
+                      disabled={submitting}
                     >
                       <option value="">Select Year</option>
                       {years.map((year) => (
@@ -529,7 +513,7 @@ const Experience = () => {
                   rows={4}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Describe your role and responsibilities..."
-                  disabled={loading}
+                  disabled={submitting}
                 />
               </div>
             </div>
@@ -538,20 +522,20 @@ const Experience = () => {
             <div className="flex justify-end gap-4 p-4 border-t bg-gray-50">
               <button
                 onClick={closeModal}
-                disabled={loading}
+                disabled={submitting}
                 className="px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSubmit}
-                disabled={loading}
+                disabled={submitting}
                 className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                {loading && (
+                {submitting && (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                 )}
-                {loading ? 'Saving...' : (editingExperience ? "Update" : "Add")}
+                {submitting ? 'Saving...' : (editingExperience ? "Update" : "Add")}
               </button>
             </div>
           </div>
