@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import React, { useEffect } from "react";
+import  { useEffect } from "react";
 import { FaUser, FaTimes } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import { RiLockPasswordFill } from "react-icons/ri";
@@ -93,7 +92,7 @@ const AddStaffModal = ({ isOpen, onClose, companyId, onStaffAdded }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-[30%] max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b">
           <h2 className="text-xl font-bold text-gray-800">Add Staff Member</h2>
