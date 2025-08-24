@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { IoSearch, IoClose, IoBusinessOutline, IoBriefcaseOutline } from "react-icons/io5";
+import {
+  IoSearch,
+  IoClose,
+  IoBusinessOutline,
+  IoBriefcaseOutline,
+} from "react-icons/io5";
+import { FaLocationDot } from "react-icons/fa6";
 import axiosInstance from "../Utils/axiosInstance";
 
 const SearchBar = ({ className = "" }) => {
@@ -10,7 +16,7 @@ const SearchBar = ({ className = "" }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState({
     companies: [],
-    jobs: []
+    jobs: [],
   });
   const [showResults, setShowResults] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,9 +43,9 @@ const SearchBar = ({ className = "" }) => {
     try {
       // Fetch all data fresh each time (simple approach)
       const [companiesRes, jobTypesRes, jobsRes] = await Promise.all([
-        axiosInstance.get('/getallcompanies'),
-        axiosInstance.get('/getalljobtypes'),
-        axiosInstance.get('/api/Jobs')
+        axiosInstance.get("/getallcompanies"),
+        axiosInstance.get("/getalljobtypes"),
+        axiosInstance.get("/api/Jobs"),
       ]);
 
       const companies = companiesRes.data || [];
@@ -51,42 +57,45 @@ const SearchBar = ({ className = "" }) => {
 
       // Filter companies
       const filteredCompanies = companies
-        .filter(company => 
-          company.companyName?.toLowerCase().includes(queryLower) ||
-          company.location?.toLowerCase().includes(queryLower)
+        .filter(
+          (company) =>
+            company.companyName?.toLowerCase().includes(queryLower) ||
+            company.location?.toLowerCase().includes(queryLower)
         )
         .slice(0, 5);
 
       // Filter jobs
       const filteredJobs = jobs
-        .map(job => {
+        .map((job) => {
           // Find company and job type info
-          const company = companies.find(c => c.companyId === job.companyId);
-          const jobType = jobTypes.find(jt => jt.jobTypeId === parseInt(job.jobType));
-          
+          const company = companies.find((c) => c.companyId === job.companyId);
+          const jobType = jobTypes.find(
+            (jt) => jt.jobTypeId === parseInt(job.jobType)
+          );
+
           return {
             ...job,
-            companyName: company?.companyName || 'Unknown Company',
-            companyLocation: company?.location || '',
-            jobTypeName: jobType?.name || 'Unknown Job Type'
+            companyName: company?.companyName || "Unknown Company",
+            companyLocation: company?.location || "",
+            jobTypeName: jobType?.name || "Unknown Job Type",
           };
         })
-        .filter(job => 
-          job.jobTypeName.toLowerCase().includes(queryLower) ||
-          job.companyName.toLowerCase().includes(queryLower) ||
-          job.location?.toLowerCase().includes(queryLower) ||
-          job.companyLocation.toLowerCase().includes(queryLower)
+        .filter(
+          (job) =>
+            job.jobTypeName.toLowerCase().includes(queryLower) ||
+            job.companyName.toLowerCase().includes(queryLower) ||
+            job.location?.toLowerCase().includes(queryLower) ||
+            job.companyLocation.toLowerCase().includes(queryLower)
         )
         .slice(0, 5);
 
       setSearchResults({
         companies: filteredCompanies,
-        jobs: filteredJobs
+        jobs: filteredJobs,
       });
       setShowResults(true);
-
     } catch (error) {
-      console.error('Search error:', error);
+      console.error("Search error:", error);
       setSearchResults({ companies: [], jobs: [] });
     } finally {
       setIsLoading(false);
@@ -115,9 +124,9 @@ const SearchBar = ({ className = "" }) => {
     setShowResults(false);
     setSearchQuery("");
 
-    if (type === 'company') {
+    if (type === "company") {
       navigate(`/company/${item.companyId}`);
-    } else if (type === 'job') {
+    } else if (type === "job") {
       navigate(`/job/${item.jobId}`);
     }
   };
@@ -127,7 +136,8 @@ const SearchBar = ({ className = "" }) => {
     setShowResults(false);
   };
 
-  const hasResults = searchResults.companies.length > 0 || searchResults.jobs.length > 0;
+  const hasResults =
+    searchResults.companies.length > 0 || searchResults.jobs.length > 0;
 
   return (
     <div className={`relative ${className}`} ref={searchRef}>
@@ -185,24 +195,27 @@ const SearchBar = ({ className = "" }) => {
                   {searchResults.jobs.map((job, index) => (
                     <button
                       key={`job-${job.jobId || index}`}
-                      onClick={() => handleResultClick('job', job)}
+                      onClick={() => handleResultClick("job", job)}
                       className="w-full text-left px-4 py-4 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-200 border-b border-gray-50 last:border-b-0 group"
                     >
                       <div className="flex items-center space-x-4">
                         <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:shadow-xl transition-shadow">
                           <span className="text-white font-bold text-lg">
-                            {(job.jobTypeName || 'J').charAt(0)}
+                            {(job.jobTypeName || "J").charAt(0)}
                           </span>
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="font-semibold text-gray-900 truncate text-lg group-hover:text-purple-700 transition-colors">
-                            {job.jobTypeName || 'Job Position'}
+                            {job.jobTypeName || "Job Position"}
                           </div>
                           <div className="text-sm text-gray-500 truncate">
                             {job.companyName}
                           </div>
-                          <div className="text-xs text-gray-400 truncate mt-1">
-                            📍 {job.location || job.companyLocation || 'Location not specified'}
+                          <div className="text-xs text-gray-400 truncate mt-1 flex items-center">
+                            <FaLocationDot className="w-3 h-3 mr-1 text-blue-400" />
+                            {job.location ||
+                              job.companyLocation ||
+                              "Location not specified"}
                           </div>
                         </div>
                       </div>
@@ -221,7 +234,7 @@ const SearchBar = ({ className = "" }) => {
                   {searchResults.companies.map((company, index) => (
                     <button
                       key={`company-${company.companyId || index}`}
-                      onClick={() => handleResultClick('company', company)}
+                      onClick={() => handleResultClick("company", company)}
                       className="w-full text-left px-4 py-4 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 flex items-center space-x-4 transition-all duration-200 border-b border-gray-50 last:border-b-0 group"
                     >
                       <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:shadow-xl transition-shadow">
@@ -233,16 +246,17 @@ const SearchBar = ({ className = "" }) => {
                           />
                         ) : (
                           <span className="text-white font-bold text-lg">
-                            {(company.companyName || 'C').charAt(0)}
+                            {(company.companyName || "C").charAt(0)}
                           </span>
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="font-semibold text-gray-900 truncate text-lg group-hover:text-blue-700 transition-colors">
-                          {company.companyName || 'Unknown Company'}
+                          {company.companyName || "Unknown Company"}
                         </div>
-                        <div className="text-sm text-gray-500 truncate">
-                          📍 {company.location || 'Location not specified'}
+                        <div className="text-sm text-gray-500 truncate flex items-center">
+                          <FaLocationDot className="w-4 h-4 mr-2 text-blue-500" />
+                          {company.location || "Location not specified"}
                         </div>
                       </div>
                     </button>
