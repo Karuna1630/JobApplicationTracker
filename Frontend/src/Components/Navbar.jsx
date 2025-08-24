@@ -129,6 +129,27 @@ const Navbar = () => {
           </>
         )}
 
+        
+        {isLoggedIn && role === 3 && (
+          <>
+            <Link
+              to="/companyprofile"
+              className="hover:text-blue-600 transition"
+            >
+              Dashboard
+            </Link>
+             <Link to="/companies" className="hover:text-blue-600 transition">
+              Companies
+            </Link>
+            <Link
+              to="/companyinsight"
+              className="hover:text-blue-600 transition"
+            >
+              Company Insights
+            </Link>
+          </>
+        )}
+
         {isLoggedIn && role === 1 && (
           <>
             <Link to="/admin" className="hover:text-blue-600 transition">
