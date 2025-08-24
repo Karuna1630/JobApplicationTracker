@@ -98,7 +98,6 @@ const Education = () => {
         console.log('Editing education with data:', educationData); // Debug log
         
         const educationResponse = await axiosInstance.post('/api/Education', educationData);
-        
         toast.success('Education updated successfully!');
         await fetchEducation();
         setShowAddForm(false);
