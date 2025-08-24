@@ -31,6 +31,7 @@ const CompanyR2 = () => {
     phoneNumber: "",
     password: "",
     confirmPassword: "",
+    userType: 2,
   };
 
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
@@ -45,6 +46,7 @@ const CompanyR2 = () => {
             email: values.email,
             phoneNumber: values.phoneNumber,
             password: values.password,
+             userType: values.userType,
             companyDto: {
               companyName: storedCompanyData.companyName,
               location: storedCompanyData.location,
@@ -52,7 +54,7 @@ const CompanyR2 = () => {
             },
           };
 
-          const response = await axiosInstance.post("/registeruser", payload);
+          const response = await axiosInstance.post("registeruser", payload);
 
           if (response.data?.isSuccess) {
             toast.success("Company and recruiter registered successfully!");

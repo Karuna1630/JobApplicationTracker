@@ -129,7 +129,7 @@ const JobIndividual = () => {
     }
   };
 
-  // ✅ Simplified fetchJob (no fallback to /api/Jobs)
+// ✅ Fixed fetchJob with correct API endpoint
   const fetchJob = async () => {
     try {
       let jobData;
@@ -138,8 +138,9 @@ const JobIndividual = () => {
       if (passedJob && passedJob.jobId.toString() === jobId) {
         jobData = passedJob;
       } else {
+        // ✅ FIXED: Use correct parameter name 'id' instead of 'jobId'
         const response = await axiosInstance.get(
-          `/api/Jobs/getjobsbyid?jobId=${jobId}`
+          `/api/Jobs/getjobsbyid?id=${jobId}`
         );
         jobData = response.data;
       }

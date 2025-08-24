@@ -14,7 +14,7 @@ const EditJobModal = ({ isOpen, onClose, jobInfo, jobId, onUpdateSuccess }) => {
     salaryRangeMax: jobInfo.salaryRangeMax || "",
     empolymentType: jobInfo.empolymentType || jobInfo.employType || "",
     experienceLevel: jobInfo.experienceLevel || jobInfo.experience || "",
-    applicationDeadline: jobInfo.applicationDeadline ? 
+    applicationDeadline: jobInfo.applicationDeadline ?
       new Date(jobInfo.applicationDeadline).toISOString().split('T')[0] : "",
   });
 
@@ -44,7 +44,6 @@ const EditJobModal = ({ isOpen, onClose, jobInfo, jobId, onUpdateSuccess }) => {
     };
   }, [isOpen]);
 
-  // Parse existing skills when component mounts or jobInfo changes
   useEffect(() => {
     if (jobInfo.skills && allSkills.length > 0) {
       try {
@@ -130,8 +129,8 @@ const EditJobModal = ({ isOpen, onClose, jobInfo, jobId, onUpdateSuccess }) => {
     return allSkills
       .filter(
         (skill) =>
-          skill && 
-          skill.skillName && 
+          skill &&
+          skill.skillName &&
           typeof skill.skillName === 'string' &&
           skill.skillName.toLowerCase().includes(input) &&
           !selectedSkillIds.includes(skill.id)
@@ -154,11 +153,11 @@ const EditJobModal = ({ isOpen, onClose, jobInfo, jobId, onUpdateSuccess }) => {
     }
 
     const isAlreadyAdded = selectedSkills.some(skill => skill.id === skillToAdd.id);
-    
+
     if (!isAlreadyAdded) {
       setSelectedSkills(prev => [...prev, skillToAdd]);
     }
-    
+
     setSkillInput("");
     setShowSkillSuggestions(true);
     skillInputRef.current?.focus();
@@ -169,7 +168,7 @@ const EditJobModal = ({ isOpen, onClose, jobInfo, jobId, onUpdateSuccess }) => {
       console.error('Invalid skill object to remove:', skillToRemove);
       return;
     }
-    
+
     setSelectedSkills(prev => prev.filter(skill => skill.id !== skillToRemove.id));
     setShowSkillSuggestions(true);
   };
@@ -214,29 +213,27 @@ const EditJobModal = ({ isOpen, onClose, jobInfo, jobId, onUpdateSuccess }) => {
       const skillIds = selectedSkills
         .filter(skill => skill && skill.id)
         .map(skill => skill.id);
-      const skillsJsonString = skillIds.length > 0 ? JSON.stringify(skillIds) : null;
+      const skillsJsonString = skillIds.length > 0 ? JSON.stringify(skillIds) : "[]";
 
       const payload = {
         JobId: jobId,
         PostedByUserId: userId,
         CompanyId: jobInfo.companyId || parseInt(localStorage.getItem('currentCompanyId')),
-        JobType: formData.jobTypeId || jobInfo.jobType,
-        Description: formData.description || jobInfo.description,
-        Requirements: formData.requirements || jobInfo.requirements,
-        Location: formData.location || jobInfo.location,
-        EmpolymentType: formData.empolymentType || jobInfo.empolymentType,
-        SalaryRangeMin: formData.salaryRangeMin ? parseFloat(formData.salaryRangeMin) : (jobInfo.salaryRangeMin || null),
-        SalaryRangeMax: formData.salaryRangeMax ? parseFloat(formData.salaryRangeMax) : (jobInfo.salaryRangeMax || null),
-        ExperienceLevel: formData.experienceLevel || jobInfo.experienceLevel,
-        ApplicationDeadline: formData.applicationDeadline ? 
-          new Date(formData.applicationDeadline).toISOString() : (jobInfo.applicationDeadline || null),
-        Skills: skillsJsonString || jobInfo.skills,
-        // Keep existing values that shouldn't be changed
+        JobType: formData.jobTypeId || jobInfo.jobType || "string",
+        Description: formData.description || jobInfo.description || "string",
+        Requirements: formData.requirements || jobInfo.requirements || "string",
+        Location: formData.location || jobInfo.location || "string",
+        EmpolymentType: formData.empolymentType || jobInfo.empolymentType || "string",
+        SalaryRangeMin: formData.salaryRangeMin ? parseFloat(formData.salaryRangeMin) : (jobInfo.salaryRangeMin || 0),
+        SalaryRangeMax: formData.salaryRangeMax ? parseFloat(formData.salaryRangeMax) : (jobInfo.salaryRangeMax || 0),
+        ExperienceLevel: formData.experienceLevel || jobInfo.experienceLevel || "string",
+        ApplicationDeadline: formData.applicationDeadline ?
+          new Date(formData.applicationDeadline).toISOString() : (jobInfo.applicationDeadline || new Date().toISOString()),
+        Skills: skillsJsonString,
         PostedAt: jobInfo.postedAt || jobInfo.createdAt || new Date().toISOString(),
         Status: jobInfo.status || 'A',
         Views: jobInfo.views || 0,
-        Responsibilities: jobInfo.responsibilities || null,
-        Benefits: jobInfo.benefits || null
+        IsPublished: jobInfo.isPublished !== undefined ? jobInfo.isPublished : true
       };
 
       console.log("Submitting job update payload:", payload);
@@ -253,16 +250,16 @@ const EditJobModal = ({ isOpen, onClose, jobInfo, jobId, onUpdateSuccess }) => {
       }
     } catch (error) {
       console.error("Error updating job:", error);
-      
+
       if (error.response) {
         console.error("Error data:", error.response.data);
-        
+
         if (error.response.data.errors) {
           Object.entries(error.response.data.errors).forEach(([field, messages]) => {
             console.error(`Field: ${field}, Errors: ${messages.join(", ")}`);
           });
         }
-        
+
         toast.error(error.response.data.message || "Failed to update job");
       } else {
         console.error("Error:", error.message);
@@ -418,7 +415,7 @@ const EditJobModal = ({ isOpen, onClose, jobInfo, jobId, onUpdateSuccess }) => {
             <label className="block text-sm font-medium mb-1">
               Required Skills
             </label>
-            
+
             {/* Display Selected Skills */}
             {selectedSkills.length > 0 && (
               <div className="mb-3">
@@ -427,7 +424,7 @@ const EditJobModal = ({ isOpen, onClose, jobInfo, jobId, onUpdateSuccess }) => {
                     if (!skill || !skill.id || !skill.skillName) {
                       return null;
                     }
-                    
+
                     return (
                       <div
                         key={`selected-skill-${skill.id}`}
@@ -469,7 +466,7 @@ const EditJobModal = ({ isOpen, onClose, jobInfo, jobId, onUpdateSuccess }) => {
                     if (!skill || !skill.id || !skill.skillName) {
                       return null;
                     }
-                    
+
                     return (
                       <button
                         key={`suggestion-${skill.id}`}
@@ -481,7 +478,7 @@ const EditJobModal = ({ isOpen, onClose, jobInfo, jobId, onUpdateSuccess }) => {
                       </button>
                     );
                   })}
-                  
+
                   {filterSkillSuggestions().length === 0 && skillInput.trim() && (
                     <div className="px-4 py-2 text-gray-500 text-center text-sm">
                       No skills found matching "{skillInput}"
@@ -490,7 +487,7 @@ const EditJobModal = ({ isOpen, onClose, jobInfo, jobId, onUpdateSuccess }) => {
                 </div>
               )}
             </div>
-            
+
             {loadingSkills && (
               <p className="text-gray-500 text-sm mt-1">Loading skills...</p>
             )}

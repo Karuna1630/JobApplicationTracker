@@ -2,7 +2,7 @@ import * as Yup from 'yup';
 
 const PasswordRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})");
 
-export const RegisterSchema = Yup.object({
+export const StaffRegisterSchema = Yup.object({
     firstName: Yup.string().min(5).required("please enter your first name"),
     lastName: Yup.string().min(3).required("please enter your last name"),
     email: Yup.string().email("please enter valid email").required("please enter your name"),
@@ -10,5 +10,6 @@ export const RegisterSchema = Yup.object({
     password: Yup.string().matches(PasswordRegex,"please enter valid password ").required("please enter your password"),
     confirmPassword: Yup.string().oneOf([Yup.ref("password")], "password do not match").required("please enter confrim password"),
     location: Yup.string().min(5).required("please enter your location"),
-    userType: Yup.number().default(4),
+    userType: Yup.number().default(3), // Staff = 3
+    companyId: Yup.number().required("Company ID is required for staff registration"),
 })

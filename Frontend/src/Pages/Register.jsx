@@ -29,6 +29,7 @@ const Register = () => {
     password: "",
     confirmPassword: "",
     location: "",
+    userType: 4, // Default to normal user
   };
 
   const handleSubmit = async (values, actions) => {
@@ -105,6 +106,13 @@ const Register = () => {
             >
               {({ errors, touched }) => (
                 <Form className="space-y-4">
+                  {/* Hidden UserType field */}
+                  <Field
+                    type="hidden"
+                    name="userType"
+                    value={4}
+                  />
+
                   {/* First Name */}
                   <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                     <FaUser className="text-gray-500 mr-3" />
