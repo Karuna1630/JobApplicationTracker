@@ -6,7 +6,7 @@ import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import PostJob from "./PostJob";
 import EditCompanyModal from "../Components/EditCompanyModal";
-import AddStaffModal from "./AddStaffModal"; // Import AddStaffModal
+import AddStaffModal from "./AddStaffModal";
 import { FaEdit, FaCamera, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import {
@@ -21,7 +21,7 @@ import {
   FaEye,
 } from "react-icons/fa";
 
-const InfoCard = ({ icon, label, value, color = "gray" }) => (
+const InfoCard = ({ icon, label, value, color = "gray", isLoading = false }) => (
   <div className="flex items-center bg-white shadow-md rounded-xl p-5 w-full sm:w-[260px] gap-4 border border-gray-100 hover:scale-[1.02] transition duration-300 ease-in-out">
     <div
       className={`text-3xl p-4 rounded-full bg-${color}-100 text-${color}-700 shadow-inner`}
@@ -30,7 +30,13 @@ const InfoCard = ({ icon, label, value, color = "gray" }) => (
     </div>
     <div>
       <p className="text-sm text-gray-500">{label}</p>
-      <p className="text-2xl font-bold text-gray-700">{value}</p>
+      <p className="text-2xl font-bold text-gray-700">
+        {isLoading ? (
+          <span className="inline-block w-6 h-6 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></span>
+        ) : (
+          value
+        )}
+      </p>
     </div>
   </div>
 );
@@ -40,10 +46,15 @@ const CompanyProfile = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [companyId, setCompanyId] = useState(null);
   const [showPostJob, setShowPostJob] = useState(false);
-  const [showAddStaff, setShowAddStaff] = useState(false); // Add state for staff modal
+  const [showAddStaff, setShowAddStaff] = useState(false);
   const [logoError, setLogoError] = useState(false);
   const [jobTypes, setJobTypes] = useState([]);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  
+  // Add state for company users
+  const [companyUsersCount, setCompanyUsersCount] = useState(0);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  
   const [companyInfo, setCompanyInfo] = useState({
     companyName: "",
     email: "",
@@ -59,6 +70,34 @@ const CompanyProfile = () => {
   const [totalJobsCount, setTotalJobsCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
+
+  // Function to fetch company users
+  const fetchCompanyUsers = async (companyId) => {
+    if (!companyId) return;
+    
+    setIsLoadingUsers(true);
+    try {
+      const response = await axiosInstance.get(`/getallusers?companyId=${companyId}`);
+      
+      if (response.data && Array.isArray(response.data)) {
+        setCompanyUsersCount(response.data.length);
+      } else if (response.data && typeof response.data === 'object') {
+        // If the API returns an object with a users array or count property
+        const count = response.data.users ? response.data.users.length : 
+                     response.data.count || response.data.totalCount || 0;
+        setCompanyUsersCount(count);
+      } else {
+        setCompanyUsersCount(0);
+      }
+    } catch (error) {
+      console.error("Error fetching company users:", error);
+      setCompanyUsersCount(0);
+      // Optionally show a toast notification
+      // toast.error("Failed to fetch company users count");
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
 
   // Add the same function from Jobs component
   const getJobTypeName = (jobTypeId) => {
@@ -218,6 +257,9 @@ const CompanyProfile = () => {
           setCompanyId(compId);
           localStorage.setItem("currentCompanyId", compId);
 
+          // Fetch company users after we have the company ID
+          await fetchCompanyUsers(compId);
+
           // Fetch all jobs for the company to get the total count and display data
           const jobsResponse = await axiosInstance.get(
             `/api/Jobs/getjobsbycompanyid?companyId=${compId}`
@@ -269,7 +311,8 @@ const CompanyProfile = () => {
   const handleStaffAdded = () => {
     toast.success("Staff member added successfully!");
     setShowAddStaff(false);
-    // Optionally reload data or update UI
+    // Refresh company users count after adding staff
+    fetchCompanyUsers(companyId);
   };
 
   const handleUpdateSuccess = (updatedData) => {
@@ -528,9 +571,10 @@ const CompanyProfile = () => {
             <div className="flex flex-wrap justify-center gap-6">
               <InfoCard
                 icon={<FaUserTie />}
-                label="Recruiters"
-                value="18"
+                label="Users"
+                value={companyUsersCount}
                 color="purple"
+                isLoading={isLoadingUsers}
               />
               <InfoCard
                 icon={<FaGlobe />}
