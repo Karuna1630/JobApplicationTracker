@@ -9,6 +9,17 @@ import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 
 const JobApplicationForm = () => {
+  // Profile-related state
+  const [userProfile, setUserProfile] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    location: "",
+    linkedinProfile: "",
+  });
+  const [loadingProfile, setLoadingProfile] = useState(true);
+
   // Skills-related state
   const [selectedSkills, setSelectedSkills] = useState([]);
   const [allSkills, setAllSkills] = useState([]);
@@ -32,7 +43,75 @@ const JobApplicationForm = () => {
   const [isSubmittingEducation, setIsSubmittingEducation] = useState(false);
   const [loadingEducation, setLoadingEducation] = useState(true);
 
+  // Form data state
+  const [formData, setFormData] = useState({
+    experience: "",
+    currentPosition: "",
+    expectedSalary: "",
+    startDate: "",
+    coverLetter: ""
+  });
+
   const skillInputRef = useRef(null);
+
+  // Fetch user profile
+  const fetchUserProfile = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const userId = getUserIdFromToken(token);
+      
+      if (!userId || userId === 0) {
+        toast.error("User ID missing or invalid. Please log in again.");
+        return;
+      }
+
+      const response = await axiosInstance.get(`/profile/${userId}`);
+      const profileData = response.data;
+
+      if (profileData) {
+        const profile = {
+          firstName: profileData.firstName || "",
+          lastName: profileData.lastName || "",
+          email: profileData.email || "",
+          phone: profileData.phoneNumber || "",
+          location: profileData.location || "",
+          linkedinProfile: profileData.linkedinProfile || "",
+        };
+        
+        setUserProfile(profile);
+      } else {
+        toast.error("User profile not found.");
+      }
+    } catch (error) {
+      console.error("Profile Fetch Error:", error);
+      toast.error("Failed to fetch user profile.");
+    } finally {
+      setLoadingProfile(false);
+    }
+  };
+
+  // Fetch user's skills
+  const fetchUserSkills = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const userId = getUserIdFromToken(token);
+      
+      if (!userId) return;
+
+      const response = await axiosInstance.get(`/api/skills/user/${userId}`);
+      if (response.data && Array.isArray(response.data)) {
+        const mappedSkills = response.data.map(userSkill => ({
+          id: userSkill.skill?.skillId || userSkill.skillId,
+          skillName: userSkill.skill?.skill || userSkill.skillName
+        })).filter(skill => skill.id && skill.skillName);
+        
+        setSelectedSkills(mappedSkills);
+      }
+    } catch (error) {
+      console.error('Error fetching user skills:', error);
+      // Don't show error toast for skills as it's not critical
+    }
+  };
 
   // Fetch all available skills
   const fetchAllSkills = async () => {
@@ -79,9 +158,26 @@ const JobApplicationForm = () => {
   };
 
   useEffect(() => {
+    fetchUserProfile();
     fetchAllSkills();
+    fetchUserSkills();
     fetchEducation();
   }, []);
+
+  // Handle form input changes
+  const handleFormChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleProfileChange = (e) => {
+    setUserProfile({
+      ...userProfile,
+      [e.target.name]: e.target.value
+    });
+  };
 
   // Skills functionality
   const filterSkillSuggestions = () => {
@@ -264,6 +360,66 @@ const JobApplicationForm = () => {
     }
   };
 
+  // Handle form submission
+  const handleSubmitApplication = async (e) => {
+    e.preventDefault();
+    
+    const token = localStorage.getItem("token");
+    const userId = getUserIdFromToken(token);
+    
+    if (!userId) {
+      toast.error("Please log in to submit application");
+      return;
+    }
+
+    // Basic validation
+    if (!userProfile.firstName || !userProfile.lastName || !userProfile.email) {
+      toast.error("Please fill in all required personal information");
+      return;
+    }
+
+    if (!formData.experience) {
+      toast.error("Please select your experience level");
+      return;
+    }
+
+    try {
+      const applicationData = {
+        userId: userId,
+        personalInfo: userProfile,
+        experience: formData.experience,
+        currentPosition: formData.currentPosition,
+        skills: selectedSkills,
+        education: educationList,
+        expectedSalary: formData.expectedSalary,
+        startDate: formData.startDate,
+        coverLetter: formData.coverLetter
+      };
+
+      // Replace with your actual job application endpoint
+      // await axiosInstance.post('/api/job-applications/submit', applicationData);
+      
+      console.log('Application Data:', applicationData);
+      toast.success("Application submitted successfully!");
+      
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      toast.error('Failed to submit application');
+    }
+  };
+
+  if (loadingProfile) {
+    return (
+      <>
+        <Navbar />
+        <div className="flex justify-center items-center min-h-screen text-lg">
+          Loading application form...
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
   return (
     <>
       <Navbar />
@@ -274,12 +430,13 @@ const JobApplicationForm = () => {
             <div className="flex justify-between items-center">
               <div>
                 <h1 className="text-3xl font-bold mb-2">Apply for Position</h1>
+                <p className="text-blue-100">Complete your application using your profile information</p>
               </div>
             </div>
           </div>
 
           {/* Form */}
-          <div className="p-8">
+          <form onSubmit={handleSubmitApplication} className="p-8">
             {/* Personal Information */}
             <div className="mb-10">
               <div className="flex items-center mb-6">
@@ -296,8 +453,12 @@ const JobApplicationForm = () => {
                   </label>
                   <input
                     type="text"
+                    name="firstName"
+                    value={userProfile.firstName}
+                    onChange={handleProfileChange}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
                     placeholder="Enter your first name"
+                    required
                   />
                 </div>
                 
@@ -307,8 +468,12 @@ const JobApplicationForm = () => {
                   </label>
                   <input
                     type="text"
+                    name="lastName"
+                    value={userProfile.lastName}
+                    onChange={handleProfileChange}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
                     placeholder="Enter your last name"
+                    required
                   />
                 </div>
               </div>
@@ -332,8 +497,12 @@ const JobApplicationForm = () => {
                     <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                     <input
                       type="email"
+                      name="email"
+                      value={userProfile.email}
+                      onChange={handleProfileChange}
                       className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
                       placeholder="your.email@example.com"
+                      required
                     />
                   </div>
                 </div>
@@ -346,8 +515,12 @@ const JobApplicationForm = () => {
                     <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                     <input
                       type="tel"
+                      name="phone"
+                      value={userProfile.phone}
+                      onChange={handleProfileChange}
                       className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
                       placeholder="+1 (555) 123-4567"
+                      required
                     />
                   </div>
                 </div>
@@ -360,8 +533,12 @@ const JobApplicationForm = () => {
                     <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                     <input
                       type="text"
+                      name="location"
+                      value={userProfile.location}
+                      onChange={handleProfileChange}
                       className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
                       placeholder="City, State, Country"
+                      required
                     />
                   </div>
                 </div>
@@ -372,6 +549,9 @@ const JobApplicationForm = () => {
                   </label>
                   <input
                     type="url"
+                    name="linkedinProfile"
+                    value={userProfile.linkedinProfile}
+                    onChange={handleProfileChange}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
                     placeholder="https://linkedin.com/in/yourprofile"
                   />
@@ -390,7 +570,7 @@ const JobApplicationForm = () => {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setShowAddEducationForm(true)}
+                  onClick={handleAddEducation}
                   className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-2 rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                 >
                   <IoAdd size={20} />
@@ -461,7 +641,7 @@ const JobApplicationForm = () => {
                   <p className="text-gray-600 mb-4">No education added yet</p>
                   <button
                     type="button"
-                    onClick={() => setShowAddEducationForm(true)}
+                    onClick={handleAddEducation}
                     className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-2 rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium"
                   >
                     Add Your First Education
@@ -484,7 +664,13 @@ const JobApplicationForm = () => {
                   <label className="block text-sm font-semibold text-gray-700">
                     Total Experience *
                   </label>
-                  <select className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 bg-white">
+                  <select 
+                    name="experience"
+                    value={formData.experience}
+                    onChange={handleFormChange}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 bg-white"
+                    required
+                  >
                     <option value="">Select experience level</option>
                     <option value="0-1">0-1 years</option>
                     <option value="1-3">1-3 years</option>
@@ -500,6 +686,9 @@ const JobApplicationForm = () => {
                   </label>
                   <input
                     type="text"
+                    name="currentPosition"
+                    value={formData.currentPosition}
+                    onChange={handleFormChange}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
                     placeholder="Software Developer"
                   />
@@ -608,7 +797,7 @@ const JobApplicationForm = () => {
             <div className="mb-10">
               <div className="flex items-center mb-6">
                 <div className="bg-orange-100 p-3 rounded-full mr-4">
-                  <Briefcase className="text-orange-600" size={24} />
+                  <DollarSign className="text-orange-600" size={24} />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800">Job Preferences</h2>
               </div>
@@ -616,12 +805,15 @@ const JobApplicationForm = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700">
-                    Expected Salary *
+                    Expected Salary
                   </label>
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                     <input
                       type="text"
+                      name="expectedSalary"
+                      value={formData.expectedSalary}
+                      onChange={handleFormChange}
                       className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
                       placeholder="80,000 - 100,000"
                     />
@@ -630,12 +822,15 @@ const JobApplicationForm = () => {
 
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700">
-                    Available Start Date *
+                    Available Start Date
                   </label>
                   <div className="relative">
                     <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                     <input
                       type="date"
+                      name="startDate"
+                      value={formData.startDate}
+                      onChange={handleFormChange}
                       className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
                     />
                   </div>
@@ -648,7 +843,7 @@ const JobApplicationForm = () => {
               <div className="flex items-center mb-4">
                 <Upload className="text-blue-600 mr-3" size={20} />
                 <label className="text-sm font-semibold text-gray-700">
-                  Resume/CV *
+                  Resume/CV
                 </label>
               </div>
               <div className="border-3 border-dashed border-gray-300 rounded-2xl p-8 text-center hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 cursor-pointer group">
@@ -660,9 +855,18 @@ const JobApplicationForm = () => {
                     <p className="text-lg font-semibold text-gray-700">Upload your resume</p>
                     <p className="text-sm text-gray-500 mt-1">PDF, DOC, or DOCX (max 5MB)</p>
                   </div>
-                  <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200">
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    className="hidden"
+                    id="resume-upload"
+                  />
+                  <label
+                    htmlFor="resume-upload"
+                    className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 cursor-pointer"
+                  >
                     Choose File
-                  </button>
+                  </label>
                 </div>
               </div>
             </div>
@@ -674,21 +878,30 @@ const JobApplicationForm = () => {
               </label>
               <textarea
                 rows="6"
+                name="coverLetter"
+                value={formData.coverLetter}
+                onChange={handleFormChange}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 resize-none"
                 placeholder="Write a brief cover letter explaining why you're interested in this position and what makes you a great fit..."
               />
             </div>
 
-            {/* Submit Buttons - Moved to the right */}
+            {/* Submit Buttons */}
             <div className="flex justify-end gap-4">
-              <button className="px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 font-semibold text-lg">
+              <button 
+                type="button"
+                className="px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 font-semibold text-lg"
+              >
                 Save as Draft
               </button>
-              <button className="px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+              <button 
+                type="submit"
+                className="px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
                 Submit Application
               </button>
             </div>
-          </div>
+          </form>
         </div>
 
         {/* Education Add/Edit Modal */}
@@ -701,6 +914,7 @@ const JobApplicationForm = () => {
                     {editingEducation ? 'Edit Education' : 'Add Education'}
                   </h3>
                   <button
+                    type="button"
                     onClick={() => setShowAddEducationForm(false)}
                     className="text-gray-500 hover:text-gray-700 p-2 hover:bg-gray-100 rounded-full transition-colors"
                   >
