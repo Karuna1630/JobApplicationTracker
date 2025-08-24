@@ -13,7 +13,7 @@ import { FaLocationDot } from "react-icons/fa6";
 import axiosInstance from "../Utils/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
-const Register = () => {
+const AddStaffModal = () => {
   const navigate = useNavigate();
   const initialValues = {
     // userId: "0",
@@ -277,6 +277,6 @@ const Register = () => {
   )
 };
 
-export default Register;
+export default AddStaffModal;
 
 

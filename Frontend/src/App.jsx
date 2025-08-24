@@ -21,7 +21,6 @@ import CompanyProfile from './Pages/CompanyProfile.jsx'
 import Skill from './Components/Skill'
 import CandidateScreening from './Pages/CandidateScreening.jsx'
 import PostJob from './Pages/PostJob.jsx'
-import CURegister from './Pages/CURegister'
 import Admin from './Pages/Admin.jsx'
 import ViewApplications from './Pages/ViewApplications'
 import CompanyInsight from './Pages/CompanyInsight.jsx'
@@ -31,6 +30,7 @@ import Experience from './Components/Experience.jsx'
 import CompanyIndividual from './Components/CompanyIndividual.jsx'
 import JobIndividual from './Components/JobIndividual.jsx'
 import JobApplicationForm from './Pages/JobApplicationForm.jsx'
+import AddStaffModal from './Pages/AddStaffModal.jsx'
 
 function App() {
   return (
@@ -57,13 +57,12 @@ function App() {
           <Route path='/editProfile' element={<EditProfile/>}/>
           <Route path='/companyprofile' element={<CompanyProfile/>}/>
           <Route path='/postjob' element={<PostJob/>}/>
-          <Route path="/registerstaff" element={<CURegister />} />
           <Route path='/admin' element={<Admin/>}/>
           <Route path='/skill' element={<Skill/>}/>
           <Route path='/candidatescreening' element={<CandidateScreening/>}/>
           <Route path='/viewapplications' element={<ViewApplications/>}/>
           <Route path='/companyinsight' element={<CompanyInsight/>}/>
-          <Route path='/curegister' element={<CURegister/>}/>
+          <Route path='/curegister' element={<AddStaffModal/>}/>
           <Route path='/jobTypeComponents' element={<JobTypeComponents/>}/>
           <Route path='/jobs' element={<Jobs/>}/>
           <Route path='/experience' element= {<Experience/>}/>
