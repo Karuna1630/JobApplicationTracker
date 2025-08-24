@@ -304,7 +304,8 @@ const JobIndividual = () => {
             <div className="flex flex-row justify-between items-center mt-6">
               <h1 className="text-3xl font-bold mb-2">{jobTypeName}</h1>
 
-              <button className="bg-white hover:bg-gray-100 text-blue-700 px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg">
+              <button onClick={() => navigate("/jobApplicationForm")} 
+                className="bg-white hover:bg-gray-100 text-blue-700 px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg">
                 Apply Now
               </button>
             </div>

@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
-import { MapPin, Clock, Eye, Calendar, DollarSign, Briefcase, Users, Building } from 'lucide-react';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { Eye,  Briefcase, } from 'lucide-react';
 import axiosInstance from '../Utils/axiosInstance';
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 
 const CompanyIndividual = () => {
+  const navigate = useNavigate();
   const { companyId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   // Get initial tab from URL params, default to 'about'
   const initialTab = searchParams.get('tab') || 'about';
-  
+
   const [company, setCompany] = useState(null);
   const [jobsData, setJobsData] = useState([]);
   const [jobTypes, setJobTypes] = useState([]);
@@ -29,11 +30,11 @@ const CompanyIndividual = () => {
   // Get skill names from skills string
   const getSkillNames = (skillsString) => {
     if (!skillsString || !allSkills.length) return [];
-    
+
     try {
       const skillIds = JSON.parse(skillsString);
       if (!Array.isArray(skillIds)) return [];
-      
+
       return skillIds
         .map(skillId => {
           const skill = allSkills.find(s => s.id === skillId);
@@ -114,7 +115,7 @@ const CompanyIndividual = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (!companyId) return;
-      
+
       try {
         setLoading(true);
         // Fetch all data in parallel
@@ -156,7 +157,7 @@ const CompanyIndividual = () => {
 
   return (
     <>
-      <Navbar/>
+      <Navbar />
       <div className="min-h-screen bg-gradient-to-br from-blue-100 to-white py-10">
         <div className="max-w-screen-2xl mx-auto">
           {/* Banner */}
@@ -176,23 +177,21 @@ const CompanyIndividual = () => {
 
           {/* Tabs */}
           <div className="flex border-b px-10 bg-white">
-            <button 
+            <button
               onClick={() => handleTabChange('about')}
-              className={`py-3 px-6 font-semibold ${
-                activeTab === 'about' 
-                  ? 'text-blue-600 border-b-2 border-blue-600' 
+              className={`py-3 px-6 font-semibold ${activeTab === 'about'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
                   : 'text-gray-600 hover:text-blue-600'
-              }`}
+                }`}
             >
               About
             </button>
-            <button 
+            <button
               onClick={() => handleTabChange('jobs')}
-              className={`py-3 px-6 font-semibold ${
-                activeTab === 'jobs' 
-                  ? 'text-blue-600 border-b-2 border-blue-600' 
+              className={`py-3 px-6 font-semibold ${activeTab === 'jobs'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
                   : 'text-gray-600 hover:text-blue-600'
-              }`}
+                }`}
             >
               Jobs ({jobsData.length})
             </button>
@@ -253,7 +252,7 @@ const CompanyIndividual = () => {
                 {/* Jobs Section */}
                 <div className="lg:col-span-3 bg-white rounded-lg shadow p-6">
                   <h2 className="text-xl font-semibold mb-3">Available Jobs ({jobsData.length})</h2>
-                  
+
                   {jobsData.length === 0 ? (
                     <div className="text-center py-12">
                       <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
@@ -278,11 +277,10 @@ const CompanyIndividual = () => {
                               </h2>
                               <div className="flex items-center gap-2 ml-4">
                                 <span
-                                  className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                    isActive
+                                  className={`px-3 py-1 rounded-full text-xs font-medium ${isActive
                                       ? "bg-green-100 text-green-700"
                                       : "bg-red-100 text-red-700"
-                                  }`}
+                                    }`}
                                 >
                                   {isActive ? "Active" : "Inactive"}
                                 </span>
@@ -294,7 +292,7 @@ const CompanyIndividual = () => {
                             </div>
 
                             <p className="text-blue-600 font-medium mb-4">{company?.companyName}</p>
-                            
+
                             {/* Description */}
                             <div className="mb-4">
                               <h3 className="font-semibold text-gray-700 mb-2">Description:</h3>
@@ -357,7 +355,7 @@ const CompanyIndividual = () => {
                               <div>
                                 <span className="font-semibold text-gray-700">Application Deadline:</span>
                                 <p className="text-gray-600 mt-1">
-                                  {formatDate(job.applicationDeadline )}
+                                  {formatDate(job.applicationDeadline)}
                                 </p>
                               </div>
                               <div>
@@ -380,7 +378,8 @@ const CompanyIndividual = () => {
 
                             {/* Action Buttons */}
                             <div className="mt-4 flex space-x-3">
-                              <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                              <button onClick={() => navigate("/jobApplicationForm")}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                                 Apply Now
                               </button>
                             </div>
@@ -431,8 +430,8 @@ const CompanyIndividual = () => {
                   <div>
                     <h3 className="font-medium text-gray-800">📄 About Company</h3>
                     <p className="text-gray-600 text-sm leading-relaxed">
-                      {company.description && company.description.length > 100 
-                        ? `${company.description.substring(0, 100)}...` 
+                      {company.description && company.description.length > 100
+                        ? `${company.description.substring(0, 100)}...`
                         : company.description || "No description available."
                       }
                     </p>
@@ -443,7 +442,7 @@ const CompanyIndividual = () => {
           </div>
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </>
   );
 };

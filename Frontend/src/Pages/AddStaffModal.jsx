@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import React, { useEffect } from "react";
 import { FaUser, FaTimes } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
@@ -17,14 +18,11 @@ const AddStaffModal = ({ isOpen, onClose, companyId, onStaffAdded }) => {
     } else {
       document.body.style.overflow = 'unset';
     }
-
     return () => {
       document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
-
   if (!isOpen) return null;
-
   const initialValues = {
     firstName: "",
     lastName: "",
