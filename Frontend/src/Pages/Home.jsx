@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaLocationDot, FaDollarSign, FaCalendarDays, FaClock } from "react-icons/fa6";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import axiosInstance from "../Utils/axiosInstance";
@@ -27,10 +28,11 @@ const CompanyCard = ({ company, onClick }) => {
           </div>
         )}
       </div>
-      <h3 className="font-semibold text-lg text-blue-700 line-clamp-1">
+      <h3 className="font-bold text-lg text-blue-800 line-clamp-1">
         {company.companyName}
       </h3>
-      <p className="text-sm text-gray-600 line-clamp-1">
+      <p className="text-sm text-gray-600 flex items-center gap-2 line-clamp-1">
+          <FaLocationDot className="w-3 h-3 text-blue-500" />
         {company.location || "Location not specified"}
       </p>
       {company.websiteUrl && (
@@ -244,12 +246,14 @@ const Home = () => {
                             />
                           )}
                           <div>
-                            <p className="text-sm font-medium text-blue-600">
+                            <p className="text-xl font-bold text-blue-800">
                               {company.companyName}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <div>
+                            <p className="text-sm text-gray-500">
                               {company.location}
                             </p>
+                            </div>
                           </div>
                         </div>
                       )}
@@ -274,7 +278,7 @@ const Home = () => {
                         {/* Location */}
                         {job.location && (
                           <div className="flex items-center text-sm text-gray-600">
-                            <span className="w-4 h-4 mr-2">📍</span>
+                            <FaLocationDot className="w-4 h-4 mr-2 text-blue-500" />
                             {job.location}
                           </div>
                         )}
@@ -282,20 +286,20 @@ const Home = () => {
                         {/* Salary */}
                         {(job.salaryRangeMin && job.salaryRangeMax) && (
                           <div className="flex items-center text-sm text-gray-600">
-                            <span className="w-4 h-4 mr-2">💰</span>
+                            <FaDollarSign className="w-4 h-4 mr-2 text-green-500" />
                             ${job.salaryRangeMin.toLocaleString()} - ${job.salaryRangeMax.toLocaleString()}
                           </div>
                         )}
 
                         {/* Posted Date */}
                         <div className="flex items-center text-sm text-gray-600">
-                          <span className="w-4 h-4 mr-2">📅</span>
+                          <FaCalendarDays className="w-4 h-4 mr-2 text-purple-500" />
                           Posted: {formatDate(job.postedAt)}
                         </div>
 
                         {/* Application Deadline */}
                         <div className="flex items-center text-sm text-red-600">
-                          <span className="w-4 h-4 mr-2">⏰</span>
+                          <FaClock className="w-4 h-4 mr-2 text-red-500" />
                           Deadline: {formatDate(job.applicationDeadline)}
                         </div>
                       </div>

@@ -130,9 +130,9 @@ const Companies = () => {
                     {/* Company Header */}
                     <div className="flex items-center gap-4 mb-4">
                       <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300">
-                        {company.companyLogo || company.logo ? (
+                        {company.companyLogo ? (
                           <img
-                            src={company.companyLogo || company.logo}
+                            src={company.companyLogo }
                             alt={`${company.companyName} logo`}
                             className="w-12 h-12 object-contain rounded"
                             onError={(e) => {
@@ -152,7 +152,7 @@ const Companies = () => {
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-semibold text-gray-800 truncate group-hover:text-blue-600 transition-colors duration-300">
+                        <h3 className="text-lg font-bold text-gray-800 truncate group-hover:text-blue-800 transition-colors duration-300">
                           {company.companyName}
                         </h3>
                         <p className="text-sm text-gray-600 flex items-center gap-1">
@@ -170,7 +170,7 @@ const Companies = () => {
                       </h4>
                       {companyJobs.length > 0 ? (
                         <div className="space-y-2">
-                          {companyJobs.slice(0, 3).map((job, index) => (
+                          {companyJobs.slice(0, 3).map((job) => (
                             <div
                               key={job.jobId}
                               onClick={(e) => {
