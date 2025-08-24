@@ -32,7 +32,7 @@ const JobApplicationForm = () => {
   const [showAddEducationForm, setShowAddEducationForm] = useState(false);
   const [editingEducation, setEditingEducation] = useState(null);
   const [educationFormData, setEducationFormData] = useState({
-    institution: "",
+    school: "",
     degree: "",
     fieldOfStudy: "",
     startDate: "",
@@ -59,7 +59,7 @@ const JobApplicationForm = () => {
     try {
       const token = localStorage.getItem("token");
       const userId = getUserIdFromToken(token);
-      
+
       if (!userId || userId === 0) {
         toast.error("User ID missing or invalid. Please log in again.");
         return;
@@ -77,7 +77,7 @@ const JobApplicationForm = () => {
           location: profileData.location || "",
           linkedinProfile: profileData.linkedinProfile || "",
         };
-        
+
         setUserProfile(profile);
       } else {
         toast.error("User profile not found.");
@@ -95,7 +95,7 @@ const JobApplicationForm = () => {
     try {
       const token = localStorage.getItem("token");
       const userId = getUserIdFromToken(token);
-      
+
       if (!userId) return;
 
       const response = await axiosInstance.get(`/api/skills/user/${userId}`);
@@ -104,12 +104,11 @@ const JobApplicationForm = () => {
           id: userSkill.skill?.skillId || userSkill.skillId,
           skillName: userSkill.skill?.skill || userSkill.skillName
         })).filter(skill => skill.id && skill.skillName);
-        
+
         setSelectedSkills(mappedSkills);
       }
     } catch (error) {
       console.error('Error fetching user skills:', error);
-      // Don't show error toast for skills as it's not critical
     }
   };
 
@@ -137,7 +136,7 @@ const JobApplicationForm = () => {
     try {
       const token = localStorage.getItem("token");
       const userId = getUserIdFromToken(token);
-      
+
       if (!userId) {
         toast.error("Please log in to view education");
         return;
@@ -193,8 +192,8 @@ const JobApplicationForm = () => {
     return allSkills
       .filter(
         (skill) =>
-          skill && 
-          skill.skillName && 
+          skill &&
+          skill.skillName &&
           typeof skill.skillName === 'string' &&
           skill.skillName.toLowerCase().includes(input) &&
           !selectedSkillIds.includes(skill.id)
@@ -217,11 +216,11 @@ const JobApplicationForm = () => {
     }
 
     const isAlreadyAdded = selectedSkills.some(skill => skill.id === skillToAdd.id);
-    
+
     if (!isAlreadyAdded) {
       setSelectedSkills(prev => [...prev, skillToAdd]);
     }
-    
+
     setSkillInput("");
     setShowSkillSuggestions(true);
     skillInputRef.current?.focus();
@@ -232,7 +231,7 @@ const JobApplicationForm = () => {
       console.error('Invalid skill object to remove:', skillToRemove);
       return;
     }
-    
+
     setSelectedSkills(prev => prev.filter(skill => skill.id !== skillToRemove.id));
     setShowSkillSuggestions(true);
   };
@@ -269,7 +268,7 @@ const JobApplicationForm = () => {
   const handleAddEducation = () => {
     setEditingEducation(null);
     setEducationFormData({
-      institution: "",
+      school: "",
       degree: "",
       fieldOfStudy: "",
       startDate: "",
@@ -283,7 +282,7 @@ const JobApplicationForm = () => {
   const handleEditEducation = (education) => {
     setEditingEducation(education);
     setEducationFormData({
-      institution: education.institution || "",
+      school: education.school || "",
       degree: education.degree || "",
       fieldOfStudy: education.fieldOfStudy || "",
       startDate: education.startDate || "",
@@ -314,7 +313,7 @@ const JobApplicationForm = () => {
 
       const payload = {
         userId: userId,
-        institution: educationFormData.institution,
+        school: educationFormData.school,
         degree: educationFormData.degree,
         fieldOfStudy: educationFormData.fieldOfStudy,
         startDate: educationFormData.startDate,
@@ -363,16 +362,14 @@ const JobApplicationForm = () => {
   // Handle form submission
   const handleSubmitApplication = async (e) => {
     e.preventDefault();
-    
+
     const token = localStorage.getItem("token");
     const userId = getUserIdFromToken(token);
-    
+
     if (!userId) {
       toast.error("Please log in to submit application");
       return;
     }
-
-    // Basic validation
     if (!userProfile.firstName || !userProfile.lastName || !userProfile.email) {
       toast.error("Please fill in all required personal information");
       return;
@@ -382,7 +379,6 @@ const JobApplicationForm = () => {
       toast.error("Please select your experience level");
       return;
     }
-
     try {
       const applicationData = {
         userId: userId,
@@ -396,12 +392,9 @@ const JobApplicationForm = () => {
         coverLetter: formData.coverLetter
       };
 
-      // Replace with your actual job application endpoint
-      // await axiosInstance.post('/api/job-applications/submit', applicationData);
-      
       console.log('Application Data:', applicationData);
       toast.success("Application submitted successfully!");
-      
+
     } catch (error) {
       console.error('Error submitting application:', error);
       toast.error('Failed to submit application');
@@ -445,7 +438,7 @@ const JobApplicationForm = () => {
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800">Personal Information</h2>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700">
@@ -461,7 +454,7 @@ const JobApplicationForm = () => {
                     required
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700">
                     Last Name *
@@ -487,7 +480,7 @@ const JobApplicationForm = () => {
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800">Contact Information</h2>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700">
@@ -506,7 +499,7 @@ const JobApplicationForm = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700">
                     Phone Number *
@@ -595,7 +588,7 @@ const JobApplicationForm = () => {
                             </h3>
                           </div>
                           <p className="text-lg font-semibold text-purple-700 mb-1">
-                            {education.institution}
+                            {education.school}
                           </p>
                           <div className="flex items-center gap-4 text-gray-600 mb-2">
                             <span className="flex items-center gap-1">
@@ -658,13 +651,13 @@ const JobApplicationForm = () => {
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800">Experience</h2>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700">
                     Total Experience *
                   </label>
-                  <select 
+                  <select
                     name="experience"
                     value={formData.experience}
                     onChange={handleFormChange}
@@ -716,7 +709,7 @@ const JobApplicationForm = () => {
                       if (!skill || !skill.id || !skill.skillName) {
                         return null;
                       }
-                      
+
                       return (
                         <div
                           key={`selected-skill-${skill.id}`}
@@ -762,7 +755,7 @@ const JobApplicationForm = () => {
                         if (!skill || !skill.id || !skill.skillName) {
                           return null;
                         }
-                        
+
                         return (
                           <button
                             key={`suggestion-${skill.id}`}
@@ -777,7 +770,7 @@ const JobApplicationForm = () => {
                           </button>
                         );
                       })}
-                      
+
                       {filterSkillSuggestions().length === 0 && skillInput.trim() && (
                         <div className="px-4 py-3 text-gray-500 text-center text-sm">
                           No skills found matching "{skillInput}"
@@ -786,7 +779,7 @@ const JobApplicationForm = () => {
                     </div>
                   )}
                 </div>
-                
+
                 {loadingSkills && (
                   <p className="text-gray-500 text-sm mt-1">Loading skills...</p>
                 )}
@@ -801,7 +794,7 @@ const JobApplicationForm = () => {
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800">Job Preferences</h2>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700">
@@ -888,13 +881,13 @@ const JobApplicationForm = () => {
 
             {/* Submit Buttons */}
             <div className="flex justify-end gap-4">
-              <button 
+              <button
                 type="button"
                 className="px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 font-semibold text-lg"
               >
                 Save as Draft
               </button>
-              <button 
+              <button
                 type="submit"
                 className="px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
@@ -914,7 +907,7 @@ const JobApplicationForm = () => {
                     {editingEducation ? 'Edit Education' : 'Add Education'}
                   </h3>
                   <button
-                    type="button"
+                    type="button" 
                     onClick={() => setShowAddEducationForm(false)}
                     className="text-gray-500 hover:text-gray-700 p-2 hover:bg-gray-100 rounded-full transition-colors"
                   >
@@ -926,39 +919,31 @@ const JobApplicationForm = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Institution *
+                        School *
                       </label>
                       <input
                         type="text"
-                        name="institution"
-                        value={educationFormData.institution}
+                        name="school"
+                        value={educationFormData.school}
                         onChange={handleEducationFormChange}
                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200"
                         placeholder="University of Technology"
                         required
                       />
                     </div>
-                    
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
                         Degree *
                       </label>
-                      <select
+                      <input
+                        type="text"
                         name="degree"
                         value={educationFormData.degree}
                         onChange={handleEducationFormChange}
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 bg-white"
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200"
+                        placeholder="Bachelor's, Master's, PhD, etc."
                         required
-                      >
-                        <option value="">Select degree</option>
-                        <option value="High School">High School</option>
-                        <option value="Associate Degree">Associate Degree</option>
-                        <option value="Bachelor's Degree">Bachelor's Degree</option>
-                        <option value="Master's Degree">Master's Degree</option>
-                        <option value="Ph.D.">Ph.D.</option>
-                        <option value="Certificate">Certificate</option>
-                        <option value="Other">Other</option>
-                      </select>
+                      />
                     </div>
                   </div>
 
@@ -991,7 +976,7 @@ const JobApplicationForm = () => {
                         required
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
                         End Date
@@ -1045,7 +1030,7 @@ const JobApplicationForm = () => {
                     <button
                       type="button"
                       onClick={handleSaveEducation}
-                      disabled={isSubmittingEducation || !educationFormData.institution || !educationFormData.degree || !educationFormData.fieldOfStudy || !educationFormData.startDate}
+                      disabled={isSubmittingEducation || !educationFormData.school || !educationFormData.degree || !educationFormData.fieldOfStudy || !educationFormData.startDate}
                       className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     >
                       {isSubmittingEducation ? 'Saving...' : (editingEducation ? 'Update Education' : 'Add Education')}
