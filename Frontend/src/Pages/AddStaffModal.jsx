@@ -1,22 +1,18 @@
 import React, { useState } from "react";
-import { FaUser } from "react-icons/fa";
+import { FaUser, FaTimes } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import { RiLockPasswordFill } from "react-icons/ri";
 import { FaPhone } from "react-icons/fa";
-import registerimage from "../assets/registerimage.png";
-import Navbar from "../Components/Navbar";
-import Footer from "../Components/Footer";
 import { Formik, Form, Field } from "formik";
-import { RegisterSchema } from "../schemas";
+import { StaffRegisterSchema } from "../schemas/index3";
 import { toast } from "react-toastify";
 import { FaLocationDot } from "react-icons/fa6";
 import axiosInstance from "../Utils/axiosInstance";
-import { useNavigate } from "react-router-dom";
 
-const AddStaffModal = () => {
-  const navigate = useNavigate();
+const AddStaffModal = ({ isOpen, onClose, companyId, onStaffAdded }) => {
+  if (!isOpen) return null;
+
   const initialValues = {
-    // userId: "0",
     firstName: "",
     lastName: "",
     email: "",
@@ -24,58 +20,37 @@ const AddStaffModal = () => {
     password: "",
     confirmPassword: "",
     location: "",
-
-    // userType: "",
-    // createdAt: "",
-    // updatedAt: "",
-    // isActive: "",
-    // company: {
-    //   companiesId: "0",
-    //   companyName: "",
-    //   companyLogo: "",
-    //   industryId: "",
-    //   website: "",
-    //   location: "",
-    //   description: "",
-    //   createdAt: "",
-    //   updatedAt: "",
-    // },
+    userType: 3, // Staff = 3
+    companyId: companyId || 1, // Use the passed companyId
   };
 
-  //fetching backend data uisng API
   const handleSubmit = async (values, actions) => {
-    console.log("values", values);
-    console.log(actions);
+    console.log("Staff values:", values);
 
     try {
-      const response = await axiosInstance.post("register-user", values);
-      console.log("User Added:", response.data);
+      const response = await axiosInstance.post("registeruser", values);
+      console.log("Staff Added:", response.data);
 
-      // Check if the response indicates success
       if (response.data.isSuccess) {
         actions.resetForm();
-        navigate("/login");
         toast.success(
-          response.data.message || "User registration successfully!"
+          response.data.message || "Staff registration successful!"
         );
+        onStaffAdded(); // Callback to parent component
       } else {
-        // Handle server-side validation errors
         toast.error(response.data.message || "Registration failed.");
       }
     } catch (error) {
       console.log(error?.message);
       console.error("Error while doing register:", error);
 
-      // Handle different types of errors
       if (error.response && error.response.data) {
-        // Server responded with error status and data
         const errorData = error.response.data;
         const errorMessage =
           errorData.message ||
           errorData.Message ||
           "Registration failed. Please try again.";
 
-        // Handle specific error cases if needed
         if (errorData.statusCode === 400) {
           if (errorMessage.includes("Email is already registered")) {
             toast.error(
@@ -85,6 +60,10 @@ const AddStaffModal = () => {
             toast.error(
               "This phone number is already in use. Please use a different number or try logging in."
             );
+          } else if (errorMessage.includes("Company with ID")) {
+            toast.error(
+              "Invalid company ID. Please contact your administrator."
+            );
           } else {
             toast.error(errorMessage);
           }
@@ -92,191 +71,195 @@ const AddStaffModal = () => {
           toast.error(errorMessage);
         }
       } else if (error.request) {
-        // Network error or no response
         toast.error(
           "Network error. Please check your connection and try again."
         );
       } else {
-        // Other errors
         toast.error("An unexpected error occurred. Please try again.");
       }
     }
   };
 
   return (
-    <>
-      <Navbar />
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-300">
-        <div className="bg-white rounded-2xl shadow-xl flex flex-col md:flex-row w-full max-w-5xl overflow-hidden mb-8 mt-8">
-          <div className="md:w-1/2 hidden md:block">
-            <img
-              src={registerimage}
-              alt="Visual"
-              className="w-full h-full object-cover"
-            />
-          </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex justify-between items-center p-6 border-b">
+          <h2 className="text-xl font-bold text-gray-800">Add Staff Member</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            <FaTimes size={20} />
+          </button>
+        </div>
 
-          <div className="md:w-1/2 w-full p-8 flex flex-col justify-center">
-            <h2 className="text-2xl font-bold text-center mb-1">
-              Create Account
-            </h2>
-            <p className="text-center text-gray-600 mb-6">
-              Get started with your job journey
-            </p>
+        {/* Form */}
+        <div className="p-6">
+          <p className="text-center text-gray-600 mb-6">
+            Register a new staff member for your company
+          </p>
 
-            <Formik
-              initialValues={initialValues}
-              validationSchema={RegisterSchema}
-              onSubmit={handleSubmit}
-            >
-              {({ errors, touched }) => (
-                <Form className="space-y-4  ">
-                  <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md ">
+          <Formik
+            initialValues={initialValues}
+            validationSchema={StaffRegisterSchema}
+            onSubmit={handleSubmit}
+          >
+            {({ errors, touched }) => (
+              <Form className="space-y-4">
+                {/* Hidden fields */}
+                <Field type="hidden" name="userType" value={3} />
+                <Field type="hidden" name="companyId" value={companyId} />
+
+                {/* First Name */}
+                <div>
+                  <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                     <FaUser className="text-gray-500 mr-3" />
                     <Field
-                      className="w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400 rounded-md"
+                      className="w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400"
                       type="text"
                       name="firstName"
                       placeholder="First Name"
                     />
                   </div>
-                  <div className="error_container">
-                    {errors.firstName && touched.firstName && (
-                      <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                        {errors.firstName}
-                      </p>
-                    )}
-                  </div>
+                  {errors.firstName && touched.firstName && (
+                    <p className="text-red-600 text-sm mt-1 ml-1 font-medium">
+                      {errors.firstName}
+                    </p>
+                  )}
+                </div>
+
+                {/* Last Name */}
+                <div>
                   <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                     <FaUser className="text-gray-500 mr-3" />
                     <Field
-                      className="w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400 rounded-md"
+                      className="w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400"
                       type="text"
                       name="lastName"
                       placeholder="Last Name"
                     />
                   </div>
-                  <div className="error_container">
-                    {errors.lastName && touched.lastName && (
-                      <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                        {errors.lastName}
-                      </p>
-                    )}
-                  </div>
+                  {errors.lastName && touched.lastName && (
+                    <p className="text-red-600 text-sm mt-1 ml-1 font-medium">
+                      {errors.lastName}
+                    </p>
+                  )}
+                </div>
+
+                {/* Email */}
+                <div>
                   <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                     <MdEmail className="text-gray-500 mr-3 text-lg" />
                     <Field
-                      className="w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400 rounded-md"
+                      className="w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400"
                       type="email"
                       name="email"
                       placeholder="Email Address"
                     />
                   </div>
-                  <div className="error_container">
-                    {errors.email && touched.email && (
-                      <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                        {errors.email}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
-                    <RiLockPasswordFill className="text-gray-500 mr-3 text-lg" />
-                    <Field
-                      type="password"
-                      name="password"
-                      placeholder="Password"
-                    />
-                  </div>
-                  <div className="error_container">
-                    {errors.password && touched.password && (
-                      <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                        {errors.password}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
-                    <RiLockPasswordFill className="text-gray-500 mr-3 text-lg" />
-                    <Field
-                      className="w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400 rounded-md"
-                      type="password"
-                      name="confirmPassword"
-                      placeholder="Confirm Password"
-                    />
-                  </div>
-                  <div className="error_container">
-                    {errors.confirmPassword && touched.confirmPassword && (
-                      <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                        {errors.confirmPassword}
-                      </p>
-                    )}
-                  </div>
+                  {errors.email && touched.email && (
+                    <p className="text-red-600 text-sm mt-1 ml-1 font-medium">
+                      {errors.email}
+                    </p>
+                  )}
+                </div>
+
+                {/* Phone Number */}
+                <div>
                   <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                     <FaPhone className="text-gray-500 mr-3" />
                     <Field
-                      className="w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400 rounded-md"
+                      className="w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400"
                       type="text"
                       name="phoneNumber"
                       placeholder="Phone Number"
                     />
                   </div>
-                  <div className="error_container">
-                    {errors.phoneNumber && touched.phoneNumber && (
-                      <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                        {errors.phoneNumber}
-                      </p>
-                    )}
+                  {errors.phoneNumber && touched.phoneNumber && (
+                    <p className="text-red-600 text-sm mt-1 ml-1 font-medium">
+                      {errors.phoneNumber}
+                    </p>
+                  )}
+                </div>
+
+                {/* Password */}
+                <div>
+                  <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
+                    <RiLockPasswordFill className="text-gray-500 mr-3 text-lg" />
+                    <Field
+                      className="w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400"
+                      type="password"
+                      name="password"
+                      placeholder="Password"
+                    />
                   </div>
+                  {errors.password && touched.password && (
+                    <p className="text-red-600 text-sm mt-1 ml-1 font-medium">
+                      {errors.password}
+                    </p>
+                  )}
+                </div>
+
+                {/* Confirm Password */}
+                <div>
+                  <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
+                    <RiLockPasswordFill className="text-gray-500 mr-3 text-lg" />
+                    <Field
+                      className="w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400"
+                      type="password"
+                      name="confirmPassword"
+                      placeholder="Confirm Password"
+                    />
+                  </div>
+                  {errors.confirmPassword && touched.confirmPassword && (
+                    <p className="text-red-600 text-sm mt-1 ml-1 font-medium">
+                      {errors.confirmPassword}
+                    </p>
+                  )}
+                </div>
+
+                {/* Location */}
+                <div>
                   <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
                     <FaLocationDot className="text-gray-500 mr-3" />
                     <Field
-                      className="w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400 rounded-md"
+                      className="w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400"
                       type="text"
                       name="location"
                       placeholder="Location"
                     />
                   </div>
-                  <div className="error_container">
-                    {errors.location && touched.location && (
-                      <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                        {errors.location}
-                      </p>
-                    )}
-                  </div>
-                  {/* <div className="flex items-center border border-gray-300 px-3 py-2 rounded-md">
-                    <IoPersonCircleSharp className="text-gray-500 mr-3" />
-                    <Field type="text" name="bio" placeholder="Bio" />
-                  </div>
-                  <div className="error_container">
-                    {errors.bio && touched.bio && (
-                      <p className="form_error text-red-600 text-sm mt-1 ml-1 font-medium">
-                        {errors.bio}
-                      </p>
-                    )}
-                  </div> */}
+                  {errors.location && touched.location && (
+                    <p className="text-red-600 text-sm mt-1 ml-1 font-medium">
+                      {errors.location}
+                    </p>
+                  )}
+                </div>
 
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="flex-1 bg-gray-500 text-white py-2 rounded-md text-lg font-medium hover:bg-gray-600 transition"
+                  >
+                    Cancel
+                  </button>
                   <button
                     type="submit"
-                    className="w-full bg-blue-600 text-white py-2 rounded-md text-lg font-medium hover:bg-blue-800   transition"
+                    className="flex-1 bg-blue-600 text-white py-2 rounded-md text-lg font-medium hover:bg-blue-800 transition"
                   >
-                    Create Account
+                    Add Staff
                   </button>
-                  <p className="text-center text-sm mt-4">
-                    Already have an account?{" "}
-                    <a href="#" className="text-cyan-600 hover:underline">
-                      Sign in here
-                    </a>
-                  </p>
-                </Form>
-              )}
-            </Formik>
-          </div>
+                </div>
+              </Form>
+            )}
+          </Formik>
         </div>
       </div>
-      <Footer />
-    </>
-  )
+    </div>
+  );
 };
 
 export default AddStaffModal;
-
-

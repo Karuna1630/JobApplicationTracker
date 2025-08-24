@@ -6,6 +6,7 @@ import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import PostJob from "./PostJob";
 import EditCompanyModal from "../Components/EditCompanyModal";
+import AddStaffModal from "./AddStaffModal"; // Import AddStaffModal
 import { FaEdit, FaCamera, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import {
@@ -39,6 +40,7 @@ const CompanyProfile = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [companyId, setCompanyId] = useState(null);
   const [showPostJob, setShowPostJob] = useState(false);
+  const [showAddStaff, setShowAddStaff] = useState(false); // Add state for staff modal
   const [logoError, setLogoError] = useState(false);
   const [jobTypes, setJobTypes] = useState([]);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
@@ -263,6 +265,13 @@ const CompanyProfile = () => {
     setReloadJobs((prev) => !prev);
   };
 
+  // Handle staff addition success
+  const handleStaffAdded = () => {
+    toast.success("Staff member added successfully!");
+    setShowAddStaff(false);
+    // Optionally reload data or update UI
+  };
+
   const handleUpdateSuccess = (updatedData) => {
     setCompanyInfo((prev) => ({
       ...prev,
@@ -355,13 +364,24 @@ const CompanyProfile = () => {
                 )}
               </div>
               
-              <button
-                onClick={() => setShowEditModal(true)}
-                className="absolute top-4 right-4 flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
-              >
-                <FaEdit />
-                Edit Profile
-              </button>
+              <div className="absolute top-4 right-4 flex gap-2">
+                <button
+                  onClick={() => setShowEditModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                >
+                  <FaEdit />
+                  Edit Profile
+                </button>
+                
+                {/* Add Staff Button */}
+                <button
+                  onClick={() => setShowAddStaff(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                >
+                  <FaUserPlus />
+                  Add Staff
+                </button>
+              </div>
             </div>
 
             <div className="pt-20 px-8 pb-8">
@@ -502,7 +522,7 @@ const CompanyProfile = () => {
           </div>
 
           <div className="bg-white shadow-xl rounded-2xl p-8 mb-8">
-            <h2 className="text-2xl font-semibond text-gray-700 mb-6">
+            <h2 className="text-2xl font-semibold text-gray-700 mb-6">
               User Insights
             </h2>
             <div className="flex flex-wrap justify-center gap-6">
@@ -542,6 +562,7 @@ const CompanyProfile = () => {
               onUpdateSuccess={handleUpdateSuccess}
             />
           )}
+          
           {showPostJob && (
             <PostJob
               onClose={() => setShowPostJob(false)}
@@ -550,6 +571,16 @@ const CompanyProfile = () => {
                 setShowPostJob(false);
               }}
               companyId={companyId}
+            />
+          )}
+          
+          {/* Add Staff Modal */}
+          {showAddStaff && (
+            <AddStaffModal
+              isOpen={showAddStaff}
+              onClose={() => setShowAddStaff(false)}
+              companyId={companyId}
+              onStaffAdded={handleStaffAdded}
             />
           )}
         </div>
