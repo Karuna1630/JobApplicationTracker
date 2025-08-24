@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import React, { useEffect } from "react";
 import { FaUser, FaTimes } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
