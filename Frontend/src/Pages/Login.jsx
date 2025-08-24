@@ -57,7 +57,7 @@ const Login = () => {
       } else if (role === 2) {
         navigate("/companyprofile");
       } else if (role === 3) {
-        navigate("/staff-dashboard");
+        navigate("/companyprofile");
       } else if (role === 4) {
         navigate("/userProfile");
       } else {

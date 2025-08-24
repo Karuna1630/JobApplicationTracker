@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { FaUser, FaTimes } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import { RiLockPasswordFill } from "react-icons/ri";
@@ -10,8 +11,18 @@ import { FaLocationDot } from "react-icons/fa6";
 import axiosInstance from "../Utils/axiosInstance";
 
 const AddStaffModal = ({ isOpen, onClose, companyId, onStaffAdded }) => {
+  // Prevent background scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
   if (!isOpen) return null;
-
   const initialValues = {
     firstName: "",
     lastName: "",
