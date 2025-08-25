@@ -8,6 +8,7 @@ import { Calendar, MapPin } from "react-feather";
 import axiosInstance from "../Utils/axiosInstance";
 import { getUserIdFromToken } from '../Utils/jwtUtils';
 import { toast } from "react-toastify";
+import { FiPlus, FiEdit2, FiTrash2 } from 'react-icons/fi';
 
 const Experience = () => {
   const [experiences, setExperiences] = useState([]);
@@ -307,16 +308,16 @@ const Experience = () => {
                   <button
                     onClick={() => openModal(experience)}
                     disabled={submitting}
-                    className="px-3 py-1 text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 py-1 hover:bg-blue-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Edit
+                    <FiEdit2 className="w-4 h-4 text-gray-600" />
                   </button>
                   <button
                     onClick={() => handleDelete(experience.experienceId || experience.id)}
                     disabled={submitting}
-                    className="px-3 py-1 text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 py-1  hover:bg-red-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Delete
+                  <FiTrash2 className="w-4 h-4 text-red-600" />
                   </button>
                 </div>
               </div>

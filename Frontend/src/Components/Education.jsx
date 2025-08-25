@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { FiPlus, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { useState, useEffect } from 'react';
+import {  FiEdit2, FiTrash2 } from 'react-icons/fi';
 import axiosInstance from '../Utils/axiosInstance';
 import { getUserIdFromToken } from '../Utils/jwtUtils';
 import { toast } from "react-toastify";
+import {IoAdd } from "react-icons/io5";
 
 const Education = () => {
   const [educationList, setEducationList] = useState([]);
@@ -228,10 +229,11 @@ const Education = () => {
               setEditingEducation(null);
               setShowAddForm(true);
             }}
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            className="p-2 flex items-center border-2 border-blue-600 text-blue-600 rounded-full hover:bg-blue-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             title="Add education"
           >
-            <FiPlus className="w-5 h-5 text-gray-600" />
+          <IoAdd size={20} />
+          Add education
           </button>
         </div>
       </div>
