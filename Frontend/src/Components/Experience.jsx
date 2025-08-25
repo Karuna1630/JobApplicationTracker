@@ -36,7 +36,7 @@ const Experience = () => {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 50 }, (_, i) => currentYear - i);
 
-  // Fetch all experiences using the same pattern as Education
+  
   const fetchExperiences = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -51,7 +51,7 @@ const Experience = () => {
     }
   };
 
-  // Save or update experience using the same logic as Education
+ 
   const handleSubmit = async () => {
     if (!formData.jobTitle.trim() || !formData.organization.trim()) {
       toast.error("Please fill in the required fields (Job Title and Organization)");
@@ -73,7 +73,7 @@ const Experience = () => {
       const token = localStorage.getItem('token');
       const userId = getUserIdFromToken(token);
 
-      // Prepare data for API - matching your original structure
+ 
       const experienceData = {
         userId,
         organization: formData.organization,
@@ -106,14 +106,14 @@ const Experience = () => {
         const experienceResponse = await axiosInstance.post('/api/Experience', experienceData);
         const experienceId = experienceResponse.data.experienceId || experienceResponse.data.id;
 
-        // Update user table with experience IDs (same logic as Education)
+        // Update user table with experience IDs 
         const existingExperienceIds = experiences.map(exp => exp.experienceId || exp.id);
         const updatedExperienceIds = [...existingExperienceIds, experienceId];
         const experienceJsonString = JSON.stringify(updatedExperienceIds);
 
         const response = await axiosInstance.post(`/submituser`, {
           userId,
-          experiences: experienceJsonString, // Fixed: Changed to 'experiences' (plural)
+          experiences: experienceJsonString,
         });
 
         if (response.data && response.data.isSuccess) {
