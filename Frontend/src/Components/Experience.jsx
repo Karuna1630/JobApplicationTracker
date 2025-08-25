@@ -113,7 +113,7 @@ const Experience = () => {
 
         const response = await axiosInstance.post(`/submituser`, {
           userId,
-          experiences: experienceJsonString, // Fixed: Changed to 'experiences' (plural)
+          experiences: experienceJsonString, 
         });
 
         if (response.data && response.data.isSuccess) {
