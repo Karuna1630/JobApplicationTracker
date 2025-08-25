@@ -8,6 +8,7 @@ import { Calendar, MapPin } from "react-feather";
 import axiosInstance from "../Utils/axiosInstance";
 import { getUserIdFromToken } from '../Utils/jwtUtils';
 import { toast } from "react-toastify";
+import { FiPlus, FiEdit2, FiTrash2 } from 'react-icons/fi';
 
 const Experience = () => {
   const [experiences, setExperiences] = useState([]);
@@ -36,7 +37,7 @@ const Experience = () => {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 50 }, (_, i) => currentYear - i);
 
-  // Fetch all experiences using the same pattern as Education
+  
   const fetchExperiences = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -51,7 +52,7 @@ const Experience = () => {
     }
   };
 
-  // Save or update experience using the same logic as Education
+ 
   const handleSubmit = async () => {
     if (!formData.jobTitle.trim() || !formData.organization.trim()) {
       toast.error("Please fill in the required fields (Job Title and Organization)");
@@ -73,7 +74,7 @@ const Experience = () => {
       const token = localStorage.getItem('token');
       const userId = getUserIdFromToken(token);
 
-      // Prepare data for API - matching your original structure
+ 
       const experienceData = {
         userId,
         organization: formData.organization,
@@ -106,14 +107,18 @@ const Experience = () => {
         const experienceResponse = await axiosInstance.post('/api/Experience', experienceData);
         const experienceId = experienceResponse.data.experienceId || experienceResponse.data.id;
 
-        // Update user table with experience IDs (same logic as Education)
+        // Update user table with experience IDs 
         const existingExperienceIds = experiences.map(exp => exp.experienceId || exp.id);
         const updatedExperienceIds = [...existingExperienceIds, experienceId];
         const experienceJsonString = JSON.stringify(updatedExperienceIds);
 
         const response = await axiosInstance.post(`/submituser`, {
           userId,
+
           experiences: experienceJsonString, 
+
+          experiences: experienceJsonString,
+
         });
 
         if (response.data && response.data.isSuccess) {
@@ -307,16 +312,16 @@ const Experience = () => {
                   <button
                     onClick={() => openModal(experience)}
                     disabled={submitting}
-                    className="px-3 py-1 text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 py-1 hover:bg-blue-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Edit
+                    <FiEdit2 className="w-4 h-4 text-gray-600" />
                   </button>
                   <button
                     onClick={() => handleDelete(experience.experienceId || experience.id)}
                     disabled={submitting}
-                    className="px-3 py-1 text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 py-1  hover:bg-red-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Delete
+                  <FiTrash2 className="w-4 h-4 text-red-600" />
                   </button>
                 </div>
               </div>

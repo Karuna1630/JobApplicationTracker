@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { FiPlus, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { useState, useEffect } from 'react';
+import {  FiEdit2, FiTrash2 } from 'react-icons/fi';
 import axiosInstance from '../Utils/axiosInstance';
 import { getUserIdFromToken } from '../Utils/jwtUtils';
 import { toast } from "react-toastify";
+import {IoAdd } from "react-icons/io5";
 
 const Education = () => {
   const [educationList, setEducationList] = useState([]);
@@ -94,22 +95,29 @@ const Education = () => {
       if (editingEducation) {
         // For editing, include the education ID (backend expects EducationId)
         educationData.educationId = editingEducation.educationId || editingEducation.id;
-        
-        console.log('Editing education with data:', educationData); // Debug log
-        
-        const educationResponse = await axiosInstance.post('/api/Education', educationData);
-        toast.success('Education updated successfully!');
-        await fetchEducation();
-        setShowAddForm(false);
-        resetForm();
-        setEditingEducation(null);
+
+        console.log("Editing education with data:", educationData); // Debug log
+
+        try {
+          const { data } = await axiosInstance.post("/api/Education", educationData);
+
+          if (data && data.isSuccess) {
+            toast.success("Education updated successfully!");
+            await fetchEducation();
+            setShowAddForm(false);
+            resetForm();
+            setEditingEducation(null);
+          } else {
+            toast.error("Failed to update education.");
+          }
+        } catch (error) {
+          console.error("Error updating education:", error);
+          toast.error("Error updating education.");
+        }
       } else {
-        // For adding new education
         console.log('Adding new education with data:', educationData); // Debug log
-        
         const educationResponse = await axiosInstance.post('/api/Education', educationData);
         const educationId = educationResponse.data.educationId || educationResponse.data.id;
-
         const existingEducationIds = educationList.map(edu => edu.educationId || edu.id);
         const updatedEducationIds = [...existingEducationIds, educationId];
         const educationJsonString = JSON.stringify(updatedEducationIds);
@@ -221,10 +229,11 @@ const Education = () => {
               setEditingEducation(null);
               setShowAddForm(true);
             }}
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            className="p-2 flex items-center border-2 border-blue-600 text-blue-600 rounded-full hover:bg-blue-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             title="Add education"
           >
-            <FiPlus className="w-5 h-5 text-gray-600" />
+          <IoAdd size={20} />
+          Add education
           </button>
         </div>
       </div>
