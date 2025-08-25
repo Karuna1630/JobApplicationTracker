@@ -40,11 +40,6 @@ const JobApplicationForm = () => {
     coverLetter: ""
   });
 
-  const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
-  ];
-
   // Fetch user profile
   const fetchUserProfile = async () => {
     try {
@@ -169,14 +164,11 @@ const JobApplicationForm = () => {
     }
   };
 
-  // Format date range for experience display (same as Experience component)
+  // Format date range for experience display (simplified without months array)
   const formatDateRange = (experience) => {
-    const startMonth = experience.startMonth ? months[experience.startMonth - 1] : "";
-    const startText = `${startMonth} ${experience.startYear}`;
-    
+    const startText = `${experience.startMonth}/${experience.startYear}`;
     const endText = experience.isCurrentlyWorking ? "Present" : 
-      (experience.endMonth ? `${months[experience.endMonth - 1]} ${experience.endYear}` : "");
-    
+      `${experience.endMonth}/${experience.endYear}`;
     return `${startText} - ${endText}`;
   };
 
