@@ -238,7 +238,7 @@ const Experience = () => {
       {/* Experience Section Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold mb-2">Experience</h2>
+          <h2 className="text-2xl font-bold mb-2"></h2>
           <p className="text-gray-600 text-lg">
             Showcase your accomplishments and get up to 2X as many profile views
             and connections

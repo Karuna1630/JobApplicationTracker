@@ -27,6 +27,10 @@ const JobApplicationForm = () => {
   const [educationList, setEducationList] = useState([]);
   const [loadingEducation, setLoadingEducation] = useState(true);
 
+  // Experience-related state
+  const [experienceList, setExperienceList] = useState([]);
+  const [loadingExperience, setLoadingExperience] = useState(true);
+
   // Form data state
   const [formData, setFormData] = useState({
     experience: "",
@@ -35,6 +39,11 @@ const JobApplicationForm = () => {
     startDate: "",
     coverLetter: ""
   });
+
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  ];
 
   // Fetch user profile
   const fetchUserProfile = async () => {
@@ -132,10 +141,50 @@ const JobApplicationForm = () => {
     }
   };
 
+  // Fetch user's experiences (using the same logic as Experience component)
+  const fetchExperiences = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const userId = getUserIdFromToken(token);
+
+      if (!userId) {
+        console.error('No user ID found');
+        return;
+      }
+
+      // Use the same API endpoint as the Experience component
+      const response = await axiosInstance.get(`/api/Experience/user/${userId}`);
+      console.log('Raw experience response:', response.data); // Add this for debugging
+      
+      if (response.data && Array.isArray(response.data)) {
+        setExperienceList(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching user experiences:', error);
+      console.error('Error response:', error.response?.data); // Add this for debugging
+      // Don't show error toast for experiences as user might not have any experiences yet
+      setExperienceList([]);
+    } finally {
+      setLoadingExperience(false);
+    }
+  };
+
+  // Format date range for experience display (same as Experience component)
+  const formatDateRange = (experience) => {
+    const startMonth = experience.startMonth ? months[experience.startMonth - 1] : "";
+    const startText = `${startMonth} ${experience.startYear}`;
+    
+    const endText = experience.isCurrentlyWorking ? "Present" : 
+      (experience.endMonth ? `${months[experience.endMonth - 1]} ${experience.endYear}` : "");
+    
+    return `${startText} - ${endText}`;
+  };
+
   useEffect(() => {
     fetchUserProfile();
     fetchUserSkills();
     fetchEducation();
+    fetchExperiences();
   }, []);
 
   // Handle form input changes
@@ -192,6 +241,7 @@ const JobApplicationForm = () => {
         currentPosition: formData.currentPosition,
         skills: selectedSkills,
         education: educationList,
+        experiences: experienceList, // Added experience list
         expectedSalary: formData.expectedSalary,
         startDate: formData.startDate,
         coverLetter: formData.coverLetter
@@ -206,7 +256,7 @@ const JobApplicationForm = () => {
     }
   };
 
-  if (loadingProfile) {
+  if (loadingProfile || loadingSkills || loadingEducation || loadingExperience) {
     return (
       <>
         <Navbar />
@@ -410,50 +460,57 @@ const JobApplicationForm = () => {
               )}
             </div>
 
-            {/* Experience Section */}
+            {/* Professional Experience Section */}
             <div className="mb-10">
               <div className="flex items-center mb-6">
-                <div className="bg-orange-100 p-3 rounded-full mr-4">
-                  <Briefcase className="text-orange-600" size={24} />
+                <div className="bg-teal-100 p-3 rounded-full mr-4">
+                  <Briefcase className="text-teal-600" size={24} />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800">Experience</h2>
+                <h2 className="text-2xl font-bold text-gray-800">Professional Experience</h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
-                    Total Experience *
-                  </label>
-                  <select
-                    name="experience"
-                    value={formData.experience}
-                    onChange={handleFormChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 bg-white"
-                    required
-                  >
-                    <option value="">Select your experience level</option>
-                    <option value="0-1">0-1 years</option>
-                    <option value="1-3">1-3 years</option>
-                    <option value="3-5">3-5 years</option>
-                    <option value="5-10">5-10 years</option>
-                    <option value="10+">10+ years</option>
-                  </select>
+              {/* Experience List (Display Only) */}
+              {experienceList.length > 0 ? (
+                <div className="space-y-4 mb-6">
+                  {experienceList.map((experience) => (
+                    <div
+                      key={experience.experienceId || experience.id}
+                      className="bg-gradient-to-r from-teal-50 to-cyan-50 border-2 border-teal-100 rounded-xl p-6 hover:shadow-lg transition-all duration-200"
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-3 h-3 bg-gradient-to-r from-teal-400 to-cyan-400 rounded-full"></div>
+                        <h3 className="text-xl font-bold text-gray-800">
+                          {experience.jobTitle}
+                        </h3>
+                      </div>
+                      <p className="text-lg font-semibold text-teal-700 mb-1">
+                        {experience.organization}
+                      </p>
+                      <div className="flex items-center gap-4 text-gray-600 mb-2">
+                        <span className="flex items-center gap-1">
+                          📅 {formatDateRange(experience)}
+                        </span>
+                        {experience.location && (
+                          <span className="flex items-center gap-1">
+                            📍 {experience.location}
+                          </span>
+                        )}
+                      </div>
+                      {experience.description && (
+                        <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
+                          {experience.description}
+                        </p>
+                      )}
+                    </div>
+                  ))}
                 </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
-                    Current Position
-                  </label>
-                  <input
-                    type="text"
-                    name="currentPosition"
-                    value={formData.currentPosition}
-                    onChange={handleFormChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
-                    placeholder="Software Developer"
-                  />
+              ) : (
+                <div className="text-center py-12 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl border-2 border-dashed border-teal-200 mb-6">
+                  <Briefcase className="mx-auto text-teal-300 mb-4" size={48} />
+                  <p className="text-gray-600 mb-4">No professional experience found in your profile</p>
+                  <p className="text-gray-500 text-sm">Please update your profile to add work experience</p>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Skills Section */}
