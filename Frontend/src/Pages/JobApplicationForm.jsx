@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { User, Mail, Phone, MapPin, GraduationCap, DollarSign, Calendar, Upload, Award } from "lucide-react";
-import { IoClose } from "react-icons/io5";
 import axiosInstance from "../Utils/axiosInstance";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
 import { toast } from "react-toastify";
@@ -148,16 +147,6 @@ const JobApplicationForm = () => {
       ...userProfile,
       [e.target.name]: e.target.value
     });
-  };
-
-  // Skills functionality
-  const removeSkill = (skillToRemove) => {
-    if (!skillToRemove || !skillToRemove.id) {
-      console.error('Invalid skill object to remove:', skillToRemove);
-      return;
-    }
-
-    setSelectedSkills(prev => prev.filter(skill => skill.id !== skillToRemove.id));
   };
 
   // Handle form submission
@@ -389,7 +378,7 @@ const JobApplicationForm = () => {
               )}
             </div>
 
-            {/* Skills Section */}
+            {/* Skills Section - Display Only */}
             <div className="mb-8">
               <div className="flex items-center mb-4">
                 <Award className="text-indigo-600 mr-2" size={24} />
@@ -410,17 +399,9 @@ const JobApplicationForm = () => {
                       return (
                         <div
                           key={`selected-skill-${skill.id}`}
-                          className="flex items-center gap-2 bg-indigo-500 text-white rounded-full px-3 py-1 text-sm"
+                          className="bg-indigo-500 text-white rounded-full px-3 py-1 text-sm"
                         >
                           <span>{skill.skillName}</span>
-                          <button
-                            type="button"
-                            onClick={() => removeSkill(skill)}
-                            className="text-white hover:text-red-200 rounded-full p-1"
-                            aria-label={`Remove skill ${skill.skillName}`}
-                          >
-                            <IoClose size={14} />
-                          </button>
                         </div>
                       );
                     })}
