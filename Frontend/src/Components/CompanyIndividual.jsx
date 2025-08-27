@@ -184,21 +184,19 @@ const CompanyIndividual = () => {
           <div className="flex border-b px-10 bg-white">
             <button
               onClick={() => handleTabChange("about")}
-              className={`py-3 px-6 font-semibold ${
-                activeTab === "about"
+              className={`py-3 px-6 font-semibold ${activeTab === "about"
                   ? "text-blue-600 border-b-2 border-blue-600"
                   : "text-gray-600 hover:text-blue-600"
-              }`}
+                }`}
             >
               About
             </button>
             <button
               onClick={() => handleTabChange("jobs")}
-              className={`py-3 px-6 font-semibold ${
-                activeTab === "jobs"
+              className={`py-3 px-6 font-semibold ${activeTab === "jobs"
                   ? "text-blue-600 border-b-2 border-blue-600"
                   : "text-gray-600 hover:text-blue-600"
-              }`}
+                }`}
             >
               Jobs ({jobsData.length})
             </button>
@@ -298,11 +296,10 @@ const CompanyIndividual = () => {
                               </h2>
                               <div className="flex items-center gap-2 ml-4">
                                 <span
-                                  className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                    isActive
+                                  className={`px-3 py-1 rounded-full text-xs font-medium ${isActive
                                       ? "bg-green-100 text-green-700"
                                       : "bg-red-100 text-red-700"
-                                  }`}
+                                    }`}
                                 >
                                   {isActive ? "Active" : "Inactive"}
                                 </span>
@@ -368,8 +365,8 @@ const CompanyIndividual = () => {
                                   {job.salaryRangeMin && job.salaryRangeMax
                                     ? `$${job.salaryRangeMin.toLocaleString()} - $${job.salaryRangeMax.toLocaleString()}`
                                     : job.salary
-                                    ? `$${job.salary.toLocaleString()}`
-                                    : "Not specified"}
+                                      ? `$${job.salary.toLocaleString()}`
+                                      : "Not specified"}
                                 </p>
                               </div>
                               <div>
@@ -428,8 +425,13 @@ const CompanyIndividual = () => {
 
                             {/* Action Buttons */}
                             <div className="mt-4 flex space-x-3">
+
                               <button
-                                onClick={() => navigate("/jobApplicationForm")}
+                                onClick={() => {
+                                  // Store company ID in localStorage before navigation
+                                  localStorage.setItem('currentCompanyId', companyId);
+                                  navigate(`/job-application/${job.jobId}`);
+                                }}
                                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                               >
                                 Apply Now

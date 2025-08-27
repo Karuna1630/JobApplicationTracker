@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SearchBar from "../Components/SearchBar"; 
+import NotificationBell from "../Components/NotificationBell"; 
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -165,6 +166,11 @@ const Navbar = () => {
         )}
       </nav>
 
+<div className="flex items-center gap-4">
+
+  {/* Show notification bell only when logged in */}
+  {isLoggedIn && <NotificationBell />}
+  </div>
       {/* Auth Buttons / Profile Dropdown */}
       <div className="relative" ref={dropdownRef}>
         {!isLoggedIn ? (
