@@ -78,8 +78,7 @@ const CompanyApplications = () => {
   const [sortOrder, setSortOrder] = useState("desc");
   const [jobTypes, setJobTypes] = useState([]);
   const [jobs, setJobs] = useState([]);
-  
-  // Statistics
+
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
@@ -88,7 +87,6 @@ const CompanyApplications = () => {
     rejected: 0
   });
 
-  // Fetch job types for display
   const fetchJobTypes = async () => {
     try {
       const response = await axiosInstance.get('/getalljobtypes');
@@ -104,7 +102,6 @@ const CompanyApplications = () => {
     }
   };
 
-  // Fetch company jobs for reference
   const fetchCompanyJobs = async (companyId) => {
     try {
       const response = await axiosInstance.get(`/api/Jobs/getjobsbycompanyid?companyId=${companyId}`);
