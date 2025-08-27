@@ -69,6 +69,7 @@ function App() {
           <Route path='/company/:companyId' element={<CompanyIndividual/>}/>
           <Route path='/job/:jobId' element={<JobIndividual/>}/>
           <Route path='/jobApplicationForm' element={<JobApplicationForm/>}/>
+          <Route path="/job-application/:jobId" element={<JobApplicationForm />} />
         </Routes>
         </BrowserRouter>
       </div>

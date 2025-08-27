@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { User, Mail, Phone, MapPin, GraduationCap, Briefcase, DollarSign, Calendar, Upload, Award } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
+import { User, Mail, GraduationCap, Briefcase, DollarSign, Upload, Award, X, FileText } from "lucide-react";
 import axiosInstance from "../Utils/axiosInstance";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
 import { toast } from "react-toastify";
@@ -7,6 +8,14 @@ import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 
 const JobApplicationForm = () => {
+  const navigate = useNavigate();
+  // Get jobId from URL parameters
+  const { jobId } = useParams();
+  
+  // Basic state for job application
+  const [selectedJobId, setSelectedJobId] = useState(null);
+  const [companyId, setCompanyId] = useState(null);
+
   // Profile-related state
   const [userProfile, setUserProfile] = useState({
     firstName: "",
@@ -30,17 +39,51 @@ const JobApplicationForm = () => {
   const [experienceList, setExperienceList] = useState([]);
   const [loadingExperience, setLoadingExperience] = useState(true);
 
-  // Form data state
+  // Resume file state
+  const [resumeFile, setResumeFile] = useState(null);
+  const [resumeFileName, setResumeFileName] = useState("");
+  const [resumeUploading, setResumeUploading] = useState(false);
+
+  // Form data state - Updated field names to match API
   const [formData, setFormData] = useState({
     experience: "",
     currentPosition: "",
-    expectedSalary: "",
-    startDate: "",
+    salaryExpectation: "",  // Changed from expectedSalary
+    availableStartDate: "",  // Changed from startDate
     coverLetter: ""
   });
 
   // Add state for submission loading
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Initialize job ID and company ID from URL params and localStorage
+  useEffect(() => {
+    if (jobId) {
+      const currentJobId = parseInt(jobId);
+      
+      if (currentJobId && !isNaN(currentJobId) && currentJobId > 0) {
+        setSelectedJobId(currentJobId);
+        
+        // Get company ID from localStorage (set from CompanyIndividual page)
+        const storedCompanyId = localStorage.getItem('currentCompanyId');
+        if (storedCompanyId) {
+          setCompanyId(parseInt(storedCompanyId));
+        } else {
+          toast.error("Missing company information. Please go back and select a job from the company page.");
+          // Optionally navigate back
+          // navigate(-1);
+        }
+        
+        // Store job ID in localStorage for consistency
+        localStorage.setItem('selectedJobId', currentJobId.toString());
+      } else {
+        console.error('Invalid job ID:', jobId);
+        toast.error("Invalid job ID. Please go back and select a job to apply for.");
+      }
+    } else {
+      toast.error("No job selected. Please go back and select a job to apply for.");
+    }
+  }, [jobId, navigate]);
 
   // Fetch user profile
   const fetchUserProfile = async () => {
@@ -78,7 +121,7 @@ const JobApplicationForm = () => {
     }
   };
 
-  // Fetch user's skills (using the same endpoint as Skills component)
+  // Fetch user's skills
   const fetchUserSkills = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -89,24 +132,21 @@ const JobApplicationForm = () => {
         return;
       }
 
-      // Use the same API endpoint as the Skills component
       const response = await axiosInstance.get(`/api/skills/getskillsbyuserid?userId=${userId}`);
-      console.log('Raw skills response:', response.data); // Add this for debugging
+      console.log('Raw skills response:', response.data);
       
       if (response.data && Array.isArray(response.data)) {
-        // Map backend response to expected format (same as Skills component)
         const mappedSkills = response.data.map(skill => ({
           id: skill.skillId,
           skillName: skill.skill
         }));
 
-        console.log('Mapped skills:', mappedSkills); // Add this for debugging
+        console.log('Mapped skills:', mappedSkills);
         setSelectedSkills(mappedSkills);
       }
     } catch (error) {
       console.error('Error fetching user skills:', error);
-      console.error('Error response:', error.response?.data); // Add this for debugging
-      // Don't show error toast for skills as user might not have any skills yet
+      console.error('Error response:', error.response?.data);
       setSelectedSkills([]);
     } finally {
       setLoadingSkills(false);
@@ -138,7 +178,7 @@ const JobApplicationForm = () => {
     }
   };
 
-  // Fetch user's experiences (using the same logic as Experience component)
+  // Fetch user's experiences
   const fetchExperiences = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -149,24 +189,22 @@ const JobApplicationForm = () => {
         return;
       }
 
-      // Use the same API endpoint as the Experience component
       const response = await axiosInstance.get(`/api/Experience/user/${userId}`);
-      console.log('Raw experience response:', response.data); // Add this for debugging
+      console.log('Raw experience response:', response.data);
       
       if (response.data && Array.isArray(response.data)) {
         setExperienceList(response.data);
       }
     } catch (error) {
       console.error('Error fetching user experiences:', error);
-      console.error('Error response:', error.response?.data); // Add this for debugging
-      // Don't show error toast for experiences as user might not have any experiences yet
+      console.error('Error response:', error.response?.data);
       setExperienceList([]);
     } finally {
       setLoadingExperience(false);
     }
   };
 
-  // Format date range for experience display (simplified without months array)
+  // Format date range for experience display
   const formatDateRange = (experience) => {
     const startText = `${experience.startMonth}/${experience.startYear}`;
     const endText = experience.isCurrentlyWorking ? "Present" : 
@@ -180,6 +218,61 @@ const JobApplicationForm = () => {
     fetchEducation();
     fetchExperiences();
   }, []);
+
+  // Handle resume file selection
+  const handleResumeFileChange = (e) => {
+    const file = e.target.files[0];
+    
+    if (file) {
+      // Validate file type
+      const allowedTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
+      
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('Please upload a PDF, DOC, or DOCX file');
+        return;
+      }
+      
+      // Validate file size (5MB max)
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      if (file.size > maxSize) {
+        toast.error('File size must be less than 5MB');
+        return;
+      }
+      
+      setResumeFile(file);
+      setResumeFileName(file.name);
+      toast.success('Resume file selected successfully');
+    }
+  };
+
+  // Remove selected resume file
+  const handleRemoveResumeFile = () => {
+    setResumeFile(null);
+    setResumeFileName("");
+    // Clear the input
+    const fileInput = document.getElementById('resume-upload');
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
+  // Convert file to base64 string for database storage
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        // Remove the data:mime/type;base64, part
+        const base64String = reader.result.split(',')[1];
+        resolve(base64String);
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
 
   // Handle form input changes
   const handleFormChange = (e) => {
@@ -196,7 +289,41 @@ const JobApplicationForm = () => {
     });
   };
 
-  // Handle form submission with actual API call
+  // Helper function to parse salary
+  const parseSalary = (salaryString) => {
+    if (!salaryString || salaryString.trim() === "") {
+      return 0;
+    }
+    
+    // Remove commas, dollar signs, and spaces
+    const cleanedSalary = salaryString.replace(/[$,\s]/g, '');
+    
+    // Handle ranges like "80000-100000" by taking the first number
+    const firstNumber = cleanedSalary.split('-')[0];
+    
+    const parsed = parseFloat(firstNumber);
+    return isNaN(parsed) ? 0 : parsed;
+  };
+
+  // Helper function to format date
+  const formatDateForAPI = (dateString) => {
+    if (!dateString || dateString.trim() === "") {
+      return null;
+    }
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return null;
+      }
+      return date.toISOString();
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return null;
+    }
+  };
+
+  // Handle form submission with resume file upload
   const handleSubmitApplication = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -210,15 +337,60 @@ const JobApplicationForm = () => {
         return;
       }
 
+      if (!selectedJobId) {
+        toast.error("No job selected. Please go back and select a job to apply for.");
+        return;
+      }
+
+      if (!companyId) {
+        toast.error("Missing company information. Please go back and select a job from the company page.");
+        return;
+      }
+
       // Validate required fields
       if (!userProfile.firstName || !userProfile.lastName || !userProfile.email) {
         toast.error("Please fill in all required personal information");
         return;
       }
 
-      // Prepare the application data according to your API structure
+      // Convert resume file to base64 if present
+      let resumeFileString = "";
+      if (resumeFile) {
+        setResumeUploading(true);
+        try {
+          resumeFileString = await fileToBase64(resumeFile);
+          console.log('Resume file converted to base64, length:', resumeFileString.length);
+        } catch (error) {
+          console.error('Error converting resume file:', error);
+          toast.error('Failed to process resume file');
+          return;
+        } finally {
+          setResumeUploading(false);
+        }
+      }
+
+      // Prepare application data with resume file
       const applicationData = {
+        applicationId: 0, // Will be generated by backend
         userId: userId,
+        jobId: parseInt(selectedJobId),
+        applicationStatus: 0, // Default status (Pending)
+        applicationDate: new Date().toISOString(),
+        
+        // Map and format the fields correctly
+        coverLetter: formData.coverLetter || "",
+        resumeFile: resumeFileString, // Base64 encoded file content
+        salaryExpectation: parseSalary(formData.salaryExpectation),
+        availableStartDate: formatDateForAPI(formData.availableStartDate),
+        createdAt: new Date().toISOString(),
+        
+        // Additional metadata for resume file
+        resumeFileName: resumeFileName || "",
+        resumeFileType: resumeFile ? resumeFile.type : "",
+        resumeFileSize: resumeFile ? resumeFile.size : 0,
+        
+        // Additional data that might be needed by your backend
+        companyId: parseInt(companyId),
         personalInfo: {
           firstName: userProfile.firstName,
           lastName: userProfile.lastName,
@@ -234,99 +406,72 @@ const JobApplicationForm = () => {
           skillName: skill.skillName
         })),
         education: educationList,
-        workExperience: experienceList,
-        expectedSalary: formData.expectedSalary,
-        startDate: formData.startDate,
-        coverLetter: formData.coverLetter
+        workExperience: experienceList
       };
 
-      console.log('Submitting application data:', applicationData);
+      console.log('Submitting application data:', {
+        ...applicationData,
+        resumeFile: resumeFileString ? `[Base64 data - ${resumeFileString.length} chars]` : ""
+      });
 
-      // Make the API call to submit the job application
+      // Submit the application
       const response = await axiosInstance.post('/submitjobapplication', applicationData);
 
       if (response.status === 200 || response.status === 201) {
         toast.success("Application submitted successfully!");
         
-        // Optional: Reset form or redirect user
-        // You might want to redirect to a success page or clear the form
-        // history.push('/applications'); // if using react-router
+        // Clear stored IDs after successful submission
+        localStorage.removeItem('selectedJobId');
+        localStorage.removeItem('currentCompanyId');
         
-        // Or reset the form data
+        // Reset the form data
         setFormData({
           experience: "",
           currentPosition: "",
-          expectedSalary: "",
-          startDate: "",
+          salaryExpectation: "",
+          availableStartDate: "",
           coverLetter: ""
         });
+
+        // Clear resume file
+        handleRemoveResumeFile();
+
+        // Optionally navigate back to company page or jobs list
+        setTimeout(() => {
+          navigate('/companies'); // or wherever you want to redirect
+        }, 2000);
       }
 
     } catch (error) {
       console.error('Error submitting application:', error);
       
-      // Handle different error scenarios
       if (error.response) {
-        // Server responded with error status
         const errorMessage = error.response.data?.message || 
                            error.response.data?.error || 
                            'Failed to submit application';
         toast.error(errorMessage);
-        
-        // Log detailed error for debugging
         console.error('Server error response:', error.response.data);
       } else if (error.request) {
-        // Request was made but no response received
         toast.error('Network error. Please check your connection and try again.');
         console.error('Network error:', error.request);
       } else {
-        // Something else happened
         toast.error('An unexpected error occurred. Please try again.');
         console.error('Unexpected error:', error.message);
       }
     } finally {
       setIsSubmitting(false);
+      setResumeUploading(false);
     }
   };
 
-  // Handle save as draft (optional functionality)
-  const handleSaveAsDraft = async () => {
-    try {
-      setIsSubmitting(true);
-      const token = localStorage.getItem("token");
-      const userId = getUserIdFromToken(token);
-
-      if (!userId) {
-        toast.error("Please log in to save draft");
-        return;
-      }
-
-      const draftData = {
-        userId: userId,
-        personalInfo: userProfile,
-        experience: formData.experience,
-        currentPosition: formData.currentPosition,
-        skills: selectedSkills,
-        education: educationList,
-        workExperience: experienceList,
-        expectedSalary: formData.expectedSalary,
-        startDate: formData.startDate,
-        coverLetter: formData.coverLetter,
-        isDraft: true
-      };
-
-      // You might have a separate endpoint for saving drafts
-      // const response = await axiosInstance.post('/savedraftapplication', draftData);
-      
-      // For now, just show a success message
-      toast.success("Draft saved successfully!");
-      
-    } catch (error) {
-      console.error('Error saving draft:', error);
-      toast.error('Failed to save draft');
-    } finally {
-      setIsSubmitting(false);
-    }
+  // Handle cancel button click
+  const handleCancel = () => {
+    // Clear stored IDs
+    localStorage.removeItem('selectedJobId');
+    localStorage.removeItem('currentCompanyId');
+    
+    // Navigate back to companies page or previous page
+    navigate('/companies'); // You can change this to navigate(-1) if you prefer going back to previous page
   };
 
   if (loadingProfile || loadingSkills || loadingEducation || loadingExperience) {
@@ -346,13 +491,16 @@ const JobApplicationForm = () => {
       <Navbar />
       <div className="min-h-screen bg-gray-50 flex justify-center p-6">
         <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl mx-auto">
-          {/* Header */}
+          {/* Header with Basic Information */}
           <div className="bg-blue-500 text-white p-6 rounded-t-lg">
-            <h1 className="text-2xl font-bold mb-2">Apply for Position</h1>
+            <h1 className="text-2xl font-bold mb-2">
+              Apply for Position
+            </h1>
             <p className="text-blue-100">Complete your application using your profile information</p>
+            <div className="mt-3 text-blue-100 text-sm space-y-1">
+            </div>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmitApplication}>
             <div className="p-6">
               {/* Personal Information */}
@@ -554,20 +702,17 @@ const JobApplicationForm = () => {
               <div className="mb-8">
                 <div className="flex items-center mb-4">
                   <Award className="text-indigo-600 mr-3" size={24} />
-                  <h2 className="text-xl font-bold text-gray-800">Skills & Expertise</h2>
+                  <h2 className="text-xl font-bold text-gray-800">Skills</h2>
                 </div>
-
                 {selectedSkills.length > 0 ? (
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Your Skills from Profile
                     </label>
                     <div className="flex flex-wrap gap-2 p-3 bg-indigo-50 rounded-lg border border-indigo-200">
                       {selectedSkills.map((skill) => {
                         if (!skill || !skill.id || !skill.skillName) {
                           return null;
                         }
-
                         return (
                           <div
                             key={`selected-skill-${skill.id}`}
@@ -587,7 +732,6 @@ const JobApplicationForm = () => {
                   </div>
                 )}
               </div>
-
               {/* Job Preferences */}
               <div className="mb-8">
                 <div className="flex items-center mb-4">
@@ -602,12 +746,14 @@ const JobApplicationForm = () => {
                     </label>
                     <input
                       type="text"
-                      name="expectedSalary"
-                      value={formData.expectedSalary}
+                      name="salaryExpectation"
+                      value={formData.salaryExpectation}
                       onChange={handleFormChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="80,000 - 100,000"
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                    </p>
                   </div>
 
                   <div>
@@ -616,8 +762,8 @@ const JobApplicationForm = () => {
                     </label>
                     <input
                       type="date"
-                      name="startDate"
-                      value={formData.startDate}
+                      name="availableStartDate"
+                      value={formData.availableStartDate}
                       onChange={handleFormChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
@@ -627,29 +773,78 @@ const JobApplicationForm = () => {
 
               {/* Resume Upload */}
               <div className="mb-8">
-                <div className="flex items-center mb-3">
+                <div className=" flex items-center mb-3">
                   <Upload className="text-blue-600 mr-3" size={20} />
                   <label className="text-sm font-medium text-gray-700">
                     Resume/CV
                   </label>
                 </div>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                  <Upload className="mx-auto text-gray-400 mb-2" size={24} />
-                  <p className="text-gray-600 mb-1">Upload your resume</p>
-                  <p className="text-sm text-gray-500 mb-3">PDF, DOC, or DOCX (max 5MB)</p>
-                  <input
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    className="hidden"
-                    id="resume-upload"
-                  />
-                  <label
-                    htmlFor="resume-upload"
-                    className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium cursor-pointer"
-                  >
-                    Choose File
-                  </label>
-                </div>
+
+                {!resumeFile ? (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                    <Upload className="mx-auto text-gray-400 mb-2" size={24} />
+                    <p className="text-gray-600 mb-1">Upload your resume</p>
+                    <p className="text-sm text-gray-500 mb-3">PDF, DOC, or DOCX (max 5MB)</p>
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      className="hidden"
+                      id="resume-upload"
+                      onChange={handleResumeFileChange}
+                    />
+                    <label
+                      htmlFor="resume-upload"
+                      className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium cursor-pointer transition-colors"
+                    >
+                      Choose File
+                    </label>
+                  </div>
+                ) : (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <FileText className="text-blue-600 mr-3" size={24} />
+                        <div>
+                          <p className="font-medium text-gray-800">{resumeFileName}</p>
+                          <p className="text-sm text-gray-600">
+                            {resumeFile && `${(resumeFile.size / (1024 * 1024)).toFixed(2)} MB`}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRemoveResumeFile}
+                        className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition-colors"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+                    
+                    {/* Option to replace file */}
+                    <div className="mt-3 pt-3 border-t border-blue-200">
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        className="hidden"
+                        id="resume-replace"
+                        onChange={handleResumeFileChange}
+                      />
+                      <label
+                        htmlFor="resume-replace"
+                        className="inline-block text-blue-600 hover:text-blue-800 text-sm font-medium cursor-pointer"
+                      >
+                        Replace file
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {resumeUploading && (
+                  <div className="mt-3 flex items-center text-blue-600">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                    Processing resume file...
+                  </div>
+                )}
               </div>
 
               {/* Cover Letter */}
@@ -671,21 +866,21 @@ const JobApplicationForm = () => {
               <div className="flex justify-end gap-4">
                 <button
                   type="button"
-                  onClick={handleSaveAsDraft}
+                  onClick={handleCancel}
                   disabled={isSubmitting}
                   className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isSubmitting ? 'Saving...' : 'Save as Draft'}
+                  Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !selectedJobId || !companyId || resumeUploading}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  {isSubmitting ? (
+                  {isSubmitting || resumeUploading ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      Submitting...
+                      {resumeUploading ? 'Processing Resume...' : 'Submitting...'}
                     </>
                   ) : (
                     'Submit Application'
