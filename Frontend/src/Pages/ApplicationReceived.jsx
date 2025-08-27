@@ -4,6 +4,7 @@ import { getUserIdFromToken } from "../Utils/jwtUtils";
 import SidebarMenu from "../Components/SidebarMenu";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
+import ReviewModal from "./ReviewModal";
 import { toast } from "react-toastify";
 import {
   FaUser,
@@ -18,7 +19,6 @@ import {
   FaSortAmountUp,
   FaFileAlt,
   FaUsers,
-  FaChartBar,
 } from "react-icons/fa";
 
 const StatusBadge = ({ status }) => {
@@ -32,8 +32,6 @@ const StatusBadge = ({ status }) => {
         return { text: "Accepted", color: "green", bgColor: "bg-green-100", textColor: "text-green-800" };
       case 4:
         return { text: "Rejected", color: "red", bgColor: "bg-red-100", textColor: "text-red-800" };
-      default:
-        return { text: "Unknown", color: "gray", bgColor: "bg-gray-100", textColor: "text-gray-800" };
     }
   };
 
@@ -66,7 +64,7 @@ const StatsCard = ({ icon, label, value, color = "blue", isLoading = false }) =>
   </div>
 );
 
-const CompanyApplications = () => {
+const ApplicationReceived = () => {
   const [applications, setApplications] = useState([]);
   const [filteredApplications, setFilteredApplications] = useState([]);
   const [companyId, setCompanyId] = useState(null);
@@ -78,6 +76,13 @@ const CompanyApplications = () => {
   const [sortOrder, setSortOrder] = useState("desc");
   const [jobTypes, setJobTypes] = useState([]);
   const [jobs, setJobs] = useState([]);
+
+  // Review Modal State
+  const [reviewModal, setReviewModal] = useState({
+    isOpen: false,
+    applicationId: null,
+    userId: null
+  });
 
   const [stats, setStats] = useState({
     total: 0,
@@ -214,6 +219,24 @@ const CompanyApplications = () => {
       console.error("Error updating application status:", error);
       toast.error("Failed to update application status");
     }
+  };
+
+  // Open review modal
+  const openReviewModal = (applicationId, userId) => {
+    setReviewModal({
+      isOpen: true,
+      applicationId: applicationId,
+      userId: userId
+    });
+  };
+
+  // Close review modal
+  const closeReviewModal = () => {
+    setReviewModal({
+      isOpen: false,
+      applicationId: null,
+      userId: null
+    });
   };
 
   // Filter and search applications
@@ -372,7 +395,7 @@ const CompanyApplications = () => {
           {/* Page Header */}
           <div className="bg-white shadow-xl rounded-2xl p-8 mb-8">
             <h1 className="text-3xl font-bold text-gray-800 mb-2">Job Applications</h1>
-            <p className="text-gray-600">Manage and review applications for your company's job postings</p>
+            <p className="text-gray-600">review applications for company's job postings</p>
           </div>
 
           {/* Statistics Cards */}
@@ -388,12 +411,6 @@ const CompanyApplications = () => {
               label="Pending"
               value={stats.pending}
               color="yellow"
-            />
-            <StatsCard
-              icon={<FaEye />}
-              label="Reviewed"
-              value={stats.reviewed}
-              color="purple"
             />
             <StatsCard
               icon={<FaCheck />}
@@ -512,7 +529,7 @@ const CompanyApplications = () => {
                             {application.applicationStatus === 1 && (
                               <>
                                 <button
-                                  onClick={() => updateApplicationStatus(application.applicationId, 2)}
+                                  onClick={() => openReviewModal(application.applicationId, application.userId)}
                                   className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
                                 >
                                   <FaEye className="inline mr-1" />
@@ -538,6 +555,13 @@ const CompanyApplications = () => {
                             {application.applicationStatus === 2 && (
                               <>
                                 <button
+                                  onClick={() => openReviewModal(application.applicationId, application.userId)}
+                                  className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                                >
+                                  <FaEye className="inline mr-1" />
+                                  View Details
+                                </button>
+                                <button
                                   onClick={() => updateApplicationStatus(application.applicationId, 3)}
                                   className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
                                 >
@@ -555,12 +579,21 @@ const CompanyApplications = () => {
                             )}
                             
                             {(application.applicationStatus === 3 || application.applicationStatus === 4) && (
-                              <button
-                                onClick={() => updateApplicationStatus(application.applicationId, 1)}
-                                className="px-3 py-1 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
-                              >
-                                Reset to Pending
-                              </button>
+                              <>
+                                <button
+                                  onClick={() => openReviewModal(application.applicationId, application.userId)}
+                                  className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                                >
+                                  <FaEye className="inline mr-1" />
+                                  View Details
+                                </button>
+                                <button
+                                  onClick={() => updateApplicationStatus(application.applicationId, 1)}
+                                  className="px-3 py-1 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
+                                >
+                                  Reset to Pending
+                                </button>
+                              </>
                             )}
                           </div>
                         </div>
@@ -594,9 +627,19 @@ const CompanyApplications = () => {
           </div>
         </div>
       </div>
+
+      {/* Review Modal */}
+      <ReviewModal
+        isOpen={reviewModal.isOpen}
+        onClose={closeReviewModal}
+        applicationId={reviewModal.applicationId}
+        userId={reviewModal.userId}
+        onStatusUpdate={updateApplicationStatus}
+      />
+
       <Footer />
     </>
   );
 };
 
-export default CompanyApplications;
+export default ApplicationReceived;
