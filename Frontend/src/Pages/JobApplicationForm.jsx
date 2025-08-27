@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { User, Mail, Phone, MapPin, GraduationCap, Briefcase, DollarSign, Calendar, Upload, Award } from "lucide-react";
-import { IoClose } from "react-icons/io5";
+import { useParams, useNavigate } from "react-router-dom";
+import { User, Mail, GraduationCap, Briefcase, DollarSign, Upload, Award, X, FileText } from "lucide-react";
 import axiosInstance from "../Utils/axiosInstance";
 import { getUserIdFromToken } from "../Utils/jwtUtils";
 import { toast } from "react-toastify";
@@ -8,6 +8,14 @@ import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 
 const JobApplicationForm = () => {
+  const navigate = useNavigate();
+  // Get jobId from URL parameters
+  const { jobId } = useParams();
+  
+  // Basic state for job application
+  const [selectedJobId, setSelectedJobId] = useState(null);
+  const [companyId, setCompanyId] = useState(null);
+
   // Profile-related state
   const [userProfile, setUserProfile] = useState({
     firstName: "",
@@ -31,14 +39,51 @@ const JobApplicationForm = () => {
   const [experienceList, setExperienceList] = useState([]);
   const [loadingExperience, setLoadingExperience] = useState(true);
 
-  // Form data state
+  // Resume file state
+  const [resumeFile, setResumeFile] = useState(null);
+  const [resumeFileName, setResumeFileName] = useState("");
+  const [resumeUploading, setResumeUploading] = useState(false);
+
+  // Form data state - Updated field names to match API
   const [formData, setFormData] = useState({
     experience: "",
     currentPosition: "",
-    expectedSalary: "",
-    startDate: "",
+    salaryExpectation: "",  // Changed from expectedSalary
+    availableStartDate: "",  // Changed from startDate
     coverLetter: ""
   });
+
+  // Add state for submission loading
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Initialize job ID and company ID from URL params and localStorage
+  useEffect(() => {
+    if (jobId) {
+      const currentJobId = parseInt(jobId);
+      
+      if (currentJobId && !isNaN(currentJobId) && currentJobId > 0) {
+        setSelectedJobId(currentJobId);
+        
+        // Get company ID from localStorage (set from CompanyIndividual page)
+        const storedCompanyId = localStorage.getItem('currentCompanyId');
+        if (storedCompanyId) {
+          setCompanyId(parseInt(storedCompanyId));
+        } else {
+          toast.error("Missing company information. Please go back and select a job from the company page.");
+          // Optionally navigate back
+          // navigate(-1);
+        }
+        
+        // Store job ID in localStorage for consistency
+        localStorage.setItem('selectedJobId', currentJobId.toString());
+      } else {
+        console.error('Invalid job ID:', jobId);
+        toast.error("Invalid job ID. Please go back and select a job to apply for.");
+      }
+    } else {
+      toast.error("No job selected. Please go back and select a job to apply for.");
+    }
+  }, [jobId, navigate]);
 
   // Fetch user profile
   const fetchUserProfile = async () => {
@@ -76,7 +121,7 @@ const JobApplicationForm = () => {
     }
   };
 
-  // Fetch user's skills (using the same endpoint as Skills component)
+  // Fetch user's skills
   const fetchUserSkills = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -87,24 +132,21 @@ const JobApplicationForm = () => {
         return;
       }
 
-      // Use the same API endpoint as the Skills component
       const response = await axiosInstance.get(`/api/skills/getskillsbyuserid?userId=${userId}`);
-      console.log('Raw skills response:', response.data); // Add this for debugging
+      console.log('Raw skills response:', response.data);
       
       if (response.data && Array.isArray(response.data)) {
-        // Map backend response to expected format (same as Skills component)
         const mappedSkills = response.data.map(skill => ({
           id: skill.skillId,
           skillName: skill.skill
         }));
 
-        console.log('Mapped skills:', mappedSkills); // Add this for debugging
+        console.log('Mapped skills:', mappedSkills);
         setSelectedSkills(mappedSkills);
       }
     } catch (error) {
       console.error('Error fetching user skills:', error);
-      console.error('Error response:', error.response?.data); // Add this for debugging
-      // Don't show error toast for skills as user might not have any skills yet
+      console.error('Error response:', error.response?.data);
       setSelectedSkills([]);
     } finally {
       setLoadingSkills(false);
@@ -136,7 +178,7 @@ const JobApplicationForm = () => {
     }
   };
 
-  // Fetch user's experiences (using the same logic as Experience component)
+  // Fetch user's experiences
   const fetchExperiences = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -147,24 +189,22 @@ const JobApplicationForm = () => {
         return;
       }
 
-      // Use the same API endpoint as the Experience component
       const response = await axiosInstance.get(`/api/Experience/user/${userId}`);
-      console.log('Raw experience response:', response.data); // Add this for debugging
+      console.log('Raw experience response:', response.data);
       
       if (response.data && Array.isArray(response.data)) {
         setExperienceList(response.data);
       }
     } catch (error) {
       console.error('Error fetching user experiences:', error);
-      console.error('Error response:', error.response?.data); // Add this for debugging
-      // Don't show error toast for experiences as user might not have any experiences yet
+      console.error('Error response:', error.response?.data);
       setExperienceList([]);
     } finally {
       setLoadingExperience(false);
     }
   };
 
-  // Format date range for experience display (simplified without months array)
+  // Format date range for experience display
   const formatDateRange = (experience) => {
     const startText = `${experience.startMonth}/${experience.startYear}`;
     const endText = experience.isCurrentlyWorking ? "Present" : 
@@ -178,6 +218,61 @@ const JobApplicationForm = () => {
     fetchEducation();
     fetchExperiences();
   }, []);
+
+  // Handle resume file selection
+  const handleResumeFileChange = (e) => {
+    const file = e.target.files[0];
+    
+    if (file) {
+      // Validate file type
+      const allowedTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
+      
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('Please upload a PDF, DOC, or DOCX file');
+        return;
+      }
+      
+      // Validate file size (5MB max)
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      if (file.size > maxSize) {
+        toast.error('File size must be less than 5MB');
+        return;
+      }
+      
+      setResumeFile(file);
+      setResumeFileName(file.name);
+      toast.success('Resume file selected successfully');
+    }
+  };
+
+  // Remove selected resume file
+  const handleRemoveResumeFile = () => {
+    setResumeFile(null);
+    setResumeFileName("");
+    // Clear the input
+    const fileInput = document.getElementById('resume-upload');
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
+  // Convert file to base64 string for database storage
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        // Remove the data:mime/type;base64, part
+        const base64String = reader.result.split(',')[1];
+        resolve(base64String);
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
 
   // Handle form input changes
   const handleFormChange = (e) => {
@@ -194,58 +289,189 @@ const JobApplicationForm = () => {
     });
   };
 
-  // Skills functionality (simplified - display only)
-  const removeSkill = (skillToRemove) => {
-    if (!skillToRemove || !skillToRemove.id) {
-      console.error('Invalid skill object to remove:', skillToRemove);
-      return;
+  // Helper function to parse salary
+  const parseSalary = (salaryString) => {
+    if (!salaryString || salaryString.trim() === "") {
+      return 0;
     }
-
-    setSelectedSkills(prev => prev.filter(skill => skill.id !== skillToRemove.id));
+    
+    // Remove commas, dollar signs, and spaces
+    const cleanedSalary = salaryString.replace(/[$,\s]/g, '');
+    
+    // Handle ranges like "80000-100000" by taking the first number
+    const firstNumber = cleanedSalary.split('-')[0];
+    
+    const parsed = parseFloat(firstNumber);
+    return isNaN(parsed) ? 0 : parsed;
   };
 
-  // Handle form submission
-  const handleSubmitApplication = async (e) => {
-    e.preventDefault();
-
-    const token = localStorage.getItem("token");
-    const userId = getUserIdFromToken(token);
-
-    if (!userId) {
-      toast.error("Please log in to submit application");
-      return;
-    }
-    if (!userProfile.firstName || !userProfile.lastName || !userProfile.email) {
-      toast.error("Please fill in all required personal information");
-      return;
-    }
-
-    if (!formData.experience) {
-      toast.error("Please select your experience level");
-      return;
+  // Helper function to format date
+  const formatDateForAPI = (dateString) => {
+    if (!dateString || dateString.trim() === "") {
+      return null;
     }
     
     try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return null;
+      }
+      return date.toISOString();
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return null;
+    }
+  };
+
+  // Handle form submission with resume file upload
+  const handleSubmitApplication = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      const userId = getUserIdFromToken(token);
+
+      if (!userId) {
+        toast.error("Please log in to submit application");
+        return;
+      }
+
+      if (!selectedJobId) {
+        toast.error("No job selected. Please go back and select a job to apply for.");
+        return;
+      }
+
+      if (!companyId) {
+        toast.error("Missing company information. Please go back and select a job from the company page.");
+        return;
+      }
+
+      // Validate required fields
+      if (!userProfile.firstName || !userProfile.lastName || !userProfile.email) {
+        toast.error("Please fill in all required personal information");
+        return;
+      }
+
+      // Convert resume file to base64 if present
+      let resumeFileString = "";
+      if (resumeFile) {
+        setResumeUploading(true);
+        try {
+          resumeFileString = await fileToBase64(resumeFile);
+          console.log('Resume file converted to base64, length:', resumeFileString.length);
+        } catch (error) {
+          console.error('Error converting resume file:', error);
+          toast.error('Failed to process resume file');
+          return;
+        } finally {
+          setResumeUploading(false);
+        }
+      }
+
+      // Prepare application data with resume file
       const applicationData = {
+        applicationId: 0, // Will be generated by backend
         userId: userId,
-        personalInfo: userProfile,
+        jobId: parseInt(selectedJobId),
+        applicationStatus: 0, // Default status (Pending)
+        applicationDate: new Date().toISOString(),
+        
+        // Map and format the fields correctly
+        coverLetter: formData.coverLetter || "",
+        resumeFile: resumeFileString, // Base64 encoded file content
+        salaryExpectation: parseSalary(formData.salaryExpectation),
+        availableStartDate: formatDateForAPI(formData.availableStartDate),
+        createdAt: new Date().toISOString(),
+        
+        // Additional metadata for resume file
+        resumeFileName: resumeFileName || "",
+        resumeFileType: resumeFile ? resumeFile.type : "",
+        resumeFileSize: resumeFile ? resumeFile.size : 0,
+        
+        // Additional data that might be needed by your backend
+        companyId: parseInt(companyId),
+        personalInfo: {
+          firstName: userProfile.firstName,
+          lastName: userProfile.lastName,
+          email: userProfile.email,
+          phone: userProfile.phone,
+          location: userProfile.location,
+          linkedinProfile: userProfile.linkedinProfile,
+        },
         experience: formData.experience,
         currentPosition: formData.currentPosition,
-        skills: selectedSkills,
+        skills: selectedSkills.map(skill => ({
+          skillId: skill.id,
+          skillName: skill.skillName
+        })),
         education: educationList,
-        experiences: experienceList, // Added experience list
-        expectedSalary: formData.expectedSalary,
-        startDate: formData.startDate,
-        coverLetter: formData.coverLetter
+        workExperience: experienceList
       };
 
-      console.log('Application Data:', applicationData);
-      toast.success("Application submitted successfully!");
+      console.log('Submitting application data:', {
+        ...applicationData,
+        resumeFile: resumeFileString ? `[Base64 data - ${resumeFileString.length} chars]` : ""
+      });
+
+      // Submit the application
+      const response = await axiosInstance.post('/submitjobapplication', applicationData);
+
+      if (response.status === 200 || response.status === 201) {
+        toast.success("Application submitted successfully!");
+        
+        // Clear stored IDs after successful submission
+        localStorage.removeItem('selectedJobId');
+        localStorage.removeItem('currentCompanyId');
+        
+        // Reset the form data
+        setFormData({
+          experience: "",
+          currentPosition: "",
+          salaryExpectation: "",
+          availableStartDate: "",
+          coverLetter: ""
+        });
+
+        // Clear resume file
+        handleRemoveResumeFile();
+
+        // Optionally navigate back to company page or jobs list
+        setTimeout(() => {
+          navigate('/companies'); // or wherever you want to redirect
+        }, 2000);
+      }
 
     } catch (error) {
       console.error('Error submitting application:', error);
-      toast.error('Failed to submit application');
+      
+      if (error.response) {
+        const errorMessage = error.response.data?.message || 
+                           error.response.data?.error || 
+                           'Failed to submit application';
+        toast.error(errorMessage);
+        console.error('Server error response:', error.response.data);
+      } else if (error.request) {
+        toast.error('Network error. Please check your connection and try again.');
+        console.error('Network error:', error.request);
+      } else {
+        toast.error('An unexpected error occurred. Please try again.');
+        console.error('Unexpected error:', error.message);
+      }
+    } finally {
+      setIsSubmitting(false);
+      setResumeUploading(false);
     }
+  };
+
+  // Handle cancel button click
+  const handleCancel = () => {
+    // Clear stored IDs
+    localStorage.removeItem('selectedJobId');
+    localStorage.removeItem('currentCompanyId');
+    
+    // Navigate back to companies page or previous page
+    navigate('/companies'); // You can change this to navigate(-1) if you prefer going back to previous page
   };
 
   if (loadingProfile || loadingSkills || loadingEducation || loadingExperience) {
@@ -263,407 +489,406 @@ const JobApplicationForm = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-br from-blue-100 to-white flex justify-center p-6">
-        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl mx-auto overflow-hidden">
-          {/* Header */}
-          <div className="bg-blue-500 text-white p-8">
-            <div className="flex justify-between items-center">
-              <div>
-                <h1 className="text-3xl font-bold mb-2">Apply for Position</h1>
-                <p className="text-blue-100">Complete your application using your profile information</p>
-              </div>
+      <div className="min-h-screen bg-gray-50 flex justify-center p-6">
+        <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl mx-auto">
+          {/* Header with Basic Information */}
+          <div className="bg-blue-500 text-white p-6 rounded-t-lg">
+            <h1 className="text-2xl font-bold mb-2">
+              Apply for Position
+            </h1>
+            <p className="text-blue-100">Complete your application using your profile information</p>
+            <div className="mt-3 text-blue-100 text-sm space-y-1">
             </div>
           </div>
 
-          {/* Form */}
-          <div className="p-8">
-            {/* Personal Information */}
-            <div className="mb-10">
-              <div className="flex items-center mb-6">
-                <div className="bg-blue-100 p-3 rounded-full mr-4">
-                  <User className="text-blue-600" size={24} />
+          <form onSubmit={handleSubmitApplication}>
+            <div className="p-6">
+              {/* Personal Information */}
+              <div className="mb-8">
+                <div className="flex items-center mb-4">
+                  <User className="text-blue-600 mr-3" size={24} />
+                  <h2 className="text-xl font-bold text-gray-800">Personal Information</h2>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800">Personal Information</h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      First Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="firstName"
+                      value={userProfile.firstName}
+                      onChange={handleProfileChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Enter your first name"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Last Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="lastName"
+                      value={userProfile.lastName}
+                      onChange={handleProfileChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Enter your last name"
+                      required
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
-                    First Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={userProfile.firstName}
-                    onChange={handleProfileChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
-                    placeholder="Enter your first name"
-                    required
-                  />
+              {/* Contact Information */}
+              <div className="mb-8">
+                <div className="flex items-center mb-4">
+                  <Mail className="text-green-600 mr-3" size={24} />
+                  <h2 className="text-xl font-bold text-gray-800">Contact Information</h2>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
-                    Last Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={userProfile.lastName}
-                    onChange={handleProfileChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
-                    placeholder="Enter your last name"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Contact Information */}
-            <div className="mb-10">
-              <div className="flex items-center mb-6">
-                <div className="bg-green-100 p-3 rounded-full mr-4">
-                  <Mail className="text-green-600" size={24} />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800">Contact Information</h2>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
-                    Email Address *
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email Address *
+                    </label>
                     <input
                       type="email"
                       name="email"
                       value={userProfile.email}
                       onChange={handleProfileChange}
-                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="your.email@example.com"
                       required
                     />
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
-                    Phone Number *
-                  </label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Phone Number *
+                    </label>
                     <input
                       type="tel"
                       name="phone"
                       value={userProfile.phone}
                       onChange={handleProfileChange}
-                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="+1 (555) 123-4567"
                       required
                     />
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
-                    Current Location *
-                  </label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Current Location *
+                    </label>
                     <input
                       type="text"
                       name="location"
                       value={userProfile.location}
                       onChange={handleProfileChange}
-                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="City, State, Country"
                       required
                     />
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
-                    LinkedIn Profile
-                  </label>
-                  <input
-                    type="url"
-                    name="linkedinProfile"
-                    value={userProfile.linkedinProfile}
-                    onChange={handleProfileChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
-                    placeholder="https://linkedin.com/in/yourprofile"
-                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      LinkedIn Profile
+                    </label>
+                    <input
+                      type="url"
+                      name="linkedinProfile"
+                      value={userProfile.linkedinProfile}
+                      onChange={handleProfileChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="https://linkedin.com/in/yourprofile"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Education Section */}
-            <div className="mb-10">
-              <div className="flex items-center mb-6">
-                <div className="bg-purple-100 p-3 rounded-full mr-4">
-                  <GraduationCap className="text-purple-600" size={24} />
+              {/* Education Section */}
+              <div className="mb-8">
+                <div className="flex items-center mb-4">
+                  <GraduationCap className="text-purple-600 mr-3" size={24} />
+                  <h2 className="text-xl font-bold text-gray-800">Education</h2>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800">Education</h2>
-              </div>
 
-              {/* Education List (Display Only) */}
-              {educationList.length > 0 ? (
-                <div className="space-y-4">
-                  {educationList.map((education) => (
-                    <div
-                      key={education.id || education.educationId}
-                      className="bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-purple-100 rounded-xl p-6 hover:shadow-lg transition-all duration-200"
-                    >
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-3 h-3 bg-gradient-to-r from-purple-400 to-indigo-400 rounded-full"></div>
-                        <h3 className="text-xl font-bold text-gray-800">
+                {educationList.length > 0 ? (
+                  <div className="space-y-4">
+                    {educationList.map((education) => (
+                      <div
+                        key={education.id || education.educationId}
+                        className="bg-purple-50 border border-purple-200 rounded-lg p-4"
+                      >
+                        <h3 className="text-lg font-bold text-gray-800 mb-1">
                           {education.degree} in {education.fieldOfStudy}
                         </h3>
-                      </div>
-                      <p className="text-lg font-semibold text-purple-700 mb-1">
-                        {education.school}
-                      </p>
-                      <div className="flex items-center gap-4 text-gray-600 mb-2">
-                        <span className="flex items-center gap-1">
-                          📅 {education.startDate} - {education.endDate || "Present"}
-                        </span>
-                        {education.grade && (
-                          <span className="flex items-center gap-1">
-                            🏆 Grade: {education.grade}
-                          </span>
+                        <p className="text-purple-700 font-medium mb-1">
+                          {education.school}
+                        </p>
+                        <div className="text-gray-600 text-sm mb-2">
+                          <span>{education.startDate} - {education.endDate || "Present"}</span>
+                          {education.grade && (
+                            <span className="ml-4">Grade: {education.grade}</span>
+                          )}
+                        </div>
+                        {education.description && (
+                          <p className="text-gray-700 text-sm">
+                            {education.description}
+                          </p>
                         )}
                       </div>
-                      {education.description && (
-                        <p className="text-gray-700 text-sm leading-relaxed">
-                          {education.description}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border-2 border-dashed border-purple-200">
-                  <GraduationCap className="mx-auto text-purple-300 mb-4" size={48} />
-                  <p className="text-gray-600 mb-4">No education information found in your profile</p>
-                  <p className="text-gray-500 text-sm">Please update your profile to add education details</p>
-                </div>
-              )}
-            </div>
-
-            {/* Professional Experience Section */}
-            <div className="mb-10">
-              <div className="flex items-center mb-6">
-                <div className="bg-teal-100 p-3 rounded-full mr-4">
-                  <Briefcase className="text-teal-600" size={24} />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800">Professional Experience</h2>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 bg-purple-50 rounded-lg border-2 border-dashed border-purple-200">
+                    <GraduationCap className="mx-auto text-purple-300 mb-2" size={32} />
+                    <p className="text-gray-600 mb-1">No education information found in your profile</p>
+                    <p className="text-gray-500 text-sm">Please update your profile to add education details</p>
+                  </div>
+                )}
               </div>
 
-              {/* Experience List (Display Only) */}
-              {experienceList.length > 0 ? (
-                <div className="space-y-4 mb-6">
-                  {experienceList.map((experience) => (
-                    <div
-                      key={experience.experienceId || experience.id}
-                      className="bg-gradient-to-r from-teal-50 to-cyan-50 border-2 border-teal-100 rounded-xl p-6 hover:shadow-lg transition-all duration-200"
-                    >
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-3 h-3 bg-gradient-to-r from-teal-400 to-cyan-400 rounded-full"></div>
-                        <h3 className="text-xl font-bold text-gray-800">
+              {/* Professional Experience Section */}
+              <div className="mb-8">
+                <div className="flex items-center mb-4">
+                  <Briefcase className="text-teal-600 mr-3" size={24} />
+                  <h2 className="text-xl font-bold text-gray-800">Professional Experience</h2>
+                </div>
+
+                {experienceList.length > 0 ? (
+                  <div className="space-y-4">
+                    {experienceList.map((experience) => (
+                      <div
+                        key={experience.experienceId || experience.id}
+                        className="bg-teal-50 border border-teal-200 rounded-lg p-4"
+                      >
+                        <h3 className="text-lg font-bold text-gray-800 mb-1">
                           {experience.jobTitle}
                         </h3>
-                      </div>
-                      <p className="text-lg font-semibold text-teal-700 mb-1">
-                        {experience.organization}
-                      </p>
-                      <div className="flex items-center gap-4 text-gray-600 mb-2">
-                        <span className="flex items-center gap-1">
-                          📅 {formatDateRange(experience)}
-                        </span>
-                        {experience.location && (
-                          <span className="flex items-center gap-1">
-                            📍 {experience.location}
-                          </span>
+                        <p className="text-teal-700 font-medium mb-1">
+                          {experience.organization}
+                        </p>
+                        <div className="text-gray-600 text-sm mb-2">
+                          <span>{formatDateRange(experience)}</span>
+                          {experience.location && (
+                            <span className="ml-4">{experience.location}</span>
+                          )}
+                        </div>
+                        {experience.description && (
+                          <p className="text-gray-700 text-sm whitespace-pre-wrap">
+                            {experience.description}
+                          </p>
                         )}
                       </div>
-                      {experience.description && (
-                        <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
-                          {experience.description}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl border-2 border-dashed border-teal-200 mb-6">
-                  <Briefcase className="mx-auto text-teal-300 mb-4" size={48} />
-                  <p className="text-gray-600 mb-4">No professional experience found in your profile</p>
-                  <p className="text-gray-500 text-sm">Please update your profile to add work experience</p>
-                </div>
-              )}
-            </div>
-
-            {/* Skills Section */}
-            <div className="mb-10">
-              <div className="flex items-center mb-6">
-                <div className="bg-indigo-100 p-3 rounded-full mr-4">
-                  <Award className="text-indigo-600" size={24} />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800">Skills & Expertise</h2>
-              </div>
-
-              {/* Display Selected Skills */}
-              {selectedSkills.length > 0 ? (
-                <div className="mb-6">
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">
-                    Your Skills from Profile
-                  </label>
-                  <div className="flex flex-wrap gap-3 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border-2 border-indigo-100 min-h-[60px]">
-                    {selectedSkills.map((skill) => {
-                      if (!skill || !skill.id || !skill.skillName) {
-                        return null;
-                      }
-
-                      return (
-                        <div
-                          key={`selected-skill-${skill.id}`}
-                          className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full px-4 py-2 text-sm font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-                        >
-                          <span>{skill.skillName}</span>
-                          <button
-                            type="button"
-                            onClick={() => removeSkill(skill)}
-                            className="text-white hover:text-red-200 hover:bg-white/20 rounded-full p-1 transition-colors duration-200"
-                            aria-label={`Remove skill ${skill.skillName}`}
-                          >
-                            <IoClose size={14} />
-                          </button>
-                        </div>
-                      );
-                    })}
+                    ))}
                   </div>
-                </div>
-              ) : (
-                <div className="text-center py-12 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border-2 border-dashed border-indigo-200">
-                  <Award className="mx-auto text-indigo-300 mb-4" size={48} />
-                  <p className="text-gray-600 mb-4">No skills found in your profile</p>
-                  <p className="text-gray-500 text-sm">Please update your profile to add your skills</p>
-                </div>
-              )}
-            </div>
-
-            {/* Job Preferences */}
-            <div className="mb-10">
-              <div className="flex items-center mb-6">
-                <div className="bg-orange-100 p-3 rounded-full mr-4">
-                  <DollarSign className="text-orange-600" size={24} />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800">Job Preferences</h2>
+                ) : (
+                  <div className="text-center py-8 bg-teal-50 rounded-lg border-2 border-dashed border-teal-200">
+                    <Briefcase className="mx-auto text-teal-300 mb-2" size={32} />
+                    <p className="text-gray-600 mb-1">No professional experience found in your profile</p>
+                    <p className="text-gray-500 text-sm">Please update your profile to add work experience</p>
+                  </div>
+                )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
-                    Expected Salary
-                  </label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              {/* Skills Section */}
+              <div className="mb-8">
+                <div className="flex items-center mb-4">
+                  <Award className="text-indigo-600 mr-3" size={24} />
+                  <h2 className="text-xl font-bold text-gray-800">Skills</h2>
+                </div>
+                {selectedSkills.length > 0 ? (
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    </label>
+                    <div className="flex flex-wrap gap-2 p-3 bg-indigo-50 rounded-lg border border-indigo-200">
+                      {selectedSkills.map((skill) => {
+                        if (!skill || !skill.id || !skill.skillName) {
+                          return null;
+                        }
+                        return (
+                          <div
+                            key={`selected-skill-${skill.id}`}
+                            className="bg-indigo-500 text-white rounded-full px-3 py-1 text-sm font-medium"
+                          >
+                            {skill.skillName}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 bg-indigo-50 rounded-lg border-2 border-dashed border-indigo-200">
+                    <Award className="mx-auto text-indigo-300 mb-2" size={32} />
+                    <p className="text-gray-600 mb-1">No skills found in your profile</p>
+                    <p className="text-gray-500 text-sm">Please update your profile to add your skills</p>
+                  </div>
+                )}
+              </div>
+              {/* Job Preferences */}
+              <div className="mb-8">
+                <div className="flex items-center mb-4">
+                  <DollarSign className="text-orange-600 mr-3" size={24} />
+                  <h2 className="text-xl font-bold text-gray-800">Job Preferences</h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Expected Salary
+                    </label>
                     <input
                       type="text"
-                      name="expectedSalary"
-                      value={formData.expectedSalary}
+                      name="salaryExpectation"
+                      value={formData.salaryExpectation}
                       onChange={handleFormChange}
-                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="80,000 - 100,000"
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                    </p>
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
-                    Available Start Date
-                  </label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Available Start Date
+                    </label>
                     <input
                       type="date"
-                      name="startDate"
-                      value={formData.startDate}
+                      name="availableStartDate"
+                      value={formData.availableStartDate}
                       onChange={handleFormChange}
-                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Resume Upload */}
-            <div className="mb-10">
-              <div className="flex items-center mb-4">
-                <Upload className="text-blue-600 mr-3" size={20} />
-                <label className="text-sm font-semibold text-gray-700">
-                  Resume/CV
-                </label>
-              </div>
-              <div className="border-3 border-dashed border-gray-300 rounded-2xl p-8 text-center hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 cursor-pointer group">
-                <div className="space-y-3">
-                  <div className="bg-blue-100 group-hover:bg-blue-200 transition-colors duration-300 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
-                    <Upload className="text-blue-600" size={28} />
-                  </div>
-                  <div>
-                    <p className="text-lg font-semibold text-gray-700">Upload your resume</p>
-                    <p className="text-sm text-gray-500 mt-1">PDF, DOC, or DOCX (max 5MB)</p>
-                  </div>
-                  <input
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    className="hidden"
-                    id="resume-upload"
-                  />
-                  <label
-                    htmlFor="resume-upload"
-                    className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 cursor-pointer"
-                  >
-                    Choose File
+              {/* Resume Upload */}
+              <div className="mb-8">
+                <div className=" flex items-center mb-3">
+                  <Upload className="text-blue-600 mr-3" size={20} />
+                  <label className="text-sm font-medium text-gray-700">
+                    Resume/CV
                   </label>
                 </div>
+
+                {!resumeFile ? (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                    <Upload className="mx-auto text-gray-400 mb-2" size={24} />
+                    <p className="text-gray-600 mb-1">Upload your resume</p>
+                    <p className="text-sm text-gray-500 mb-3">PDF, DOC, or DOCX (max 5MB)</p>
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      className="hidden"
+                      id="resume-upload"
+                      onChange={handleResumeFileChange}
+                    />
+                    <label
+                      htmlFor="resume-upload"
+                      className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium cursor-pointer transition-colors"
+                    >
+                      Choose File
+                    </label>
+                  </div>
+                ) : (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <FileText className="text-blue-600 mr-3" size={24} />
+                        <div>
+                          <p className="font-medium text-gray-800">{resumeFileName}</p>
+                          <p className="text-sm text-gray-600">
+                            {resumeFile && `${(resumeFile.size / (1024 * 1024)).toFixed(2)} MB`}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRemoveResumeFile}
+                        className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition-colors"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+                    
+                    {/* Option to replace file */}
+                    <div className="mt-3 pt-3 border-t border-blue-200">
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        className="hidden"
+                        id="resume-replace"
+                        onChange={handleResumeFileChange}
+                      />
+                      <label
+                        htmlFor="resume-replace"
+                        className="inline-block text-blue-600 hover:text-blue-800 text-sm font-medium cursor-pointer"
+                      >
+                        Replace file
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {resumeUploading && (
+                  <div className="mt-3 flex items-center text-blue-600">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                    Processing resume file...
+                  </div>
+                )}
+              </div>
+
+              {/* Cover Letter */}
+              <div className="mb-8">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Cover Letter (Optional)
+                </label>
+                <textarea
+                  rows="6"
+                  name="coverLetter"
+                  value={formData.coverLetter}
+                  onChange={handleFormChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                  placeholder="Write a brief cover letter explaining why you're interested in this position and what makes you a great fit..."
+                />
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="flex justify-end gap-4">
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={isSubmitting}
+                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || !selectedJobId || !companyId || resumeUploading}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isSubmitting || resumeUploading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      {resumeUploading ? 'Processing Resume...' : 'Submitting...'}
+                    </>
+                  ) : (
+                    'Submit Application'
+                  )}
+                </button>
               </div>
             </div>
-
-            {/* Cover Letter */}
-            <div className="mb-10">
-              <label className="block text-sm font-semibold text-gray-700 mb-3">
-                Cover Letter (Optional)
-              </label>
-              <textarea
-                rows="6"
-                name="coverLetter"
-                value={formData.coverLetter}
-                onChange={handleFormChange}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 resize-none"
-                placeholder="Write a brief cover letter explaining why you're interested in this position and what makes you a great fit..."
-              />
-            </div>
-
-            {/* Submit Buttons */}
-            <div className="flex justify-end gap-4">
-              <button
-                type="button"
-                className="px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 font-semibold text-lg"
-              >
-                Save as Draft
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmitApplication}
-                className="px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-              >
-                Submit Application
-              </button>
-            </div>
-          </div>
+          </form>
         </div>
       </div>
       <Footer />
