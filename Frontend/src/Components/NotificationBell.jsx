@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, X, Trash2, Mail, MessageSquare, AlertTriangle, ExternalLink } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Bell, X, Trash2, Mail, MessageSquare, AlertTriangle } from 'lucide-react';
 import axiosInstance from '../Utils/axiosInstance';
 import { getUserIdFromToken } from '../Utils/jwtUtils';
 import { toast } from 'react-toastify';
@@ -11,8 +10,6 @@ const NotificationBell = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   
-  const navigate = useNavigate();
-
   // Get user ID from token
   const userId = getUserIdFromToken(localStorage.getItem('token'));
 
@@ -42,7 +39,7 @@ const NotificationBell = () => {
     }
   }, [userId, isOpen]);
 
-  // Function to load notifications (only show recent 10 in dropdown)
+  // Function to load ALL notifications (no limit)
   const loadNotifications = async () => {
     try {
       setLoading(true);
@@ -63,10 +60,9 @@ const NotificationBell = () => {
       
       console.log('Loaded notifications:', allNotifications);
       
-      // Sort by creation date and take only the most recent 10 for dropdown
+      // Sort by creation date (most recent first) - Show ALL notifications
       const sortedNotifications = allNotifications
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .slice(0, 10); // Only show 10 most recent in dropdown
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       
       setNotifications(sortedNotifications);
       
@@ -179,7 +175,7 @@ const NotificationBell = () => {
     }
   };
 
-  // Function to format date
+  // Function to format date (updated to match screenshot format)
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -190,10 +186,15 @@ const NotificationBell = () => {
     if (diffInHours < 24) return `${Math.floor(diffInHours)}h ago`;
     if (diffInDays < 30) return `${Math.floor(diffInDays)} days ago`;
     
+    // Format like: "August 18, 2025 at 08:06 AM"
     return date.toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'long', 
       day: 'numeric'
+    }) + ' at ' + date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
     });
   };
 
@@ -228,12 +229,6 @@ const NotificationBell = () => {
     }
   };
 
-  // Navigate to full notifications page
-  const goToNotificationsPage = () => {
-    setIsOpen(false);
-    navigate('/notifications');
-  };
-
   // Get notification type info
   const getNotificationType = (typeId) => {
     return notificationTypes[typeId] || notificationTypes[3]; // Default to system alert
@@ -264,24 +259,24 @@ const NotificationBell = () => {
             onClick={() => setIsOpen(false)}
           />
           
-          {/* Dropdown Content */}
-          <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-[500px] overflow-hidden">
+          {/* Dropdown Content - Made wider and taller to accommodate all notifications */}
+          <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-[600px] overflow-hidden">
             {/* Header */}
             <div className="px-4 py-3 border-b border-gray-100 bg-white">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-base font-medium text-gray-900">Notifications</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
                   {unreadCount > 0 && (
-                    <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full font-medium">
+                    <span className="bg-blue-100 text-blue-600 text-sm px-2 py-1 rounded-full font-medium">
                       {unreadCount}
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2">
                   {unreadCount > 0 && (
                     <button
                       onClick={markAllAsRead}
-                      className="text-xs text-blue-600 hover:text-blue-700 px-2 py-1 rounded hover:bg-blue-50 transition-colors"
+                      className="text-sm text-blue-600 hover:text-blue-700 px-3 py-1 rounded hover:bg-blue-50 transition-colors font-medium"
                     >
                       Mark all as read
                     </button>
@@ -290,47 +285,47 @@ const NotificationBell = () => {
                     onClick={() => setIsOpen(false)}
                     className="text-gray-400 hover:text-gray-600 p-1"
                   >
-                    <X size={16} />
+                    <X size={18} />
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Notifications List */}
-            <div className="max-h-96 overflow-y-auto">
+            {/* Notifications List - Show ALL notifications with scroll */}
+            <div className="max-h-[500px] overflow-y-auto">
               {loading ? (
                 <div className="p-6 text-center text-gray-500">
                   <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600 mx-auto mb-2"></div>
                   <p className="text-sm">Loading...</p>
                 </div>
               ) : notifications.length === 0 ? (
-                <div className="p-6 text-center text-gray-500">
-                  <Bell size={32} className="mx-auto mb-3 text-gray-300" />
-                  <p className="text-sm font-medium mb-1">No notifications</p>
-                  <p className="text-xs text-gray-400">You're all caught up!</p>
+                <div className="p-8 text-center text-gray-500">
+                  <Bell size={40} className="mx-auto mb-4 text-gray-300" />
+                  <p className="text-base font-medium mb-2">No notifications</p>
+                  <p className="text-sm text-gray-400">You're all caught up!</p>
                 </div>
               ) : (
-                <div className="divide-y divide-gray-50">
-                  {notifications.map((notification, index) => {
+                <div className="divide-y divide-gray-100">
+                  {notifications.map((notification) => {
                     const notificationType = getNotificationType(notification.notificationTypeId);
                     const IconComponent = notificationType.icon;
                     
                     return (
                       <div
                         key={notification.notificationId}
-                        className={`px-4 py-3 hover:bg-gray-25 cursor-pointer transition-colors duration-150 ${
-                          !notification.isRead ? 'bg-blue-25 border-l-2 border-l-blue-500' : 'bg-white'
+                        className={`px-4 py-4 hover:bg-gray-50 cursor-pointer transition-colors duration-150 group ${
+                          !notification.isRead ? 'bg-blue-50 border-l-4 border-l-blue-500' : 'bg-white'
                         }`}
                         onClick={() => handleNotificationClick(notification)}
                       >
-                        <div className="flex items-start gap-3">
+                        <div className="flex items-start gap-4">
                           {/* Notification Type Icon */}
-                          <div className={`p-1.5 rounded-full flex-shrink-0 mt-0.5 ${
+                          <div className={`p-2 rounded-lg flex-shrink-0 mt-1 ${
                             notification.notificationTypeId === 1 ? 'bg-blue-100' :
                             notification.notificationTypeId === 2 ? 'bg-green-100' :
                             'bg-orange-100'
                           }`}>
-                            <IconComponent className={`w-3 h-3 ${
+                            <IconComponent className={`w-4 h-4 ${
                               notification.notificationTypeId === 1 ? 'text-blue-600' :
                               notification.notificationTypeId === 2 ? 'text-green-600' :
                               'text-orange-600'
@@ -339,39 +334,37 @@ const NotificationBell = () => {
                           
                           {/* Notification Content */}
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-xs font-medium text-gray-900">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-semibold text-gray-900">
                                 {notificationType.name}
                               </span>
-                              <span className="text-xs text-gray-500">
-                                {formatDate(notification.createdAt)}
-                              </span>
+                              {!notification.isRead && (
+                                <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
+                              )}
                             </div>
                             
-                            <p className="text-sm text-gray-700 leading-relaxed mb-1">
+                            <p className="text-base text-gray-800 leading-relaxed mb-3">
                               {notification.message}
                             </p>
                             
                             {notification.title && notification.title !== 'string' && (
-                              <p className="text-xs text-blue-600 font-medium">
+                              <p className="text-sm text-blue-600 font-medium mb-2">
                                 {notification.title}
                               </p>
                             )}
                             
-                            {!notification.isRead && (
-                              <div className="flex items-center justify-end mt-2">
-                                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                              </div>
-                            )}
+                            <p className="text-sm text-gray-500">
+                              {formatDate(notification.createdAt)}
+                            </p>
                           </div>
                           
                           {/* Delete Button */}
                           <button
                             onClick={(e) => deleteNotification(notification.notificationId, e)}
-                            className="text-gray-300 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0"
+                            className="text-gray-300 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0"
                             title="Delete notification"
                           >
-                            <Trash2 size={12} />
+                            <Trash2 size={16} />
                           </button>
                         </div>
                       </div>
@@ -379,17 +372,6 @@ const NotificationBell = () => {
                   })}
                 </div>
               )}
-            </div>
-
-            {/* Footer */}
-            <div className="px-4 py-3 border-t border-gray-100 bg-gray-50">
-              <button
-                onClick={goToNotificationsPage}
-                className="w-full text-center text-blue-600 hover:text-blue-700 text-sm font-medium py-2 hover:bg-blue-50 rounded transition-colors duration-150 flex items-center justify-center gap-2"
-              >
-                <span>View All Notifications</span>
-                <ExternalLink size={14} />
-              </button>
             </div>
           </div>
         </>
