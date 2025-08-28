@@ -164,15 +164,6 @@ const ReviewModal = ({
     return `${startText} - ${endText}`;
   };
 
-  const handleStatusUpdate = async (newStatus) => {
-    try {
-      await onStatusUpdate(applicationId, newStatus);
-      onClose(); // Close modal after successful update
-    } catch (error) {
-      console.error("Error updating status:", error);
-    }
-  };
-
   const formatDate = (dateString) => {
     if (!dateString) return "Not provided";
     const date = new Date(dateString);
@@ -440,8 +431,8 @@ const ReviewModal = ({
                       Expected Salary
                     </label>
                     <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
-                      {applicationData.salaryExpectation || applicationData.expectedSalary ? 
-                        `$${applicationData.salaryExpectation || applicationData.expectedSalary}` : 
+                      {applicationData.salaryExpectation || applicationData.salaryExpectation ? 
+                        `$${applicationData.salaryExpectation || applicationData.salaryExpectation}` : 
                         "Not specified"
                       }
                     </div>
@@ -549,27 +540,6 @@ const ReviewModal = ({
                   className="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50"
                 >
                   Close
-                </button>
-                <button
-                  onClick={() => handleStatusUpdate(4)}
-                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center gap-2"
-                >
-                  <FaTimesCircle />
-                  Reject
-                </button>
-                <button
-                  onClick={() => handleStatusUpdate(2)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2"
-                >
-                  <FaEye />
-                  Reviewed
-                </button>
-                <button
-                  onClick={() => handleStatusUpdate(3)}
-                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-2"
-                >
-                  <FaCheck />
-                  Accept
                 </button>
               </div>
             </div>

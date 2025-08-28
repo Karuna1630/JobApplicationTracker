@@ -55,6 +55,10 @@ const CompanyProfile = () => {
   const [companyUsersCount, setCompanyUsersCount] = useState(0);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   
+  // Add state for total applications
+  const [totalApplicationsCount, setTotalApplicationsCount] = useState(0);
+  const [isLoadingApplications, setIsLoadingApplications] = useState(false);
+  
   const [companyInfo, setCompanyInfo] = useState({
     companyName: "",
     email: "",
@@ -96,6 +100,34 @@ const CompanyProfile = () => {
       // toast.error("Failed to fetch company users count");
     } finally {
       setIsLoadingUsers(false);
+    }
+  };
+
+  // Function to fetch total job applications for the company
+  const fetchTotalApplications = async (companyId) => {
+    if (!companyId) return;
+    
+    setIsLoadingApplications(true);
+    try {
+      const response = await axiosInstance.get(`/getalljobapplication?companyId=${companyId}`);
+      
+      if (response.data && Array.isArray(response.data)) {
+        setTotalApplicationsCount(response.data.length);
+      } else if (response.data && typeof response.data === 'object') {
+        // If the API returns an object with applications array or count property
+        const count = response.data.applications ? response.data.applications.length : 
+                     response.data.count || response.data.totalCount || response.data.total || 0;
+        setTotalApplicationsCount(count);
+      } else {
+        setTotalApplicationsCount(0);
+      }
+    } catch (error) {
+      console.error("Error fetching total applications:", error);
+      setTotalApplicationsCount(0);
+      // Optionally show a toast notification
+      // toast.error("Failed to fetch applications count");
+    } finally {
+      setIsLoadingApplications(false);
     }
   };
 
@@ -259,6 +291,9 @@ const CompanyProfile = () => {
 
           // Fetch company users after we have the company ID
           await fetchCompanyUsers(compId);
+          
+          // Fetch total applications after we have the company ID
+          await fetchTotalApplications(compId);
 
           // Fetch all jobs for the company to get the total count and display data
           const jobsResponse = await axiosInstance.get(
@@ -456,39 +491,7 @@ const CompanyProfile = () => {
             </ul>
           </div>
 
-          <div className="bg-white shadow-xl rounded-2xl p-8 mb-8">
-            <h2 className="text-2xl font-semibold text-gray-700 mb-6">
-              Company Dashboard
-            </h2>
-            <div className="flex flex-wrap justify-center gap-6">
-              <InfoCard
-                icon={<FaSuitcase />}
-                label="Total Jobs Posted"
-                value={totalJobsCount}
-                color="blue"
-              />
-              <InfoCard
-                icon={<FaUsers />}
-                label="Total Applications"
-                value="1,240"
-                color="green"
-              />
-              <InfoCard
-                icon={<FaUserCheck />}
-                label="Hired Candidates"
-                value="120"
-                color="indigo"
-              />
-              <InfoCard
-                icon={<FaUserClock />}
-                label="Pending Interviews"
-                value="45"
-                color="yellow"
-              />
-            </div>
-          </div>
-
-          <div className="bg-white shadow-xl rounded-2xl p-8 mb-8">
+           <div className="bg-white shadow-xl rounded-2xl p-8 mb-8">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-semibold text-gray-700">
                 Recent Job Posts
@@ -566,36 +569,45 @@ const CompanyProfile = () => {
 
           <div className="bg-white shadow-xl rounded-2xl p-8 mb-8">
             <h2 className="text-2xl font-semibold text-gray-700 mb-6">
-              User Insights
+              Company Dashboard
             </h2>
             <div className="flex flex-wrap justify-center gap-6">
               <InfoCard
+                icon={<FaSuitcase />}
+                label="Total Jobs Posted"
+                value={totalJobsCount}
+                color="blue"
+              />
+              <InfoCard
+                icon={<FaUsers />}
+                label="Total Applications"
+                value={totalApplicationsCount}
+                color="green"
+                isLoading={isLoadingApplications}
+              />
+              <InfoCard
+                icon={<FaUserCheck />}
+                label="Hired Candidates"
+                value="120"
+                color="indigo"
+              />
+              <InfoCard
+                icon={<FaUserClock />}
+                label="Pending Interviews"
+                value="45"
+                color="yellow"
+              />
+              <InfoCard
                 icon={<FaUserTie />}
-                label="Users"
+                label="Company Users"
                 value={companyUsersCount}
                 color="purple"
                 isLoading={isLoadingUsers}
               />
-              <InfoCard
-                icon={<FaGlobe />}
-                label="Website Visitors"
-                value="5,230"
-                color="cyan"
-              />
-              <InfoCard
-                icon={<FaChartLine />}
-                label="HR Staff"
-                value="6"
-                color="pink"
-              />
-              <InfoCard
-                icon={<FaUserPlus />}
-                label="New Signups (30d)"
-                value="14"
-                color="orange"
-              />
             </div>
           </div>
+
+         
 
           {showEditModal && (
             <EditCompanyModal

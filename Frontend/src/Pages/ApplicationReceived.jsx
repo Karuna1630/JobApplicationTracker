@@ -19,7 +19,6 @@ import {
   FaSortAmountUp,
   FaFileAlt,
   FaUsers,
-  FaPhone,
 } from "react-icons/fa";
 
 const StatusBadge = ({ status, applicationStatuses }) => {
@@ -37,12 +36,12 @@ const StatusBadge = ({ status, applicationStatuses }) => {
             bgColor: "bg-yellow-100", 
             textColor: "text-yellow-800" 
           };
-        case 'phone screen':
+        case 'approve':
           return { 
             text: statusObj.statusName, 
-            color: "blue", 
-            bgColor: "bg-blue-100", 
-            textColor: "text-blue-800" 
+            color: "green", 
+            bgColor: "bg-green-100", 
+            textColor: "text-green-800" 
           };
         case 'rejected':
           return { 
@@ -61,15 +60,13 @@ const StatusBadge = ({ status, applicationStatuses }) => {
       }
     }
     
-    // Fallback to old hardcoded values
+    // Fallback to hardcoded values
     switch (status) {
       case 1:
-        return { text: "Pending", color: "yellow", bgColor: "bg-yellow-100", textColor: "text-yellow-800" };
+        return { text: "Applied", color: "yellow", bgColor: "bg-yellow-100", textColor: "text-yellow-800" };
       case 2:
-        return { text: "Reviewed", color: "blue", bgColor: "bg-blue-100", textColor: "text-blue-800" };
+        return { text: "Approve", color: "green", bgColor: "bg-green-100", textColor: "text-green-800" };
       case 3:
-        return { text: "Accepted", color: "green", bgColor: "bg-green-100", textColor: "text-green-800" };
-      case 4:
         return { text: "Rejected", color: "red", bgColor: "bg-red-100", textColor: "text-red-800" };
       default:
         return { text: "Unknown", color: "gray", bgColor: "bg-gray-100", textColor: "text-gray-800" };
@@ -129,47 +126,64 @@ const ApplicationReceived = () => {
   const [stats, setStats] = useState({
     total: 0,
     applied: 0,
-    phoneScreen: 0,
+    approved: 0,
     rejected: 0
   });
 
-  // Fetch application statuses from API
+  // FIXED: Better error handling for fetching application statuses
   const fetchApplicationStatuses = async () => {
     try {
       const response = await axiosInstance.get('/api/ApplicationStatus');
-      if (response.data && Array.isArray(response.data)) {
-        setApplicationStatuses(response.data);
-      } else if (response.data && response.data.data && Array.isArray(response.data.data)) {
-        setApplicationStatuses(response.data.data);
+      
+      // More robust response handling
+      let statusData = [];
+      if (response.data) {
+        if (Array.isArray(response.data)) {
+          statusData = response.data;
+        } else if (response.data.data && Array.isArray(response.data.data)) {
+          statusData = response.data.data;
+        } else if (response.data.applicationStatuses && Array.isArray(response.data.applicationStatuses)) {
+          statusData = response.data.applicationStatuses;
+        }
+      }
+
+      if (statusData.length > 0) {
+        setApplicationStatuses(statusData);
+        console.log("Application statuses loaded:", statusData);
       } else {
-        // Fallback to default statuses if API response format is unexpected
+        console.log("No status data found in response, using defaults");
         setDefaultApplicationStatuses();
       }
     } catch (error) {
       console.error("Error fetching application statuses:", error);
-      // Set default statuses if API call fails
       setDefaultApplicationStatuses();
     }
   };
 
   // Set default application statuses (fallback)
   const setDefaultApplicationStatuses = () => {
-    setApplicationStatuses([
+    const defaultStatuses = [
       { applicationStatusId: 1, statusName: "Applied", description: "Application submitted" },
-      { applicationStatusId: 2, statusName: "Phone Screen", description: "Initial phone interview scheduled" },
+      { applicationStatusId: 2, statusName: "Approve", description: "Application was approved" },
       { applicationStatusId: 3, statusName: "Rejected", description: "Application was not successful" }
-    ]);
+    ];
+    setApplicationStatuses(defaultStatuses);
+    console.log("Using default application statuses:", defaultStatuses);
   };
 
   const fetchJobTypes = async () => {
     try {
       const response = await axiosInstance.get('/getalljobtypes');
+      
       if (response.data && Array.isArray(response.data)) {
         const mappedJobTypes = response.data.map(job => ({
           id: job.jobTypeId,
           name: job.name
         }));
         setJobTypes(mappedJobTypes);
+        console.log("Job types loaded:", mappedJobTypes);
+      } else {
+        console.log("No job types found in response");
       }
     } catch (error) {
       console.error("Error fetching job types:", error);
@@ -179,8 +193,12 @@ const ApplicationReceived = () => {
   const fetchCompanyJobs = async (companyId) => {
     try {
       const response = await axiosInstance.get(`/api/Jobs/getjobsbycompanyid?companyId=${companyId}`);
+      
       if (response.data && Array.isArray(response.data)) {
         setJobs(response.data);
+        console.log("Company jobs loaded:", response.data.length);
+      } else {
+        console.log("No jobs found for company");
       }
     } catch (error) {
       console.error("Error fetching company jobs:", error);
@@ -189,121 +207,251 @@ const ApplicationReceived = () => {
 
   // Get job type name by ID
   const getJobTypeName = (jobTypeId) => {
+    if (!jobTypeId) return "Unknown Job Type";
     const jobType = jobTypes.find(jt => jt.id === parseInt(jobTypeId));
     return jobType ? jobType.name : `Job Type ${jobTypeId}`;
   };
 
   // Get job details by job ID
   const getJobDetails = (jobId) => {
+    if (!jobId) return {};
     const job = jobs.find(j => j.jobId === jobId || j.id === jobId);
     return job || {};
   };
 
-  // Fetch applications by company ID
+  // FIXED: More robust application fetching with better error handling
   const fetchApplications = async (companyId) => {
     try {
       setIsLoading(true);
+      setErrorMsg("");
+      
+      console.log("Fetching applications for company:", companyId);
       const response = await axiosInstance.get(`/getapplicationsbycompanyid?companyId=${companyId}`);
       
-      // Handle different possible response structures
+      console.log("Raw API response:", response.data);
+      
+      // FIXED: More comprehensive response structure handling
       let applicationsData = [];
+      
       if (response.data) {
+        // Handle different possible response structures
         if (Array.isArray(response.data)) {
           applicationsData = response.data;
-        } else if (response.data.data && Array.isArray(response.data.data)) {
-          applicationsData = response.data.data;
-        } else if (response.data.applications && Array.isArray(response.data.applications)) {
-          applicationsData = response.data.applications;
+        } else if (response.data.data) {
+          if (Array.isArray(response.data.data)) {
+            applicationsData = response.data.data;
+          } else {
+            console.log("response.data.data exists but is not an array:", typeof response.data.data);
+          }
+        } else if (response.data.applications) {
+          if (Array.isArray(response.data.applications)) {
+            applicationsData = response.data.applications;
+          } else {
+            console.log("response.data.applications exists but is not an array:", typeof response.data.applications);
+          }
+        } else if (response.data.result) {
+          if (Array.isArray(response.data.result)) {
+            applicationsData = response.data.result;
+          } else {
+            console.log("response.data.result exists but is not an array:", typeof response.data.result);
+          }
         }
       }
 
-      if (applicationsData.length > 0) {
+      console.log("Processed applications data:", applicationsData);
+
+      if (Array.isArray(applicationsData) && applicationsData.length > 0) {
         setApplications(applicationsData);
         setFilteredApplications(applicationsData);
         
-        // Calculate statistics based on actual status IDs from API
+        // Calculate statistics
         const newStats = {
           total: applicationsData.length,
-          applied: applicationsData.filter(app => app.applicationStatus === 1 || app.status === 1).length,
-          phoneScreen: applicationsData.filter(app => app.applicationStatus === 2 || app.status === 2).length,
-          rejected: applicationsData.filter(app => app.applicationStatus === 3 || app.status === 3).length,
+          applied: applicationsData.filter(app => (app.applicationStatus === 1 || app.status === 1)).length,
+          approved: applicationsData.filter(app => (app.applicationStatus === 2 || app.status === 2)).length,
+          rejected: applicationsData.filter(app => (app.applicationStatus === 3 || app.status === 3)).length,
         };
         setStats(newStats);
         
         toast.success(`Found ${applicationsData.length} applications`);
       } else {
+        console.log("No applications found or invalid data structure");
         setApplications([]);
         setFilteredApplications([]);
-        setStats({ total: 0, applied: 0, phoneScreen: 0, rejected: 0 });
+        setStats({ total: 0, applied: 0, approved: 0, rejected: 0 });
         toast.info("No applications found for this company");
       }
     } catch (error) {
       console.error("Error fetching applications:", error);
-      setErrorMsg("Failed to fetch applications");
-      toast.error("Failed to fetch applications");
+      console.error("Error response:", error.response?.data);
+      
+      setErrorMsg(`Failed to fetch applications: ${error.message}`);
+      toast.error(`Failed to fetch applications: ${error.message}`);
       setApplications([]);
       setFilteredApplications([]);
-      setStats({ total: 0, applied: 0, phoneScreen: 0, rejected: 0 });
+      setStats({ total: 0, applied: 0, approved: 0, rejected: 0 });
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Update application status - using your API structure
+  // Approve Application using correct API endpoint
+  const approveApplication = async (applicationId) => {
+    try {
+      console.log("Attempting to approve application:", applicationId);
+      
+      const response = await axiosInstance.post(`/acceptjobapplication?id=${applicationId}`);
+      
+      if (response.status === 200 || response.status === 201) {
+        if (response.data && response.data.isSuccess !== false) {
+          updateApplicationInState(applicationId, 2);
+          toast.success("Application approved successfully!");
+        } else {
+          toast.error(response.data?.message || "Failed to approve application - API returned error");
+        }
+      } else {
+        toast.error("Failed to approve application - Unexpected response");
+      }
+    } catch (error) {
+      console.error("Error approving application:", error);
+      
+      if (error.response?.status === 400) {
+        toast.error("Bad request - Please check if the application ID is valid");
+      } else if (error.response?.status === 404) {
+        toast.error("Application not found or endpoint not available");
+      } else if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Failed to approve application");
+      }
+    }
+  };
+
+  // Reject Application using correct API endpoint
+  const rejectApplication = async (applicationId) => {
+    try {
+      console.log("Attempting to reject application:", applicationId);
+      
+      const response = await axiosInstance.post(`/rejectjobapplication?id=${applicationId}`);
+      
+      if (response.status === 200 || response.status === 201) {
+        if (response.data && response.data.isSuccess !== false) {
+          updateApplicationInState(applicationId, 3);
+          toast.success("Application rejected successfully!");
+        } else {
+          toast.error(response.data?.message || "Failed to reject application - API returned error");
+        }
+      } else {
+        toast.error("Failed to reject application - Unexpected response");
+      }
+    } catch (error) {
+      console.error("Error rejecting application:", error);
+      
+      if (error.response?.status === 400) {
+        toast.error("Bad request - Please check if the application ID is valid");
+      } else if (error.response?.status === 404) {
+        toast.error("Application not found or endpoint not available");
+      } else if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Failed to reject application");
+      }
+    }
+  };
+
+  // Helper function to update application state
+  const updateApplicationInState = (applicationId, newStatus) => {
+    // Update the applications array
+    setApplications(prev => 
+      prev.map(app => {
+        const currentId = app.applicationId || app.id;
+        return currentId === applicationId 
+          ? { ...app, applicationStatus: newStatus, status: newStatus }
+          : app;
+      })
+    );
+    
+    // Update filtered applications as well
+    setFilteredApplications(prev => 
+      prev.map(app => {
+        const currentId = app.applicationId || app.id;
+        return currentId === applicationId 
+          ? { ...app, applicationStatus: newStatus, status: newStatus }
+          : app;
+      })
+    );
+    
+    // Recalculate stats
+    const updatedApps = applications.map(app => {
+      const currentId = app.applicationId || app.id;
+      return currentId === applicationId 
+        ? { ...app, applicationStatus: newStatus, status: newStatus }
+        : app;
+    });
+    
+    const newStats = {
+      total: updatedApps.length,
+      applied: updatedApps.filter(app => (app.applicationStatus || app.status) === 1).length,
+      approved: updatedApps.filter(app => (app.applicationStatus || app.status) === 2).length,
+      rejected: updatedApps.filter(app => (app.applicationStatus || app.status) === 3).length,
+    };
+    setStats(newStats);
+  };
+
+  // Update application status (fallback method)
   const updateApplicationStatus = async (applicationId, newStatus) => {
     try {
-      // If you have an update endpoint, use it. Otherwise, you might need to create one
-      // For now, I'll assume you have an endpoint similar to your original code
-      const response = await axiosInstance.put(`/updateapplicationstatus`, {
-        applicationId: applicationId,
-        status: newStatus
-      });
-      
-      // Handle different possible response structures
-      if (response.data && (response.data.isSuccess !== false)) {
-        // Update the application in the state
-        setApplications(prev => 
-          prev.map(app => {
-            const currentStatus = app.applicationStatus || app.status;
-            const currentId = app.applicationId || app.id;
+      const requestPayloads = [
+        { applicationId: applicationId, status: newStatus },
+        { ApplicationId: applicationId, Status: newStatus },
+        { id: applicationId, status: newStatus },
+        { Id: applicationId, Status: newStatus }
+      ];
+
+      const endpoints = [
+        '/updateapplicationstatus',
+        '/api/Application/updatestatus',
+        '/api/applications/updatestatus',
+        '/Application/updatestatus',
+        '/applications/updatestatus'
+      ];
+
+      let response = null;
+      let lastError = null;
+
+      for (const endpoint of endpoints) {
+        for (const payload of requestPayloads) {
+          try {
+            console.log(`Trying endpoint: ${endpoint} with payload:`, payload);
+            response = await axiosInstance.put(endpoint, payload);
             
-            return currentId === applicationId 
-              ? { ...app, applicationStatus: newStatus, status: newStatus }
-              : app;
-          })
-        );
-        
-        // Update filtered applications as well
-        setFilteredApplications(prev => 
-          prev.map(app => {
-            const currentId = app.applicationId || app.id;
-            return currentId === applicationId 
-              ? { ...app, applicationStatus: newStatus, status: newStatus }
-              : app;
-          })
-        );
-        
-        const statusObj = applicationStatuses.find(s => s.applicationStatusId === newStatus);
-        const statusName = statusObj ? statusObj.statusName : 'Status';
-        toast.success(`Application moved to ${statusName}`);
-        
-        // Recalculate stats
-        const updatedApps = applications.map(app => {
-          const currentId = app.applicationId || app.id;
-          return currentId === applicationId 
-            ? { ...app, applicationStatus: newStatus, status: newStatus }
-            : app;
-        });
-        
-        const newStats = {
-          total: updatedApps.length,
-          applied: updatedApps.filter(app => (app.applicationStatus || app.status) === 1).length,
-          phoneScreen: updatedApps.filter(app => (app.applicationStatus || app.status) === 2).length,
-          rejected: updatedApps.filter(app => (app.applicationStatus || app.status) === 3).length,
-        };
-        setStats(newStats);
+            if (response.status === 200 || response.status === 201) {
+              break;
+            }
+          } catch (error) {
+            lastError = error;
+            continue;
+          }
+        }
+        if (response && (response.status === 200 || response.status === 201)) {
+          break;
+        }
+      }
+
+      // Handle response
+      if (response && (response.status === 200 || response.status === 201)) {
+        if (response.data && (response.data.isSuccess !== false)) {
+          updateApplicationInState(applicationId, newStatus);
+          
+          const statusObj = applicationStatuses.find(s => s.applicationStatusId === newStatus);
+          const statusName = statusObj ? statusObj.statusName : 'Status';
+          toast.success(`Application moved to ${statusName}`);
+        } else {
+          toast.error(response.data?.message || "Failed to update application status");
+        }
       } else {
-        toast.error(response.data?.message || "Failed to update application status");
+        console.error("All update attempts failed. Last error:", lastError);
+        toast.error(lastError?.response?.data?.message || "Failed to update application status");
       }
     } catch (error) {
       console.error("Error updating application status:", error);
@@ -352,10 +500,10 @@ const ApplicationReceived = () => {
     if (statusFilter !== "all") {
       const statusMap = {
         "applied": 1,
-        "phoneScreen": 2,
+        "approved": 2,
         "rejected": 3
       };
-      filtered = filtered.filter(app => app.applicationStatus === statusMap[statusFilter]);
+      filtered = filtered.filter(app => (app.applicationStatus || app.status) === statusMap[statusFilter]);
     }
     
     // Apply sorting
@@ -364,20 +512,20 @@ const ApplicationReceived = () => {
       
       switch (sortBy) {
         case "date":
-          aValue = new Date(a.applicationDate);
-          bValue = new Date(b.applicationDate);
+          aValue = new Date(a.applicationDate || a.createdDate || 0);
+          bValue = new Date(b.applicationDate || b.createdDate || 0);
           break;
         case "status":
-          aValue = a.applicationStatus;
-          bValue = b.applicationStatus;
+          aValue = a.applicationStatus || a.status || 0;
+          bValue = b.applicationStatus || b.status || 0;
           break;
         case "jobId":
-          aValue = a.jobId;
-          bValue = b.jobId;
+          aValue = a.jobId || 0;
+          bValue = b.jobId || 0;
           break;
         default:
-          aValue = a.applicationId;
-          bValue = b.applicationId;
+          aValue = a.applicationId || a.id || 0;
+          bValue = b.applicationId || b.id || 0;
       }
       
       if (sortOrder === "asc") {
@@ -394,7 +542,6 @@ const ApplicationReceived = () => {
   useEffect(() => {
     const initializeComponent = async () => {
       try {
-        // Get company ID from token or localStorage
         const token = localStorage.getItem("token");
         const userId = getUserIdFromToken(token);
         
@@ -404,11 +551,10 @@ const ApplicationReceived = () => {
           return;
         }
 
-        // First try to get companyId from localStorage
+        // Get company ID
         let compId = localStorage.getItem("currentCompanyId");
         
         if (!compId) {
-          // If not in localStorage, fetch from profile
           const profileResponse = await axiosInstance.get(`/profile/${userId}`);
           const profileData = profileResponse.data;
           
@@ -428,12 +574,14 @@ const ApplicationReceived = () => {
         await Promise.all([
           fetchApplicationStatuses(),
           fetchJobTypes(),
-          fetchCompanyJobs(compId),
-          fetchApplications(compId)
+          fetchCompanyJobs(compId)
         ]);
+        
+        // Fetch applications last to ensure all reference data is loaded
+        await fetchApplications(compId);
 
       } catch (error) {
-        setErrorMsg("Failed to initialize component.");
+        setErrorMsg(`Failed to initialize component: ${error.message}`);
         console.error("Component Initialization Error:", error);
         setIsLoading(false);
       }
@@ -444,14 +592,23 @@ const ApplicationReceived = () => {
 
   // Format date for display
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    if (!dateString) return "Date not available";
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "Invalid date";
+      
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Date error";
+    }
   };
 
   if (isLoading) {
@@ -467,8 +624,16 @@ const ApplicationReceived = () => {
 
   if (errorMsg) {
     return (
-      <div className="flex justify-center items-center min-h-screen text-red-600 text-lg">
-        {errorMsg}
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-center">
+          <div className="text-red-600 text-lg mb-4">{errorMsg}</div>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
@@ -485,7 +650,7 @@ const ApplicationReceived = () => {
           {/* Page Header */}
           <div className="bg-white shadow-xl rounded-2xl p-8 mb-8">
             <h1 className="text-3xl font-bold text-gray-800 mb-2">Job Applications</h1>
-            <p className="text-gray-600">review applications for company's job postings</p>
+            <p className="text-gray-600">Review applications for company's job postings</p>
           </div>
 
           {/* Statistics Cards */}
@@ -503,10 +668,10 @@ const ApplicationReceived = () => {
               color="yellow"
             />
             <StatsCard
-              icon={<FaPhone />}
-              label="Phone Screen"
-              value={stats.phoneScreen}
-              color="blue"
+              icon={<FaCheck />}
+              label="Approved"
+              value={stats.approved}
+              color="green"
             />
             <StatsCard
               icon={<FaTimes />}
@@ -541,7 +706,7 @@ const ApplicationReceived = () => {
                 >
                   <option value="all">All Status</option>
                   <option value="applied">Applied</option>
-                  <option value="phoneScreen">Phone Screen</option>
+                  <option value="approved">Approved</option>
                   <option value="rejected">Rejected</option>
                 </select>
               </div>
@@ -575,9 +740,11 @@ const ApplicationReceived = () => {
                 {filteredApplications.map((application) => {
                   const jobDetails = getJobDetails(application.jobId);
                   const jobTypeName = getJobTypeName(jobDetails.jobType || jobDetails.jobTypeId);
+                  const currentApplicationId = application.applicationId || application.id;
+                  const currentStatus = application.applicationStatus || application.status;
                   
                   return (
-                    <div key={application.applicationId} className="p-6 hover:bg-gray-50 transition-colors">
+                    <div key={currentApplicationId} className="p-6 hover:bg-gray-50 transition-colors">
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-4 mb-3">
@@ -586,7 +753,7 @@ const ApplicationReceived = () => {
                             </div>
                             <div>
                               <h3 className="text-lg font-semibold text-gray-800">
-                                Application #{application.applicationId || application.id}
+                                Application #{currentApplicationId}
                               </h3>
                               <p className="text-sm text-gray-600">User ID: {application.userId}</p>
                             </div>
@@ -605,7 +772,7 @@ const ApplicationReceived = () => {
                               <p className="text-sm font-medium text-gray-700">Application Date</p>
                               <p className="text-gray-600 flex items-center gap-1">
                                 <FaCalendarAlt className="text-xs" />
-                                {formatDate(application.applicationDate)}
+                                {formatDate(application.applicationDate || application.createdDate)}
                               </p>
                             </div>
                           </div>
@@ -613,31 +780,31 @@ const ApplicationReceived = () => {
                         
                         <div className="flex items-center gap-4">
                           <StatusBadge 
-                            status={application.applicationStatus || application.status} 
+                            status={currentStatus} 
                             applicationStatuses={applicationStatuses}
                           />
                           
-                          {/* Action Buttons */}
+                          {/* Action Buttons - Updated to use new API endpoints with better error handling */}
                           <div className="flex gap-2">
-                            {/* Applied Status (ID: 1) - Can move to Phone Screen or Reject */}
-                            {(application.applicationStatus === 1 || application.status === 1) && (
+                            {/* Applied Status (ID: 1) - Can move to Approved or Reject */}
+                            {currentStatus === 1 && (
                               <>
                                 <button
-                                  onClick={() => openReviewModal(application.applicationId || application.id, application.userId)}
+                                  onClick={() => openReviewModal(currentApplicationId, application.userId)}
                                   className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
                                 >
                                   <FaEye className="inline mr-1" />
                                   Review
                                 </button>
                                 <button
-                                  onClick={() => updateApplicationStatus(application.applicationId || application.id, 2)}
-                                  className="px-3 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
+                                  onClick={() => approveApplication(currentApplicationId)}
+                                  className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
                                 >
-                                  <FaPhone className="inline mr-1" />
-                                  Phone Screen
+                                  <FaCheck className="inline mr-1" />
+                                  Approve
                                 </button>
                                 <button
-                                  onClick={() => updateApplicationStatus(application.applicationId || application.id, 3)}
+                                  onClick={() => rejectApplication(currentApplicationId)}
                                   className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
                                 >
                                   <FaTimes className="inline mr-1" />
@@ -646,47 +813,35 @@ const ApplicationReceived = () => {
                               </>
                             )}
                             
-                            {/* Phone Screen Status (ID: 2) - Can view details or reject */}
-                            {(application.applicationStatus === 2 || application.status === 2) && (
+                            {/* Approved Status (ID: 2) - Can view details or reject */}
+                            {currentStatus === 2 && (
                               <>
                                 <button
-                                  onClick={() => openReviewModal(application.applicationId || application.id, application.userId)}
+                                  onClick={() => openReviewModal(currentApplicationId, application.userId)}
                                   className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
                                 >
                                   <FaEye className="inline mr-1" />
                                   View Details
                                 </button>
                                 <button
-                                  onClick={() => updateApplicationStatus(application.applicationId || application.id, 3)}
+                                  onClick={() => rejectApplication(currentApplicationId)}
                                   className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
                                 >
                                   <FaTimes className="inline mr-1" />
                                   Reject
-                                </button>
-                                <button
-                                  onClick={() => updateApplicationStatus(application.applicationId || application.id, 1)}
-                                  className="px-3 py-1 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
-                                >
-                                  Back to Applied
                                 </button>
                               </>
                             )}
                             
                             {/* Rejected Status (ID: 3) - Can view details or reset */}
-                            {(application.applicationStatus === 3 || application.status === 3) && (
+                            {currentStatus === 3 && (
                               <>
                                 <button
-                                  onClick={() => openReviewModal(application.applicationId || application.id, application.userId)}
+                                  onClick={() => openReviewModal(currentApplicationId, application.userId)}
                                   className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
                                 >
                                   <FaEye className="inline mr-1" />
                                   View Details
-                                </button>
-                                <button
-                                  onClick={() => updateApplicationStatus(application.applicationId || application.id, 1)}
-                                  className="px-3 py-1 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
-                                >
-                                  Reset to Applied
                                 </button>
                               </>
                             )}
@@ -701,28 +856,11 @@ const ApplicationReceived = () => {
               <div className="text-center py-12">
                 <FaUsers className="text-6xl text-gray-300 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-700 mb-2">No Applications Found</h3>
-                <p className="text-gray-500">
-                  {searchTerm || statusFilter !== "all" 
-                    ? "No applications match your current filters." 
-                    : "No applications have been submitted for your company's job postings yet."}
-                </p>
-                {(searchTerm || statusFilter !== "all") && (
-                  <button
-                    onClick={() => {
-                      setSearchTerm("");
-                      setStatusFilter("all");
-                    }}
-                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Clear Filters
-                  </button>
-                )}
               </div>
             )}
           </div>
         </div>
       </div>
-
       {/* Review Modal */}
       <ReviewModal
         isOpen={reviewModal.isOpen}
@@ -731,7 +869,6 @@ const ApplicationReceived = () => {
         userId={reviewModal.userId}
         onStatusUpdate={updateApplicationStatus}
       />
-
       <Footer />
     </>
   );
