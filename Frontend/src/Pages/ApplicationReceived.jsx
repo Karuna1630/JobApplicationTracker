@@ -19,10 +19,49 @@ import {
   FaSortAmountUp,
   FaFileAlt,
   FaUsers,
+  FaPhone,
 } from "react-icons/fa";
 
-const StatusBadge = ({ status }) => {
+const StatusBadge = ({ status, applicationStatuses }) => {
   const getStatusInfo = (status) => {
+    // Find the status in the API response
+    const statusObj = applicationStatuses.find(s => s.applicationStatusId === status);
+    
+    if (statusObj) {
+      // Map API statuses to colors
+      switch (statusObj.statusName.toLowerCase()) {
+        case 'applied':
+          return { 
+            text: statusObj.statusName, 
+            color: "yellow", 
+            bgColor: "bg-yellow-100", 
+            textColor: "text-yellow-800" 
+          };
+        case 'phone screen':
+          return { 
+            text: statusObj.statusName, 
+            color: "blue", 
+            bgColor: "bg-blue-100", 
+            textColor: "text-blue-800" 
+          };
+        case 'rejected':
+          return { 
+            text: statusObj.statusName, 
+            color: "red", 
+            bgColor: "bg-red-100", 
+            textColor: "text-red-800" 
+          };
+        default:
+          return { 
+            text: statusObj.statusName, 
+            color: "gray", 
+            bgColor: "bg-gray-100", 
+            textColor: "text-gray-800" 
+          };
+      }
+    }
+    
+    // Fallback to old hardcoded values
     switch (status) {
       case 1:
         return { text: "Pending", color: "yellow", bgColor: "bg-yellow-100", textColor: "text-yellow-800" };
@@ -32,6 +71,8 @@ const StatusBadge = ({ status }) => {
         return { text: "Accepted", color: "green", bgColor: "bg-green-100", textColor: "text-green-800" };
       case 4:
         return { text: "Rejected", color: "red", bgColor: "bg-red-100", textColor: "text-red-800" };
+      default:
+        return { text: "Unknown", color: "gray", bgColor: "bg-gray-100", textColor: "text-gray-800" };
     }
   };
 
@@ -76,6 +117,7 @@ const ApplicationReceived = () => {
   const [sortOrder, setSortOrder] = useState("desc");
   const [jobTypes, setJobTypes] = useState([]);
   const [jobs, setJobs] = useState([]);
+  const [applicationStatuses, setApplicationStatuses] = useState([]);
 
   // Review Modal State
   const [reviewModal, setReviewModal] = useState({
@@ -86,11 +128,38 @@ const ApplicationReceived = () => {
 
   const [stats, setStats] = useState({
     total: 0,
-    pending: 0,
-    reviewed: 0,
-    accepted: 0,
+    applied: 0,
+    phoneScreen: 0,
     rejected: 0
   });
+
+  // Fetch application statuses from API
+  const fetchApplicationStatuses = async () => {
+    try {
+      const response = await axiosInstance.get('/api/ApplicationStatus');
+      if (response.data && Array.isArray(response.data)) {
+        setApplicationStatuses(response.data);
+      } else if (response.data && response.data.data && Array.isArray(response.data.data)) {
+        setApplicationStatuses(response.data.data);
+      } else {
+        // Fallback to default statuses if API response format is unexpected
+        setDefaultApplicationStatuses();
+      }
+    } catch (error) {
+      console.error("Error fetching application statuses:", error);
+      // Set default statuses if API call fails
+      setDefaultApplicationStatuses();
+    }
+  };
+
+  // Set default application statuses (fallback)
+  const setDefaultApplicationStatuses = () => {
+    setApplicationStatuses([
+      { applicationStatusId: 1, statusName: "Applied", description: "Application submitted" },
+      { applicationStatusId: 2, statusName: "Phone Screen", description: "Initial phone interview scheduled" },
+      { applicationStatusId: 3, statusName: "Rejected", description: "Application was not successful" }
+    ]);
+  };
 
   const fetchJobTypes = async () => {
     try {
@@ -136,18 +205,28 @@ const ApplicationReceived = () => {
       setIsLoading(true);
       const response = await axiosInstance.get(`/getapplicationsbycompanyid?companyId=${companyId}`);
       
-      if (response.data && response.data.data && Array.isArray(response.data.data)) {
-        const applicationsData = response.data.data;
+      // Handle different possible response structures
+      let applicationsData = [];
+      if (response.data) {
+        if (Array.isArray(response.data)) {
+          applicationsData = response.data;
+        } else if (response.data.data && Array.isArray(response.data.data)) {
+          applicationsData = response.data.data;
+        } else if (response.data.applications && Array.isArray(response.data.applications)) {
+          applicationsData = response.data.applications;
+        }
+      }
+
+      if (applicationsData.length > 0) {
         setApplications(applicationsData);
         setFilteredApplications(applicationsData);
         
-        // Calculate statistics
+        // Calculate statistics based on actual status IDs from API
         const newStats = {
           total: applicationsData.length,
-          pending: applicationsData.filter(app => app.applicationStatus === 1).length,
-          reviewed: applicationsData.filter(app => app.applicationStatus === 2).length,
-          accepted: applicationsData.filter(app => app.applicationStatus === 3).length,
-          rejected: applicationsData.filter(app => app.applicationStatus === 4).length,
+          applied: applicationsData.filter(app => app.applicationStatus === 1 || app.status === 1).length,
+          phoneScreen: applicationsData.filter(app => app.applicationStatus === 2 || app.status === 2).length,
+          rejected: applicationsData.filter(app => app.applicationStatus === 3 || app.status === 3).length,
         };
         setStats(newStats);
         
@@ -155,6 +234,7 @@ const ApplicationReceived = () => {
       } else {
         setApplications([]);
         setFilteredApplications([]);
+        setStats({ total: 0, applied: 0, phoneScreen: 0, rejected: 0 });
         toast.info("No applications found for this company");
       }
     } catch (error) {
@@ -163,57 +243,67 @@ const ApplicationReceived = () => {
       toast.error("Failed to fetch applications");
       setApplications([]);
       setFilteredApplications([]);
+      setStats({ total: 0, applied: 0, phoneScreen: 0, rejected: 0 });
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Update application status
+  // Update application status - using your API structure
   const updateApplicationStatus = async (applicationId, newStatus) => {
     try {
+      // If you have an update endpoint, use it. Otherwise, you might need to create one
+      // For now, I'll assume you have an endpoint similar to your original code
       const response = await axiosInstance.put(`/updateapplicationstatus`, {
         applicationId: applicationId,
         status: newStatus
       });
       
-      if (response.data.isSuccess) {
+      // Handle different possible response structures
+      if (response.data && (response.data.isSuccess !== false)) {
         // Update the application in the state
         setApplications(prev => 
-          prev.map(app => 
-            app.applicationId === applicationId 
-              ? { ...app, applicationStatus: newStatus }
-              : app
-          )
+          prev.map(app => {
+            const currentStatus = app.applicationStatus || app.status;
+            const currentId = app.applicationId || app.id;
+            
+            return currentId === applicationId 
+              ? { ...app, applicationStatus: newStatus, status: newStatus }
+              : app;
+          })
         );
         
         // Update filtered applications as well
         setFilteredApplications(prev => 
-          prev.map(app => 
-            app.applicationId === applicationId 
-              ? { ...app, applicationStatus: newStatus }
-              : app
-          )
+          prev.map(app => {
+            const currentId = app.applicationId || app.id;
+            return currentId === applicationId 
+              ? { ...app, applicationStatus: newStatus, status: newStatus }
+              : app;
+          })
         );
         
-        toast.success("Application status updated successfully");
+        const statusObj = applicationStatuses.find(s => s.applicationStatusId === newStatus);
+        const statusName = statusObj ? statusObj.statusName : 'Status';
+        toast.success(`Application moved to ${statusName}`);
         
         // Recalculate stats
-        const updatedApps = applications.map(app => 
-          app.applicationId === applicationId 
-            ? { ...app, applicationStatus: newStatus }
-            : app
-        );
+        const updatedApps = applications.map(app => {
+          const currentId = app.applicationId || app.id;
+          return currentId === applicationId 
+            ? { ...app, applicationStatus: newStatus, status: newStatus }
+            : app;
+        });
         
         const newStats = {
           total: updatedApps.length,
-          pending: updatedApps.filter(app => app.applicationStatus === 1).length,
-          reviewed: updatedApps.filter(app => app.applicationStatus === 2).length,
-          accepted: updatedApps.filter(app => app.applicationStatus === 3).length,
-          rejected: updatedApps.filter(app => app.applicationStatus === 4).length,
+          applied: updatedApps.filter(app => (app.applicationStatus || app.status) === 1).length,
+          phoneScreen: updatedApps.filter(app => (app.applicationStatus || app.status) === 2).length,
+          rejected: updatedApps.filter(app => (app.applicationStatus || app.status) === 3).length,
         };
         setStats(newStats);
       } else {
-        toast.error(response.data.message || "Failed to update application status");
+        toast.error(response.data?.message || "Failed to update application status");
       }
     } catch (error) {
       console.error("Error updating application status:", error);
@@ -261,10 +351,9 @@ const ApplicationReceived = () => {
     // Apply status filter
     if (statusFilter !== "all") {
       const statusMap = {
-        "pending": 1,
-        "reviewed": 2,
-        "accepted": 3,
-        "rejected": 4
+        "applied": 1,
+        "phoneScreen": 2,
+        "rejected": 3
       };
       filtered = filtered.filter(app => app.applicationStatus === statusMap[statusFilter]);
     }
@@ -337,6 +426,7 @@ const ApplicationReceived = () => {
 
         // Fetch required data
         await Promise.all([
+          fetchApplicationStatuses(),
           fetchJobTypes(),
           fetchCompanyJobs(compId),
           fetchApplications(compId)
@@ -399,7 +489,7 @@ const ApplicationReceived = () => {
           </div>
 
           {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <StatsCard
               icon={<FaFileAlt />}
               label="Total Applications"
@@ -408,15 +498,15 @@ const ApplicationReceived = () => {
             />
             <StatsCard
               icon={<FaClock />}
-              label="Pending"
-              value={stats.pending}
+              label="Applied"
+              value={stats.applied}
               color="yellow"
             />
             <StatsCard
-              icon={<FaCheck />}
-              label="Accepted"
-              value={stats.accepted}
-              color="green"
+              icon={<FaPhone />}
+              label="Phone Screen"
+              value={stats.phoneScreen}
+              color="blue"
             />
             <StatsCard
               icon={<FaTimes />}
@@ -450,9 +540,8 @@ const ApplicationReceived = () => {
                   className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="all">All Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="reviewed">Reviewed</option>
-                  <option value="accepted">Accepted</option>
+                  <option value="applied">Applied</option>
+                  <option value="phoneScreen">Phone Screen</option>
                   <option value="rejected">Rejected</option>
                 </select>
               </div>
@@ -488,7 +577,7 @@ const ApplicationReceived = () => {
                   const jobTypeName = getJobTypeName(jobDetails.jobType || jobDetails.jobTypeId);
                   
                   return (
-                    <div className="p-6 hover:bg-gray-50 transition-colors">
+                    <div key={application.applicationId} className="p-6 hover:bg-gray-50 transition-colors">
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-4 mb-3">
@@ -497,8 +586,9 @@ const ApplicationReceived = () => {
                             </div>
                             <div>
                               <h3 className="text-lg font-semibold text-gray-800">
+                                Application #{application.applicationId || application.id}
                               </h3>
-                              <p className="text-sm text-gray-600"></p>
+                              <p className="text-sm text-gray-600">User ID: {application.userId}</p>
                             </div>
                           </div>
                           
@@ -522,28 +612,32 @@ const ApplicationReceived = () => {
                         </div>
                         
                         <div className="flex items-center gap-4">
-                          <StatusBadge status={application.applicationStatus} />
+                          <StatusBadge 
+                            status={application.applicationStatus || application.status} 
+                            applicationStatuses={applicationStatuses}
+                          />
                           
                           {/* Action Buttons */}
                           <div className="flex gap-2">
-                            {application.applicationStatus === 1 && (
+                            {/* Applied Status (ID: 1) - Can move to Phone Screen or Reject */}
+                            {(application.applicationStatus === 1 || application.status === 1) && (
                               <>
                                 <button
-                                  onClick={() => openReviewModal(application.applicationId, application.userId)}
+                                  onClick={() => openReviewModal(application.applicationId || application.id, application.userId)}
                                   className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
                                 >
                                   <FaEye className="inline mr-1" />
                                   Review
                                 </button>
                                 <button
-                                  onClick={() => updateApplicationStatus(application.applicationId, 3)}
-                                  className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                                  onClick={() => updateApplicationStatus(application.applicationId || application.id, 2)}
+                                  className="px-3 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
                                 >
-                                  <FaCheck className="inline mr-1" />
-                                  Accept
+                                  <FaPhone className="inline mr-1" />
+                                  Phone Screen
                                 </button>
                                 <button
-                                  onClick={() => updateApplicationStatus(application.applicationId, 4)}
+                                  onClick={() => updateApplicationStatus(application.applicationId || application.id, 3)}
                                   className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
                                 >
                                   <FaTimes className="inline mr-1" />
@@ -552,46 +646,47 @@ const ApplicationReceived = () => {
                               </>
                             )}
                             
-                            {application.applicationStatus === 2 && (
+                            {/* Phone Screen Status (ID: 2) - Can view details or reject */}
+                            {(application.applicationStatus === 2 || application.status === 2) && (
                               <>
                                 <button
-                                  onClick={() => openReviewModal(application.applicationId, application.userId)}
+                                  onClick={() => openReviewModal(application.applicationId || application.id, application.userId)}
                                   className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
                                 >
                                   <FaEye className="inline mr-1" />
                                   View Details
                                 </button>
                                 <button
-                                  onClick={() => updateApplicationStatus(application.applicationId, 3)}
-                                  className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
-                                >
-                                  <FaCheck className="inline mr-1" />
-                                  Accept
-                                </button>
-                                <button
-                                  onClick={() => updateApplicationStatus(application.applicationId, 4)}
+                                  onClick={() => updateApplicationStatus(application.applicationId || application.id, 3)}
                                   className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
                                 >
                                   <FaTimes className="inline mr-1" />
                                   Reject
                                 </button>
-                              </>
-                            )}
-                            
-                            {(application.applicationStatus === 3 || application.applicationStatus === 4) && (
-                              <>
                                 <button
-                                  onClick={() => openReviewModal(application.applicationId, application.userId)}
-                                  className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                                >
-                                  <FaEye className="inline mr-1" />
-                                  View Details
-                                </button>
-                                <button
-                                  onClick={() => updateApplicationStatus(application.applicationId, 1)}
+                                  onClick={() => updateApplicationStatus(application.applicationId || application.id, 1)}
                                   className="px-3 py-1 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
                                 >
-                                  Reset to Pending
+                                  Back to Applied
+                                </button>
+                              </>
+                            )}
+                            
+                            {/* Rejected Status (ID: 3) - Can view details or reset */}
+                            {(application.applicationStatus === 3 || application.status === 3) && (
+                              <>
+                                <button
+                                  onClick={() => openReviewModal(application.applicationId || application.id, application.userId)}
+                                  className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                                >
+                                  <FaEye className="inline mr-1" />
+                                  View Details
+                                </button>
+                                <button
+                                  onClick={() => updateApplicationStatus(application.applicationId || application.id, 1)}
+                                  className="px-3 py-1 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
+                                >
+                                  Reset to Applied
                                 </button>
                               </>
                             )}

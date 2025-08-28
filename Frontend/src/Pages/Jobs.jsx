@@ -68,7 +68,7 @@ const Jobs = ({ reloadTrigger, companyId: propCompanyId }) => {
     return deadlineDate >= today;
   };
 
-  // ✅ NEW: Handle publish/unpublish functionality
+  //Handle publish/unpublish functionality
   const handlePublishToggle = async (jobId, isCurrentlyPublished) => {
     try {
       // Add job to publishing state
