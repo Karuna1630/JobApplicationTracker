@@ -109,7 +109,6 @@ const Navbar = () => {
               My Profile
             </Link>
             <Link to="/myStatus" className="hover:text-blue-600 transition">
-            <Link to="/status" className="hover:text-blue-600 transition-colors">
               My Status
             </Link>
           </>
