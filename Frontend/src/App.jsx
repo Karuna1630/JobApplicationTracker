@@ -32,7 +32,7 @@ import JobIndividual from './Components/JobIndividual.jsx'
 import JobApplicationForm from './Pages/JobApplicationForm.jsx'
 import AddStaffModal from './Pages/AddStaffModal.jsx'
 import ReviewModal from './Pages/ReviewModal.jsx'
-
+import MyStatus from './Pages/MyStatus.jsx'
 
 
 function App() {
@@ -74,6 +74,7 @@ function App() {
           <Route path='/jobApplicationForm' element={<JobApplicationForm/>}/>
           <Route path="/job-application/:jobId" element={<JobApplicationForm />} />
           <Route path='/reviewModal' element={<ReviewModal/>}/>
+          <Route path='/myStatus' element={<MyStatus/>}/>
         </Routes>
         </BrowserRouter>
       </div>

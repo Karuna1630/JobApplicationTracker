@@ -304,7 +304,14 @@ const JobIndividual = () => {
             <div className="flex flex-row justify-between items-center mt-6">
               <h1 className="text-3xl font-bold mb-2">{jobTypeName}</h1>
 
-              <button onClick={() => navigate("/jobApplicationForm")} 
+              <button 
+                onClick={() => {
+                  // Store company ID in localStorage before navigation
+                  if (job?.companyId) {
+                    localStorage.setItem('currentCompanyId', job.companyId);
+                  }
+                  navigate(`/job-application/${jobId}`);
+                }} 
                 className="bg-white hover:bg-gray-100 text-blue-700 px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg">
                 Apply Now
               </button>
@@ -561,7 +568,16 @@ const JobIndividual = () => {
 
               {/* Apply Button (Mobile) */}
               <div className="lg:hidden">
-                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                <button 
+                  onClick={() => {
+                    // Store company ID in localStorage before navigation
+                    if (job?.companyId) {
+                      localStorage.setItem('currentCompanyId', job.companyId);
+                    }
+                    navigate(`/job-application/${jobId}`);
+                  }}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                >
                   Apply Now
                 </button>
               </div>
