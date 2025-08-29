@@ -10,6 +10,7 @@ import Education from "../Components/Education";
 import Experience from "../Components/Experience";
 import Skill from "../Components/Skill"; // Import the new Skills component
 import { toast } from "react-toastify";
+import UserSidebarMenu from "../Components/UserSidebarMenu";
 
 const UserProfile = () => {
   const [userInfo, setUserInfo] = useState({
@@ -144,7 +145,12 @@ const UserProfile = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-br from-blue-100 to-white flex justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-br from-blue-100 to-white p-6">
+        <div className="flex gap-60">
+          {/* Sidebar */}
+          <div className="w-64 py-28">
+            <UserSidebarMenu />
+          </div>
         <div className="w-full max-w-5xl bg-white rounded-2xl shadow-lg overflow-hidden relative">
           {/* Header */}
           <div
@@ -258,6 +264,7 @@ const UserProfile = () => {
           <div className="border-t border-gray-300 px-8 py-6">
             <Education />
           </div>
+        </div>
         </div>
       </div>
 

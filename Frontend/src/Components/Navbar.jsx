@@ -112,9 +112,6 @@ const Navbar = () => {
             <Link to="/contactus" className="hover:text-blue-600 transition-colors">
               Contact Us
             </Link>
-            <Link to="/myStatus" className="hover:text-blue-600 transition">
-              My Status
-            </Link>
           </>
         )}
 
