@@ -28,10 +28,49 @@ const JobIndividual = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [companyLoading, setCompanyLoading] = useState(false);
+  
+  // Add authentication state
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
 
   // Get company and job data from navigation state if available
   const passedCompany = location.state?.company;
   const passedJob = location.state?.job;
+
+  // Update authentication status when localStorage changes
+  useEffect(() => {
+    const updateAuthStatus = () => {
+      setIsLoggedIn(!!localStorage.getItem("token"));
+    };
+
+    updateAuthStatus();
+
+    // Listen for storage changes (e.g., login/logout in other tabs)
+    window.addEventListener("storage", updateAuthStatus);
+
+    return () => {
+      window.removeEventListener("storage", updateAuthStatus);
+    };
+  }, []);
+
+  // Handle apply button click with login check
+  const handleApplyClick = () => {
+    if (!isLoggedIn) {
+      // Store the current job ID and intended destination in localStorage for redirect after login
+      localStorage.setItem('redirectAfterLogin', `/job-application/${jobId}`);
+      if (job?.companyId) {
+        localStorage.setItem('currentCompanyId', job.companyId);
+      }
+      // Navigate to login page
+      navigate('/login');
+      return;
+    }
+
+    // User is logged in, proceed with application
+    if (job?.companyId) {
+      localStorage.setItem('currentCompanyId', job.companyId);
+    }
+    navigate(`/job-application/${jobId}`);
+  };
 
   // Get job type name by ID
   const getJobTypeName = (jobTypeId) => {
@@ -82,7 +121,7 @@ const JobIndividual = () => {
   // Fetch Job Types
   const fetchJobTypes = async () => {
     try {
-      const response = await axiosInstance.get("/getalljobtypes");
+      const response = await axiosInstance.get(`/getalljobtypes`);
       if (response.data && Array.isArray(response.data)) {
         const mappedJobTypes = response.data.map((job) => ({
           id: job.jobTypeId,
@@ -155,7 +194,7 @@ const JobIndividual = () => {
         await fetchCompany(jobData.companyId);
       }
     } catch (error) {
-      console.error(`❌ Failed to fetch job with ID ${jobId}:`, error);
+      // console.error(❌ Failed to fetch job with ID ${jobId}:, error);
       setJob(null);
       setCompany(null);
     }
@@ -276,11 +315,11 @@ const JobIndividual = () => {
                   {/* Company Info */}
                   <div className="mb-4">
                     <h2 className="text-xl font-semibold text-blue-100 mb-1">
-                      {company.companyName}
+                      {company?.companyName}
                     </h2>
                     <p className="text-blue-200 flex items-center">
                       <MapPin className="w-4 h-4 mr-1" />
-                      {company.location}
+                      {company?.location}
                     </p>
                   </div>
                 </div>
@@ -305,15 +344,9 @@ const JobIndividual = () => {
               <h1 className="text-3xl font-bold mb-2">{jobTypeName}</h1>
 
               <button 
-                onClick={() => {
-                  // Store company ID in localStorage before navigation
-                  if (job?.companyId) {
-                    localStorage.setItem('currentCompanyId', job.companyId);
-                  }
-                  navigate(`/job-application/${jobId}`);
-                }} 
+                onClick={handleApplyClick}
                 className="bg-white hover:bg-gray-100 text-blue-700 px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg">
-                Apply Now
+                {isLoggedIn ? 'Apply Now' : 'Login to Apply'}
               </button>
             </div>
           </div>
@@ -328,7 +361,7 @@ const JobIndividual = () => {
                   Job Description
                 </h3>
                 <div className="prose max-w-none text-gray-700">
-                  {job.description  ? (
+                  {job.description ? (
                     <div className="whitespace-pre-wrap leading-relaxed">
                       {job.description}
                     </div>
@@ -417,9 +450,9 @@ const JobIndividual = () => {
                     </h4>
                     <p className="text-gray-600">
                       {job.salaryRangeMin && job.salaryRangeMax
-                        ? `${job.salaryRangeMin.toLocaleString()} - ${job.salaryRangeMax.toLocaleString()}`
+                        ? `$${job.salaryRangeMin.toLocaleString()} - $${job.salaryRangeMax.toLocaleString()}`
                         : job.salary
-                        ? `${job.salary.toLocaleString()}`
+                        ? `$${job.salary.toLocaleString()}`
                         : "Not specified"}
                     </p>
                   </div>
@@ -430,7 +463,7 @@ const JobIndividual = () => {
                       Experience Level
                     </h4>
                     <p className="text-gray-600">
-                      {job.experienceLevel ||  "Not specified"}
+                      {job.experienceLevel || "Not specified"}
                     </p>
                   </div>
 
@@ -440,7 +473,7 @@ const JobIndividual = () => {
                       Employment Type
                     </h4>
                     <p className="text-gray-600">
-                      {job.empolymentType ||  "Not specified"}
+                      {job.empolymentType || "Not specified"}
                     </p>
                   </div>
 
@@ -460,9 +493,7 @@ const JobIndividual = () => {
                       Posted Date
                     </h4>
                     <p className="text-gray-600">
-                      {formatDate(
-                        job.postedAt
-                      )}
+                      {formatDate(job.postedAt)}
                     </p>
                   </div>
                 </div>
@@ -569,16 +600,10 @@ const JobIndividual = () => {
               {/* Apply Button (Mobile) */}
               <div className="lg:hidden">
                 <button 
-                  onClick={() => {
-                    // Store company ID in localStorage before navigation
-                    if (job?.companyId) {
-                      localStorage.setItem('currentCompanyId', job.companyId);
-                    }
-                    navigate(`/job-application/${jobId}`);
-                  }}
+                  onClick={handleApplyClick}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
                 >
-                  Apply Now
+                  {isLoggedIn ? 'Apply Now' : 'Login to Apply'}
                 </button>
               </div>
             </div>
