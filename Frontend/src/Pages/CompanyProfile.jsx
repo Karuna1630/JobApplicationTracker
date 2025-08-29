@@ -15,10 +15,8 @@ import {
   FaUserCheck,
   FaUserClock,
   FaUserTie,
-  FaGlobe,
-  FaChartLine,
   FaUserPlus,
-  FaEye,
+
 } from "react-icons/fa";
 
 const InfoCard = ({ icon, label, value, color = "gray", isLoading = false }) => (
@@ -606,9 +604,6 @@ const CompanyProfile = () => {
               />
             </div>
           </div>
-
-         
-
           {showEditModal && (
             <EditCompanyModal
               isOpen={showEditModal}
