@@ -99,9 +99,7 @@ const Navbar = () => {
         {/* Role-specific links for logged in users */}
         {isLoggedIn && role === 4 && (
           <>
-            <Link to="/applications" className="hover:text-blue-600 transition-colors">
-              Overview
-            </Link>
+           
             <Link to="/companies" className="hover:text-blue-600 transition-colors">
               Companies
             </Link>
@@ -109,7 +107,6 @@ const Navbar = () => {
               My Profile
             </Link>
             <Link to="/myStatus" className="hover:text-blue-600 transition">
-            <Link to="/status" className="hover:text-blue-600 transition-colors">
               My Status
             </Link>
           </>
