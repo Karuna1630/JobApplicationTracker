@@ -117,45 +117,36 @@ const MyStatus = () => {
       return [];
     }
 
-    console.log('Processing applications data:', applicationsData);
-
-    return applicationsData.map((app, index) => {
-      console.log(`Processing application ${index + 1}:`, app);
-      
+    return applicationsData.map((app, index) => {      
       const job = jobsMap[app.jobId];
       const company = job ? companiesMap[job.companyId] : null;
       const jobTypeName = job ? jobTypesMap[parseInt(job.jobType)] : null;
       
-      console.log(`App ${index + 1} - Job:`, job);
-      console.log(`App ${index + 1} - Company:`, company);
-      console.log(`App ${index + 1} - Job Type Name:`, jobTypeName);
-      
       // Extract company name and location using correct API property names
       const companyName = company?.companyName || 'Unknown Company';
-      const companyLocation = company?.location || 'Location not specified'; // Fixed: use 'location' not 'companylocation'
-      const companyLogo = company?.companyLogo || null; // Get logo from company data
-
-      console.log(`App ${index + 1} - Resolved company name:`, companyName);
-      console.log(`App ${index + 1} - Resolved location:`, companyLocation);
-      console.log(`App ${index + 1} - Company logo:`, companyLogo);
+      const companyLocation = company?.location || 'Location not specified';
+      const companyLogo = company?.companyLogo || null;
       
-      // Determine status and color from applicationStatus
-      let status = 'Pending';
+      // FIXED: Determine status and color from applicationStatus
+      let status = 'Applied';
       let statusColor = 'bg-yellow-100 text-yellow-800';
       
       if (app.applicationStatus !== undefined && app.applicationStatus !== null) {
         switch (parseInt(app.applicationStatus)) {
           case 1:
-            status = 'Accepted';
-            statusColor = 'bg-green-100 text-green-800';
+            status = 'Applied';
+            statusColor = 'bg-yellow-100 text-yellow-800';
             break;
           case 2:
+            status = 'Approved';
+            statusColor = 'bg-green-100 text-green-800';
+            break;
+          case 3:
             status = 'Rejected';
             statusColor = 'bg-red-100 text-red-800';
             break;
-          case 0:
           default:
-            status = 'Pending';
+            status = 'Applied';
             statusColor = 'bg-yellow-100 text-yellow-800';
             break;
         }
@@ -178,9 +169,7 @@ const MyStatus = () => {
         jobTypeName: jobTypeName || 'Not specified',
         statusColor,
         applicationId: app.applicationId || app.id || 'N/A',
-        // Add salary info from job if available
         salary: job ? `$${job.salaryRangeMin} - $${job.salaryRangeMax}` : null,
-        // Add job description
         description: job?.description || null
       };
       
@@ -204,13 +193,6 @@ const MyStatus = () => {
         fetchAllJobs(),
         fetchApplicationsByUserId(userIdValue)
       ]);
-      
-      console.log('All data fetched successfully');
-      console.log('Job Types:', jobTypesMap);
-      console.log('Companies:', companiesMap);
-      console.log('Jobs:', jobsMap);
-      console.log('Applications:', applicationsData);
-
       // Store the maps in state
       setJobTypes(jobTypesMap);
       setCompanies(companiesMap);
