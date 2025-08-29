@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, X, Mail, MessageSquare, AlertTriangle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'; // Add this import
 import axiosInstance from '../Utils/axiosInstance';
 import { getUserIdFromToken } from '../Utils/jwtUtils';
 import { toast } from 'react-toastify';
@@ -9,6 +10,7 @@ const NotificationBell = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate(); // Add navigation hook
   
   // Get user ID from token
   const userId = getUserIdFromToken(localStorage.getItem('token'));
@@ -144,6 +146,37 @@ const NotificationBell = () => {
     }
   };
 
+  // Function to extract job ID from notification
+  const extractJobId = (notification) => {
+    // Method 1: Check if jobId exists directly in notification object
+    if (notification.jobId) {
+      return notification.jobId;
+    }
+    
+    // Method 2: Check if there's a relatedId field that contains jobId
+    if (notification.relatedId) {
+      return notification.relatedId;
+    }
+    
+    // Method 3: Parse from message content if jobId is mentioned
+    if (notification.message) {
+      const jobIdMatch = notification.message.match(/job\s*(?:id|#)?\s*:?\s*(\d+)/i);
+      if (jobIdMatch) {
+        return parseInt(jobIdMatch[1]);
+      }
+    }
+    
+    // Method 4: Parse from title if jobId is mentioned
+    if (notification.title) {
+      const jobIdMatch = notification.title.match(/job\s*(?:id|#)?\s*:?\s*(\d+)/i);
+      if (jobIdMatch) {
+        return parseInt(jobIdMatch[1]);
+      }
+    }
+    
+    return null;
+  };
+
   // Function to format date (updated to match screenshot format)
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -175,26 +208,43 @@ const NotificationBell = () => {
     }
   };
 
-  // Handle notification click
-  const handleNotificationClick = (notification) => {
-    // Mark as read if not already read
-    if (!notification.isRead) {
-      markAsRead(notification.notificationId);
-    }
+  // Handle notification click - Updated to include navigation
+  const handleNotificationClick = async (notification) => {
+    try {
+      // Always mark as read first if not already read
+      if (!notification.isRead) {
+        await markAsRead(notification.notificationId);
+      }
 
-    // Handle specific actions based on notification type
-    switch(notification.notificationTypeId) {
-      case 1: // Email
-        toast.info('Email notification - Check your email inbox');
-        break;
-      case 2: // SMS
-        toast.info('SMS notification - Check your phone messages');
-        break;
-      case 3: // System Alert
-        toast.info('System alert acknowledged');
-        break;
-      default:
-        toast.info('Notification viewed');
+      // Extract job ID from notification
+      const jobId = extractJobId(notification);
+      
+      // Close the dropdown
+      setIsOpen(false);
+
+      // Navigate to job page if jobId exists
+      if (jobId) {
+        navigate(`/job/${jobId}`);
+        toast.success('Navigating to job details...');
+      } else {
+        // Handle specific actions based on notification type if no jobId
+        switch(notification.notificationTypeId) {
+          case 1: // Email
+            toast.info('Email notification - Check your email inbox');
+            break;
+          case 2: // SMS
+            toast.info('SMS notification - Check your phone messages');
+            break;
+          case 3: // System Alert
+            toast.info('System alert acknowledged');
+            break;
+          default:
+            toast.info('Notification viewed');
+        }
+      }
+    } catch (error) {
+      console.error('Error handling notification click:', error);
+      toast.error('Failed to process notification');
     }
   };
 
@@ -278,13 +328,14 @@ const NotificationBell = () => {
                   {notifications.map((notification) => {
                     const notificationType = getNotificationType(notification.notificationTypeId);
                     const IconComponent = notificationType.icon;
+                    const hasJobId = extractJobId(notification) !== null;
                     
                     return (
                       <div
                         key={notification.notificationId}
                         className={`px-4 py-4 hover:bg-gray-50 cursor-pointer transition-colors duration-150 ${
                           !notification.isRead ? 'bg-blue-50 border-l-4 border-l-blue-500' : 'bg-white'
-                        }`}
+                        } ${hasJobId ? 'hover:bg-blue-50' : ''}`}
                         onClick={() => handleNotificationClick(notification)}
                       >
                         <div className="flex items-start gap-4">
@@ -306,6 +357,7 @@ const NotificationBell = () => {
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-sm font-semibold text-gray-900">
                                 {notificationType.name}
+                                {hasJobId && <span className="ml-1 text-xs text-blue-600">(Click to view job)</span>}
                               </span>
                               {!notification.isRead && (
                                 <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
