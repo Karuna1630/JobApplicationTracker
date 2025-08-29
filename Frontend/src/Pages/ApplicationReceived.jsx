@@ -6,19 +6,7 @@ import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import ReviewModal from "./ReviewModal";
 import { toast } from "react-toastify";
-import {
-  FaUser,
-  FaCalendarAlt,
-  FaEye,
-  FaCheck,
-  FaTimes,
-  FaClock,
-  FaSearch,
-  FaFilter,
-  FaSortAmountDown,
-  FaSortAmountUp,
-  FaFileAlt,
-  FaUsers,
+import {FaCalendarAlt,FaEye,FaCheck,FaTimes,FaClock,FaSearch,FaFilter,FaSortAmountDown,FaSortAmountUp,FaFileAlt,FaUsers,
 } from "react-icons/fa";
 
 const StatusBadge = ({ status, applicationStatuses }) => {
@@ -102,6 +90,40 @@ const StatsCard = ({ icon, label, value, color = "blue", isLoading = false }) =>
   </div>
 );
 
+// User Avatar Component
+const UserAvatar = ({ profileImageUrl, firstName, lastName, size = "md" }) => {
+  const [imageError, setImageError] = useState(false);
+  
+  const sizeClasses = {
+    sm: "w-8 h-8 text-sm",
+    md: "w-12 h-12 text-lg",
+    lg: "w-16 h-16 text-xl"
+  };
+
+  const getInitials = () => {
+    const first = firstName ? firstName.charAt(0).toUpperCase() : '';
+    const last = lastName ? lastName.charAt(0).toUpperCase() : '';
+    return first + last;
+  };
+
+  if (profileImageUrl && !imageError) {
+    return (
+      <img
+        src={profileImageUrl}
+        alt={`${firstName} ${lastName}`}
+        className={`${sizeClasses[size]} rounded-full object-cover border-2 border-gray-200`}
+        onError={() => setImageError(true)}
+      />
+    );
+  }
+
+  return (
+    <div className={`${sizeClasses[size]} bg-blue-100 rounded-full flex items-center justify-center border-2 border-gray-200`}>
+      <span className="text-blue-600 font-semibold">{getInitials()}</span>
+    </div>
+  );
+};
+
 const ApplicationReceived = () => {
   const [applications, setApplications] = useState([]);
   const [filteredApplications, setFilteredApplications] = useState([]);
@@ -115,6 +137,8 @@ const ApplicationReceived = () => {
   const [jobTypes, setJobTypes] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [applicationStatuses, setApplicationStatuses] = useState([]);
+  const [userDetails, setUserDetails] = useState({}); // Store user profile data
+  const [userProfiles, setUserProfiles] = useState({}); // Store user profile images and bio
 
   // Review Modal State
   const [reviewModal, setReviewModal] = useState({
@@ -129,6 +153,96 @@ const ApplicationReceived = () => {
     approved: 0,
     rejected: 0
   });
+
+  // Fetch user profile details
+  const fetchUserProfile = async (userId) => {
+    try {
+      if (userDetails[userId]) {
+        return userDetails[userId]; // Return cached data
+      }
+
+      const response = await axiosInstance.get(`/profile/${userId}`);
+      const userData = response.data;
+      
+      // Cache the user data
+      setUserDetails(prev => ({
+        ...prev,
+        [userId]: userData
+      }));
+
+      return userData;
+    } catch (error) {
+      console.error(`Error fetching user profile for userId ${userId}:`, error);
+      return null;
+    }
+  };
+
+  // Fetch user uploaded profile (profile image and bio)
+  const fetchUserUploadedProfile = async (userId) => {
+    try {
+      if (userProfiles[userId]) {
+        return userProfiles[userId]; // Return cached data
+      }
+
+      const response = await axiosInstance.get(`/getuserUploadedprofileByid/${userId}`);
+      const profileData = response.data;
+      
+      // Cache the profile data
+      setUserProfiles(prev => ({
+        ...prev,
+        [userId]: profileData
+      }));
+
+      return profileData;
+    } catch (error) {
+      console.error(`Error fetching user uploaded profile for userId ${userId}:`, error);
+      return null;
+    }
+  };
+
+  // Fetch all user details for applications
+  const fetchAllUserDetails = async (applications) => {
+    const userIds = [...new Set(applications.map(app => app.userId))];
+    
+    // Fetch user profiles and uploaded profiles in parallel
+    const promises = userIds.map(async (userId) => {
+      const [profile, uploadedProfile] = await Promise.all([
+        fetchUserProfile(userId),
+        fetchUserUploadedProfile(userId)
+      ]);
+      
+      return {
+        userId,
+        profile,
+        uploadedProfile
+      };
+    });
+
+    try {
+      await Promise.all(promises);
+      console.log("All user details loaded successfully");
+    } catch (error) {
+      console.error("Error loading user details:", error);
+    }
+  };
+
+  // Get user display name
+  const getUserDisplayName = (userId) => {
+    const user = userDetails[userId];
+    if (user) {
+      return `${user.firstName || ''} ${user.lastName || ''}`;
+    }
+    return 'Loading...';
+  };
+
+  // Get user profile image
+  const getUserProfileImage = (userId) => {
+    const profile = userProfiles[userId];
+    if (profile && profile.isSuccess && profile.profileImageUrl) {
+      return profile.profileImageUrl;
+    }
+    return null;
+  };
 
   // FIXED: Better error handling for fetching application statuses
   const fetchApplicationStatuses = async () => {
@@ -263,6 +377,9 @@ const ApplicationReceived = () => {
       if (Array.isArray(applicationsData) && applicationsData.length > 0) {
         setApplications(applicationsData);
         setFilteredApplications(applicationsData);
+        
+        // Fetch user details for all applications
+        await fetchAllUserDetails(applicationsData);
         
         // Calculate statistics
         const newStats = {
@@ -422,7 +539,7 @@ const ApplicationReceived = () => {
       for (const endpoint of endpoints) {
         for (const payload of requestPayloads) {
           try {
-            console.log(`Trying endpoint: ${endpoint} with payload:`, payload);
+            console.log(`Trying endpoint: ${endpoint} with payload:, payload`);
             response = await axiosInstance.put(endpoint, payload);
             
             if (response.status === 200 || response.status === 201) {
@@ -486,9 +603,10 @@ const ApplicationReceived = () => {
       filtered = filtered.filter(app => {
         const jobDetails = getJobDetails(app.jobId);
         const jobTypeName = getJobTypeName(jobDetails.jobType || jobDetails.jobTypeId);
+        const userName = getUserDisplayName(app.userId).toLowerCase();
         
         return (
-          app.userId?.toString().includes(searchTerm.toLowerCase()) ||
+          userName.includes(searchTerm.toLowerCase()) ||
           app.applicationId?.toString().includes(searchTerm.toLowerCase()) ||
           jobTypeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
           jobDetails.location?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -523,6 +641,10 @@ const ApplicationReceived = () => {
           aValue = a.jobId || 0;
           bValue = b.jobId || 0;
           break;
+        case "name":
+          aValue = getUserDisplayName(a.userId);
+          bValue = getUserDisplayName(b.userId);
+          break;
         default:
           aValue = a.applicationId || a.id || 0;
           bValue = b.applicationId || b.id || 0;
@@ -536,7 +658,7 @@ const ApplicationReceived = () => {
     });
     
     setFilteredApplications(filtered);
-  }, [applications, searchTerm, statusFilter, sortBy, sortOrder, jobTypes, jobs]);
+  }, [applications, searchTerm, statusFilter, sortBy, sortOrder, jobTypes, jobs, userDetails]);
 
   // Initialize component
   useEffect(() => {
@@ -689,7 +811,7 @@ const ApplicationReceived = () => {
                 <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search applications..."
+                  placeholder="Search by name, job type, location..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -719,6 +841,7 @@ const ApplicationReceived = () => {
                   className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="date">Sort by Date</option>
+                  <option value="name">Sort by Name</option>
                   <option value="status">Sort by Status</option>
                   <option value="jobId">Sort by Job</option>
                 </select>
@@ -742,20 +865,25 @@ const ApplicationReceived = () => {
                   const jobTypeName = getJobTypeName(jobDetails.jobType || jobDetails.jobTypeId);
                   const currentApplicationId = application.applicationId || application.id;
                   const currentStatus = application.applicationStatus || application.status;
+                  const userDisplayName = getUserDisplayName(application.userId);
+                  const userProfileImage = getUserProfileImage(application.userId);
+                  const userProfile = userDetails[application.userId];
                   
                   return (
                     <div key={currentApplicationId} className="p-6 hover:bg-gray-50 transition-colors">
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-4 mb-3">
-                            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                              <FaUser className="text-blue-600 text-lg" />
-                            </div>
+                            <UserAvatar 
+                              profileImageUrl={userProfileImage}
+                              firstName={userProfile?.firstName}
+                              lastName={userProfile?.lastName}
+                              size="md"
+                            />
                             <div>
                               <h3 className="text-lg font-semibold text-gray-800">
-                                Application #{currentApplicationId}
+                                {userDisplayName}
                               </h3>
-                              <p className="text-sm text-gray-600">User ID: {application.userId}</p>
                             </div>
                           </div>
                           
@@ -856,11 +984,18 @@ const ApplicationReceived = () => {
               <div className="text-center py-12">
                 <FaUsers className="text-6xl text-gray-300 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-700 mb-2">No Applications Found</h3>
+                <p className="text-gray-500">
+                  {searchTerm || statusFilter !== "all" 
+                    ? "Try adjusting your search or filter criteria" 
+                    : "No applications have been submitted yet"
+                  }
+                </p>
               </div>
             )}
           </div>
         </div>
       </div>
+      
       {/* Review Modal */}
       <ReviewModal
         isOpen={reviewModal.isOpen}
