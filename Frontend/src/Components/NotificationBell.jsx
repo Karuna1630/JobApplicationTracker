@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, X, Trash2, Mail, MessageSquare, AlertTriangle } from 'lucide-react';
+import { Bell, X, Mail, MessageSquare, AlertTriangle } from 'lucide-react';
 import axiosInstance from '../Utils/axiosInstance';
 import { getUserIdFromToken } from '../Utils/jwtUtils';
 import { toast } from 'react-toastify';
@@ -103,9 +103,7 @@ const NotificationBell = () => {
   // Function to mark notification as read
   const markAsRead = async (notificationId) => {
     try {
-      const response = await axiosInstance.put('api/Notification/mark-read', {
-        notificationId
-      });
+      const response = await axiosInstance.put(`api/Notification/mark-read/${notificationId}`);
       
       // Handle response format
       const success = response.data.isSuccess !== undefined ? 
@@ -124,35 +122,6 @@ const NotificationBell = () => {
     } catch (error) {
       console.error('Error marking as read:', error);
       toast.error('Failed to mark as read');
-    }
-  };
-
-  // Function to delete notification
-  const deleteNotification = async (notificationId, event) => {
-    // Stop event propagation to prevent dropdown from closing
-    event.stopPropagation();
-    
-    try {
-      const response = await axiosInstance.delete(`api/Notification/${notificationId}`);
-      
-      const success = response.data.isSuccess !== undefined ? 
-        response.data.isSuccess : response.status === 200;
-      
-      if (success) {
-        // Remove from local state
-        const deletedNotification = notifications.find(n => n.notificationId === notificationId);
-        setNotifications(prev => prev.filter(n => n.notificationId !== notificationId));
-        
-        // Update unread count if deleted notification was unread
-        if (deletedNotification && !deletedNotification.isRead) {
-          setUnreadCount(prev => Math.max(0, prev - 1));
-        }
-        
-        toast.success('Notification deleted');
-      }
-    } catch (error) {
-      console.error('Error deleting notification:', error);
-      toast.error('Failed to delete notification');
     }
   };
 
@@ -259,7 +228,7 @@ const NotificationBell = () => {
             onClick={() => setIsOpen(false)}
           />
           
-          {/* Dropdown Content - Made wider and taller to accommodate all notifications */}
+          {/* Dropdown Content */}
           <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-[600px] overflow-hidden">
             {/* Header */}
             <div className="px-4 py-3 border-b border-gray-100 bg-white">
@@ -291,7 +260,7 @@ const NotificationBell = () => {
               </div>
             </div>
 
-            {/* Notifications List - Show ALL notifications with scroll */}
+            {/* Notifications List */}
             <div className="max-h-[500px] overflow-y-auto">
               {loading ? (
                 <div className="p-6 text-center text-gray-500">
@@ -313,7 +282,7 @@ const NotificationBell = () => {
                     return (
                       <div
                         key={notification.notificationId}
-                        className={`px-4 py-4 hover:bg-gray-50 cursor-pointer transition-colors duration-150 group ${
+                        className={`px-4 py-4 hover:bg-gray-50 cursor-pointer transition-colors duration-150 ${
                           !notification.isRead ? 'bg-blue-50 border-l-4 border-l-blue-500' : 'bg-white'
                         }`}
                         onClick={() => handleNotificationClick(notification)}
@@ -357,15 +326,6 @@ const NotificationBell = () => {
                               {formatDate(notification.createdAt)}
                             </p>
                           </div>
-                          
-                          {/* Delete Button */}
-                          <button
-                            onClick={(e) => deleteNotification(notification.notificationId, e)}
-                            className="text-gray-300 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0"
-                            title="Delete notification"
-                          >
-                            <Trash2 size={16} />
-                          </button>
                         </div>
                       </div>
                     );
