@@ -2,7 +2,6 @@ import React from "react";
 import {
   FaClipboardList,
   FaBriefcase,
-  FaPlusCircle,
   FaChartBar,
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
