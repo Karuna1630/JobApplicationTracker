@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, X, Trash2 } from 'lucide-react';
+import { Bell, X, Mail, MessageSquare, AlertTriangle } from 'lucide-react';
 import axiosInstance from '../Utils/axiosInstance';
 import { getUserIdFromToken } from '../Utils/jwtUtils';
 import { toast } from 'react-toastify';
@@ -9,9 +9,16 @@ const NotificationBell = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  
   // Get user ID from token
   const userId = getUserIdFromToken(localStorage.getItem('token'));
+
+  // Notification types mapping
+  const notificationTypes = {
+    1: { name: 'Email', icon: Mail, color: 'blue', description: 'Email notifications' },
+    2: { name: 'SMS', icon: MessageSquare, color: 'green', description: 'SMS notifications' },
+    3: { name: 'System Alert', icon: AlertTriangle, color: 'orange', description: 'In-app notifications' }
+  };
 
   // Load notifications when component mounts
   useEffect(() => {
@@ -22,21 +29,43 @@ const NotificationBell = () => {
       // Check for new notifications every 30 seconds
       const interval = setInterval(() => {
         loadUnreadCount();
+        // Only refresh notifications if dropdown is closed to avoid interrupting user
+        if (!isOpen) {
+          loadNotifications();
+        }
       }, 30000);
 
       return () => clearInterval(interval);
     }
-  }, [userId]);
+  }, [userId, isOpen]);
 
-  // Function to load all notifications
+  // Function to load ALL notifications (no limit)
   const loadNotifications = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get(`/Notification/user/${userId}`);
+      const response = await axiosInstance.get(`api/Notification/user/${userId}`);
       
-      if (response.data.isSuccess) {
-        setNotifications(response.data.data || []);
+      // Handle both response formats: direct array or wrapped in {isSuccess, data}
+      let allNotifications = [];
+      
+      if (response.data.isSuccess !== undefined) {
+        // Standard wrapped response
+        if (response.data.isSuccess) {
+          allNotifications = response.data.data || [];
+        }
+      } else if (Array.isArray(response.data)) {
+        // Direct array response
+        allNotifications = response.data;
       }
+      
+      console.log('Loaded notifications:', allNotifications);
+      
+      // Sort by creation date (most recent first) - Show ALL notifications
+      const sortedNotifications = allNotifications
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
+      setNotifications(sortedNotifications);
+      
     } catch (error) {
       console.error('Error loading notifications:', error);
     } finally {
@@ -47,28 +76,44 @@ const NotificationBell = () => {
   // Function to load unread count
   const loadUnreadCount = async () => {
     try {
-      const response = await axiosInstance.get(`/Notification/user/${userId}/unread-count`);
+      const response = await axiosInstance.get(`api/Notification/user/${userId}/unread-count`);
       
-      if (response.data.isSuccess) {
-        setUnreadCount(response.data.data || 0);
+      // Handle both response formats
+      let count = 0;
+      if (response.data.isSuccess !== undefined) {
+        if (response.data.isSuccess) {
+          count = response.data.data || 0;
+        }
+      } else {
+        // If direct number response
+        count = typeof response.data === 'number' ? response.data : 0;
       }
+      
+      setUnreadCount(count);
     } catch (error) {
       console.error('Error loading unread count:', error);
+      // Fallback: calculate unread count from notifications
+      if (notifications.length > 0) {
+        const unreadFromNotifications = notifications.filter(n => !n.isRead).length;
+        setUnreadCount(unreadFromNotifications);
+      }
     }
   };
 
   // Function to mark notification as read
   const markAsRead = async (notificationId) => {
     try {
-      const response = await axiosInstance.put('/Notification/mark-read', {
-        notificationId
-      });
+      const response = await axiosInstance.put(`api/Notification/mark-read/${notificationId}`);
       
-      if (response.data.isSuccess) {
+      // Handle response format
+      const success = response.data.isSuccess !== undefined ? 
+        response.data.isSuccess : response.status === 200;
+      
+      if (success) {
         // Update local state
         setNotifications(prev => 
           prev.map(n => 
-            n.id === notificationId ? { ...n, isRead: true } : n
+            n.notificationId === notificationId ? { ...n, isRead: true } : n
           )
         );
         setUnreadCount(prev => Math.max(0, prev - 1));
@@ -80,35 +125,15 @@ const NotificationBell = () => {
     }
   };
 
-  // Function to delete notification
-  const deleteNotification = async (notificationId) => {
-    try {
-      const response = await axiosInstance.delete(`/Notification/${notificationId}`);
-      
-      if (response.data.isSuccess) {
-        // Remove from local state
-        const deletedNotification = notifications.find(n => n.id === notificationId);
-        setNotifications(prev => prev.filter(n => n.id !== notificationId));
-        
-        // Update unread count if deleted notification was unread
-        if (deletedNotification && !deletedNotification.isRead) {
-          setUnreadCount(prev => Math.max(0, prev - 1));
-        }
-        
-        toast.success('Notification deleted');
-      }
-    } catch (error) {
-      console.error('Error deleting notification:', error);
-      toast.error('Failed to delete notification');
-    }
-  };
-
   // Function to mark all as read
   const markAllAsRead = async () => {
     try {
-      const response = await axiosInstance.put(`/Notification/user/${userId}/mark-all-read`);
+      const response = await axiosInstance.put(`api/Notification/user/${userId}/mark-all-read`);
       
-      if (response.data.isSuccess) {
+      const success = response.data.isSuccess !== undefined ? 
+        response.data.isSuccess : response.status === 200;
+      
+      if (success) {
         setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
         setUnreadCount(0);
         toast.success('All notifications marked as read');
@@ -119,15 +144,27 @@ const NotificationBell = () => {
     }
   };
 
-  // Function to format date
+  // Function to format date (updated to match screenshot format)
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffInHours = (now - date) / (1000 * 60 * 60);
+    const diffInDays = diffInHours / 24;
 
     if (diffInHours < 1) return 'Just now';
-    if (diffInHours < 24) return `${Math.floor(diffInHours)} hours ago`;
-    return date.toLocaleDateString();
+    if (diffInHours < 24) return `${Math.floor(diffInHours)}h ago`;
+    if (diffInDays < 30) return `${Math.floor(diffInDays)} days ago`;
+    
+    // Format like: "August 18, 2025 at 08:06 AM"
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric'
+    }) + ' at ' + date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
   };
 
   // Handle bell click
@@ -138,100 +175,166 @@ const NotificationBell = () => {
     }
   };
 
+  // Handle notification click
+  const handleNotificationClick = (notification) => {
+    // Mark as read if not already read
+    if (!notification.isRead) {
+      markAsRead(notification.notificationId);
+    }
+
+    // Handle specific actions based on notification type
+    switch(notification.notificationTypeId) {
+      case 1: // Email
+        toast.info('Email notification - Check your email inbox');
+        break;
+      case 2: // SMS
+        toast.info('SMS notification - Check your phone messages');
+        break;
+      case 3: // System Alert
+        toast.info('System alert acknowledged');
+        break;
+      default:
+        toast.info('Notification viewed');
+    }
+  };
+
+  // Get notification type info
+  const getNotificationType = (typeId) => {
+    return notificationTypes[typeId] || notificationTypes[3]; // Default to system alert
+  };
+
   return (
     <div className="relative">
       {/* Bell Icon */}
       <button
         onClick={handleBellClick}
-        className="relative p-2 text-blue-800 hover:text-blue-600 transition-colors"
+        className="relative p-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
+        aria-label="Notifications"
       >
-        <Bell size={24} />
+        <Bell size={20} />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
-            {unreadCount > 99 ? '99+' : unreadCount}
+          <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-medium text-[10px]">
+            {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 z-50">
-          {/* Header */}
-          <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-800">Notifications</h3>
-            <div className="flex items-center gap-2">
-              {notifications.length > 0 && (
-                <button
-                  onClick={markAllAsRead}
-                  className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
-                >
-                  Mark all as read
-                </button>
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 z-40" 
+            onClick={() => setIsOpen(false)}
+          />
+          
+          {/* Dropdown Content */}
+          <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-[600px] overflow-hidden">
+            {/* Header */}
+            <div className="px-4 py-3 border-b border-gray-100 bg-white">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+                  {unreadCount > 0 && (
+                    <span className="bg-blue-100 text-blue-600 text-sm px-2 py-1 rounded-full font-medium">
+                      {unreadCount}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  {unreadCount > 0 && (
+                    <button
+                      onClick={markAllAsRead}
+                      className="text-sm text-blue-600 hover:text-blue-700 px-3 py-1 rounded hover:bg-blue-50 transition-colors font-medium"
+                    >
+                      Mark all as read
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="text-gray-400 hover:text-gray-600 p-1"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Notifications List */}
+            <div className="max-h-[500px] overflow-y-auto">
+              {loading ? (
+                <div className="p-6 text-center text-gray-500">
+                  <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600 mx-auto mb-2"></div>
+                  <p className="text-sm">Loading...</p>
+                </div>
+              ) : notifications.length === 0 ? (
+                <div className="p-8 text-center text-gray-500">
+                  <Bell size={40} className="mx-auto mb-4 text-gray-300" />
+                  <p className="text-base font-medium mb-2">No notifications</p>
+                  <p className="text-sm text-gray-400">You're all caught up!</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {notifications.map((notification) => {
+                    const notificationType = getNotificationType(notification.notificationTypeId);
+                    const IconComponent = notificationType.icon;
+                    
+                    return (
+                      <div
+                        key={notification.notificationId}
+                        className={`px-4 py-4 hover:bg-gray-50 cursor-pointer transition-colors duration-150 ${
+                          !notification.isRead ? 'bg-blue-50 border-l-4 border-l-blue-500' : 'bg-white'
+                        }`}
+                        onClick={() => handleNotificationClick(notification)}
+                      >
+                        <div className="flex items-start gap-4">
+                          {/* Notification Type Icon */}
+                          <div className={`p-2 rounded-lg flex-shrink-0 mt-1 ${
+                            notification.notificationTypeId === 1 ? 'bg-blue-100' :
+                            notification.notificationTypeId === 2 ? 'bg-green-100' :
+                            'bg-orange-100'
+                          }`}>
+                            <IconComponent className={`w-4 h-4 ${
+                              notification.notificationTypeId === 1 ? 'text-blue-600' :
+                              notification.notificationTypeId === 2 ? 'text-green-600' :
+                              'text-orange-600'
+                            }`} />
+                          </div>
+                          
+                          {/* Notification Content */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-semibold text-gray-900">
+                                {notificationType.name}
+                              </span>
+                              {!notification.isRead && (
+                                <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
+                              )}
+                            </div>
+                            
+                            <p className="text-base text-gray-800 leading-relaxed mb-3">
+                              {notification.message}
+                            </p>
+                            
+                            {notification.title && notification.title !== 'string' && (
+                              <p className="text-sm text-blue-600 font-medium mb-2">
+                                {notification.title}
+                              </p>
+                            )}
+                            
+                            <p className="text-sm text-gray-500">
+                              {formatDate(notification.createdAt)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
-              <button
-                onClick={() => setIsOpen(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X size={20} />
-              </button>
             </div>
           </div>
-
-          {/* Notifications List */}
-          <div className="max-h-96 overflow-y-auto">
-            {loading ? (
-              <div className="p-6 text-center text-gray-500">
-                Loading notifications...
-              </div>
-            ) : notifications.length === 0 ? (
-              <div className="p-6 text-center text-gray-500">
-                <Bell size={48} className="mx-auto mb-2 text-gray-300" />
-                <p>No notifications yet</p>
-              </div>
-            ) : (
-              notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className={`p-4 border-b border-gray-100 hover:bg-gray-50 ${
-                    !notification.isRead ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
-                  }`}
-                >
-                  <div className="flex justify-between items-start">
-                    <div 
-                      className="flex-1 cursor-pointer"
-                      onClick={() => markAsRead(notification.id)}
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-2xl">📢</span>
-                        <span className="text-sm text-gray-600">
-                          {formatDate(notification.createdAt)}
-                        </span>
-                        {!notification.isRead && (
-                          <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-800 mb-1">
-                        {notification.message}
-                      </p>
-                      {notification.jobTitle && (
-                        <p className="text-xs text-blue-600 font-medium">
-                          Job: {notification.jobTitle}
-                        </p>
-                      )}
-                    </div>
-                    
-                    <button
-                      onClick={() => deleteNotification(notification.id)}
-                      className="text-gray-400 hover:text-red-500 ml-2 p-1"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+        </>
       )}
     </div>
   );
