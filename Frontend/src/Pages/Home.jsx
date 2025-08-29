@@ -57,6 +57,27 @@ const Home = () => {
   const [loadingJobs, setLoadingJobs] = useState(false);
   const [loadingCompanies, setLoadingCompanies] = useState(false);
   const [jobTypes, setJobTypes] = useState([]);
+  
+  // Add authentication state
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+  const [role, setRole] = useState(Number(localStorage.getItem("role")));
+
+  // Update authentication status when localStorage changes
+  useEffect(() => {
+    const updateAuthStatus = () => {
+      setIsLoggedIn(!!localStorage.getItem("token"));
+      setRole(Number(localStorage.getItem("role")));
+    };
+
+    updateAuthStatus();
+
+    // Listen for storage changes (e.g., login/logout in other tabs)
+    window.addEventListener("storage", updateAuthStatus);
+
+    return () => {
+      window.removeEventListener("storage", updateAuthStatus);
+    };
+  }, []);
 
    const formatDate = (dateString) => {
     if (!dateString) return "Not specified";
@@ -145,6 +166,8 @@ const Home = () => {
     });
   };
 
+
+
   return (
     <>
       <Navbar />
@@ -157,20 +180,24 @@ const Home = () => {
           <p className="text-lg mb-6">
             Stay organized and take control of your job search — all in one place.
           </p>
-          <div className="space-x-4">
-            <button
-              onClick={() => navigate("/registercomp")}
-              className="bg-white text-blue-700 font-semibold px-6 py-3 rounded-xl hover:bg-blue-100 transition-colors"
-            >
-              Get Started
-            </button>
-            <button
-              onClick={() => navigate("/login")}
-              className="bg-blue-800 text-white px-6 py-3 rounded-xl hover:bg-blue-900 transition-colors"
-            >
-              Login
-            </button>
-          </div>
+          
+          {/* Conditional rendering based on login status */}
+          {!isLoggedIn && (
+            <div className="space-x-4">
+              <button
+                onClick={() => navigate("/registercomp")}
+                className="bg-white text-blue-700 font-semibold px-6 py-3 rounded-xl hover:bg-blue-100 transition-colors"
+              >
+                Get Started
+              </button>
+              <button
+                onClick={() => navigate("/login")}
+                className="bg-blue-800 text-white px-6 py-3 rounded-xl hover:bg-blue-900 transition-colors"
+              >
+                Login
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Top Companies */}
@@ -329,18 +356,20 @@ const Home = () => {
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="bg-blue-700 text-white py-20 px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Join hundreds managing their job search smartly
-          </h2>
-          <button
-            onClick={() => navigate("/registercomp")}
-            className="bg-white text-blue-700 font-semibold px-8 py-3 rounded-xl hover:bg-blue-100 transition-colors"
-          >
-            Sign Up Now
-          </button>
-        </section>
+        {/* CTA Section - Only show when not logged in */}
+        {!isLoggedIn && (
+          <section className="bg-blue-700 text-white py-20 px-4 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              Join hundreds managing their job search smartly
+            </h2>
+            <button
+              onClick={() => navigate("/registercomp")}
+              className="bg-white text-blue-700 font-semibold px-8 py-3 rounded-xl hover:bg-blue-100 transition-colors"
+            >
+              Sign Up Now
+            </button>
+          </section>
+        )}
       </div>
       <Footer />
     </>

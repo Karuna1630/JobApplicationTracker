@@ -39,7 +39,7 @@ const ContactUs = () => {
               We'd love to hear from you! Fill out the form or contact us using the details below.
             </p>
             <div className="text-gray-600 space-y-2 text-base">
-              <p><strong>📍 Address:</strong> Tower Block, Dulari Highway, Itahari-11, Morang</p>
+              <p><strong>📍 Address:</strong> Itahari, Mahendra Highway, Itahari-11, Morang</p>
               <p><strong>📞 Phone:</strong> +977 1234566</p>
               <p><strong>📧 Email:</strong> info@jobmanager.com</p>
             </div>

@@ -93,6 +93,9 @@ const Navbar = () => {
             <Link to="/contactus" className="hover:text-blue-600 transition-colors">
               Contact Us
             </Link>
+             <Link to="/termsandpolicy" className="hover:text-blue-600 transition-colors">
+              TermsandPolicy
+            </Link>
           </>
         )}
 
@@ -103,8 +106,11 @@ const Navbar = () => {
             <Link to="/companies" className="hover:text-blue-600 transition-colors">
               Companies
             </Link>
-            <Link to="/userprofile" className="hover:text-blue-600 transition-colors">
-              My Profile
+             <Link to="/aboutus" className="hover:text-blue-600 transition-colors">
+              About Us
+            </Link>
+            <Link to="/contactus" className="hover:text-blue-600 transition-colors">
+              Contact Us
             </Link>
             <Link to="/myStatus" className="hover:text-blue-600 transition">
               My Status
@@ -208,12 +214,7 @@ const Navbar = () => {
 
               {dropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-50 py-2">
-                  <div className="px-4 py-2 border-b border-gray-100">
-                    <p className="text-sm text-gray-600">Signed in as</p>
-                    <p className="text-sm font-semibold text-gray-900 truncate">
-                      {firstName} {lastName}
-                    </p>
-                  </div>
+                  
                   
                   <Link
                     to="/userprofile"
@@ -223,20 +224,10 @@ const Navbar = () => {
                     <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    Profile Settings
+                    Profile 
                   </Link>
 
-                  {/* Add Notifications link */}
-                  <Link
-                    to="/notifications"
-                    className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
-                    onClick={() => setDropdownOpen(false)}
-                  >
-                    <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM9 17h5l-5 5v-5zM3 7l3-3v6l-3-3zM21 7l-3-3v6l3-3z" />
-                    </svg>
-                    All Notifications
-                  </Link>
+                
 
                   <div className="border-t border-gray-100 mt-2 pt-2">
                     <button

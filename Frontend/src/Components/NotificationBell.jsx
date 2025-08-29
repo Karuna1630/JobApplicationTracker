@@ -60,8 +60,6 @@ const NotificationBell = () => {
         allNotifications = response.data;
       }
       
-      console.log('Loaded notifications:', allNotifications);
-      
       // Sort by creation date (most recent first) - Show ALL notifications
       const sortedNotifications = allNotifications
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
