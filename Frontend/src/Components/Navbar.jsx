@@ -102,7 +102,6 @@ const Navbar = () => {
         {/* Role-specific links for logged in users */}
         {isLoggedIn && role === 4 && (
           <>
-           
             <Link to="/companies" className="hover:text-blue-600 transition-colors">
               Companies
             </Link>
@@ -123,8 +122,14 @@ const Navbar = () => {
             <Link to="/companies" className="hover:text-blue-600 transition-colors">
               Companies
             </Link>
-            <Link to="/companyinsight" className="hover:text-blue-600 transition-colors">
-              Company Insights
+             <Link to="/aboutus" className="hover:text-blue-600 transition-colors">
+              About Us
+            </Link>
+            <Link to="/contactus" className="hover:text-blue-600 transition-colors">
+              Contact Us
+            </Link>
+             <Link to="/termsandpolicy" className="hover:text-blue-600 transition-colors">
+              TermsandPolicy
             </Link>
           </>
         )}

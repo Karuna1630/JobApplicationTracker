@@ -415,7 +415,7 @@ const JobApplicationForm = () => {
       });
 
       // Submit the application
-      const response = await axiosInstance.post('/submitjobapplication', applicationData);
+      const response = await axiosInstance.post('submitjobapplication', applicationData);
 
       if (response.status === 200 || response.status === 201) {
         toast.success("Application submitted successfully!");
